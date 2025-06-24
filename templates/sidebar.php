@@ -36,7 +36,7 @@
                                     <div class="accordion-body p-0">
                                         <ul class="nav flex-column">
                                             <li class="nav-item">
-                                                <a class="nav-link ps-4 py-2" href="tasks.php?action=list" style="color: #BDC3C7;">
+                                                <a class="nav-link ps-4 py-2" href="my" style="color: #BDC3C7;">
                                                     <i class="fas fa-list me-2" style="color: #BDC3C7;"></i> My Tasks
                                                 </a>
                                             </li>
