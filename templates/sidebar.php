@@ -135,9 +135,9 @@
                             <span class="text-white font-weight-bold">JD</span>
                         </div>
                         <small class="text-white d-block">John Doe</small>
-                        <small class="text-muted">Administrator</small>
+                        <small class="text-white">Administrator</small>
                     </div>
-                    <small class="text-muted" style="font-size: 0.75rem;">v2.1.0</small>
+                    <small class="text-white" style="font-size: 0.75rem;">v2.1.0</small>
                 </div>
             </div>
         </nav>

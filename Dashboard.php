@@ -11,21 +11,22 @@
         </div>
         <div class="btn-toolbar mb-2 mb-md-0">
             <div class="btn-group me-3">
-                <button type="button" class="btn btn-sm btn-outline-primary">
+                <button type="button" class="btn btn-sm btn-primary">
                     <i class="fas fa-plus me-1"></i> New Task
                 </button>
-                <button type="button" class="btn btn-sm btn-outline-primary">
+                <button type="button" class="btn btn-sm btn-outline-secondary">
                     <i class="fas fa-file-invoice me-1"></i> Create Invoice
                 </button>
             </div>
             <div class="dropdown">
-                <button class="btn btn-sm btn-light dropdown-toggle" type="button" id="timePeriodDropdown" data-bs-toggle="dropdown">
+                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="timePeriodDropdown" data-bs-toggle="dropdown">
                     <i class="fas fa-calendar-alt me-1"></i> This Week
                 </button>
                 <ul class="dropdown-menu" aria-labelledby="timePeriodDropdown">
                     <li><a class="dropdown-item" href="#">Today</a></li>
                     <li><a class="dropdown-item" href="#">This Week</a></li>
                     <li><a class="dropdown-item" href="#">This Month</a></li>
+                    <li><hr class="dropdown-divider"></li>
                     <li><a class="dropdown-item" href="#">Custom Range</a></li>
                 </ul>
             </div>
@@ -35,10 +36,10 @@
     <!-- Stats Cards -->
     <div class="row mb-4">
         <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card stat-card border-start-lg border-start-primary">
+            <div class="card stat-card border-start-lg border-start-primary shadow-sm">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
-                        <div class="stat-icon bg-primary bg-opacity-10 text-primary">
+                        <div class="stat-icon bg-primary bg-opacity-10 text-primary rounded">
                             <i class="fas fa-tasks"></i>
                         </div>
                         <div class="ms-auto text-end">
@@ -55,10 +56,10 @@
         </div>
         
         <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card stat-card border-start-lg border-start-success">
+            <div class="card stat-card border-start-lg border-start-success shadow-sm">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
-                        <div class="stat-icon bg-success bg-opacity-10 text-success">
+                        <div class="stat-icon bg-success bg-opacity-10 text-success rounded">
                             <i class="fas fa-check-circle"></i>
                         </div>
                         <div class="ms-auto text-end">
@@ -75,10 +76,10 @@
         </div>
         
         <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card stat-card border-start-lg border-start-warning">
+            <div class="card stat-card border-start-lg border-start-warning shadow-sm">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
-                        <div class="stat-icon bg-warning bg-opacity-10 text-warning">
+                        <div class="stat-icon bg-warning bg-opacity-10 text-warning rounded">
                             <i class="fas fa-hourglass-half"></i>
                         </div>
                         <div class="ms-auto text-end">
@@ -95,10 +96,10 @@
         </div>
         
         <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card stat-card border-start-lg border-start-danger">
+            <div class="card stat-card border-start-lg border-start-danger shadow-sm">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
-                        <div class="stat-icon bg-danger bg-opacity-10 text-danger">
+                        <div class="stat-icon bg-danger bg-opacity-10 text-danger rounded">
                             <i class="fas fa-exclamation-circle"></i>
                         </div>
                         <div class="ms-auto text-end">
@@ -118,27 +119,27 @@
     <!-- Activity Overview -->
     <div class="row mb-4">
         <div class="col-lg-8 mb-4">
-            <div class="card h-100">
-                <div class="card-header d-flex justify-content-between align-items-center">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center border-bottom">
                     <h5 class="mb-0">Task Activity</h5>
                     <div class="dropdown">
-                        <button class="btn btn-sm btn-light dropdown-toggle" type="button" id="chartFilterDropdown" data-bs-toggle="dropdown">
+                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="chartFilterDropdown" data-bs-toggle="dropdown">
                             This Month
                         </button>
-                        <ul class="dropdown-menu" aria-labelledby="chartFilterDropdown">
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="chartFilterDropdown">
                             <li><a class="dropdown-item" href="#">Today</a></li>
                             <li><a class="dropdown-item" href="#">This Week</a></li>
                             <li><a class="dropdown-item" href="#">This Month</a></li>
+                            <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="#">This Year</a></li>
                         </ul>
                     </div>
                 </div>
                 <div class="card-body">
                     <div class="chart-container" style="height: 300px;">
-                        <!-- Chart would be rendered here -->
                         <div class="d-flex align-items-center justify-content-center h-100">
                             <div class="text-center">
-                                <i class="fas fa-chart-line fa-3x text-muted mb-3"></i>
+                                <i class="fas fa-chart-line fa-3x text-muted mb-3 opacity-25"></i>
                                 <p class="text-muted">Task completion chart will appear here</p>
                             </div>
                         </div>
@@ -148,39 +149,38 @@
         </div>
         
         <div class="col-lg-4 mb-4">
-            <div class="card h-100">
-                <div class="card-header">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-white border-bottom">
                     <h5 class="mb-0">Task Distribution</h5>
                 </div>
                 <div class="card-body">
-                    <div class="chart-container" style="height: 300px;">
-                        <!-- Pie chart would be rendered here -->
+                    <div class="chart-container" style="height: 220px;">
                         <div class="d-flex align-items-center justify-content-center h-100">
                             <div class="text-center">
-                                <i class="fas fa-chart-pie fa-3x text-muted mb-3"></i>
+                                <i class="fas fa-chart-pie fa-3x text-muted mb-3 opacity-25"></i>
                                 <p class="text-muted">Task distribution chart will appear here</p>
                             </div>
                         </div>
                     </div>
-                    <div class="mt-3">
-                        <div class="d-flex align-items-center mb-2">
-                            <span class="badge bg-primary me-2">&nbsp;</span>
-                            <span class="text-muted">Development</span>
+                    <div class="mt-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <span class="badge bg-primary me-2" style="width: 12px; height: 12px; padding: 0;"></span>
+                            <span class="text-muted small">Development</span>
                             <span class="ms-auto fw-bold">45%</span>
                         </div>
-                        <div class="d-flex align-items-center mb-2">
-                            <span class="badge bg-success me-2">&nbsp;</span>
-                            <span class="text-muted">Design</span>
+                        <div class="d-flex align-items-center mb-3">
+                            <span class="badge bg-success me-2" style="width: 12px; height: 12px; padding: 0;"></span>
+                            <span class="text-muted small">Design</span>
                             <span class="ms-auto fw-bold">30%</span>
                         </div>
-                        <div class="d-flex align-items-center mb-2">
-                            <span class="badge bg-info me-2">&nbsp;</span>
-                            <span class="text-muted">Testing</span>
+                        <div class="d-flex align-items-center mb-3">
+                            <span class="badge bg-info me-2" style="width: 12px; height: 12px; padding: 0;"></span>
+                            <span class="text-muted small">Testing</span>
                             <span class="ms-auto fw-bold">15%</span>
                         </div>
                         <div class="d-flex align-items-center">
-                            <span class="badge bg-warning me-2">&nbsp;</span>
-                            <span class="text-muted">Documentation</span>
+                            <span class="badge bg-warning me-2" style="width: 12px; height: 12px; padding: 0;"></span>
+                            <span class="text-muted small">Documentation</span>
                             <span class="ms-auto fw-bold">10%</span>
                         </div>
                     </div>
@@ -192,8 +192,8 @@
     <!-- Recent Tasks & Projects -->
     <div class="row">
         <div class="col-lg-6 mb-4">
-            <div class="card h-100">
-                <div class="card-header d-flex justify-content-between align-items-center">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center border-bottom">
                     <h5 class="mb-0">Recent Tasks</h5>
                     <a href="tasks.php" class="btn btn-sm btn-outline-primary">View All</a>
                 </div>
@@ -269,8 +269,8 @@
         </div>
         
         <div class="col-lg-6 mb-4">
-            <div class="card h-100">
-                <div class="card-header d-flex justify-content-between align-items-center">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center border-bottom">
                     <h5 class="mb-0">Active Projects</h5>
                     <a href="projects.php" class="btn btn-sm btn-outline-primary">View All</a>
                 </div>
@@ -279,7 +279,7 @@
                         <div class="list-group-item">
                             <div class="d-flex align-items-center">
                                 <div class="flex-shrink-0">
-                                    <div class="project-icon bg-primary bg-opacity-10 text-primary">
+                                    <div class="project-icon bg-primary bg-opacity-10 text-primary rounded">
                                         <i class="fas fa-shopping-cart"></i>
                                     </div>
                                 </div>
@@ -298,7 +298,7 @@
                         <div class="list-group-item">
                             <div class="d-flex align-items-center">
                                 <div class="flex-shrink-0">
-                                    <div class="project-icon bg-info bg-opacity-10 text-info">
+                                    <div class="project-icon bg-info bg-opacity-10 text-info rounded">
                                         <i class="fas fa-mobile-alt"></i>
                                     </div>
                                 </div>
@@ -317,7 +317,7 @@
                         <div class="list-group-item">
                             <div class="d-flex align-items-center">
                                 <div class="flex-shrink-0">
-                                    <div class="project-icon bg-warning bg-opacity-10 text-warning">
+                                    <div class="project-icon bg-warning bg-opacity-10 text-warning rounded">
                                         <i class="fas fa-desktop"></i>
                                     </div>
                                 </div>
@@ -336,7 +336,7 @@
                         <div class="list-group-item">
                             <div class="d-flex align-items-center">
                                 <div class="flex-shrink-0">
-                                    <div class="project-icon bg-success bg-opacity-10 text-success">
+                                    <div class="project-icon bg-success bg-opacity-10 text-success rounded">
                                         <i class="fas fa-globe"></i>
                                     </div>
                                 </div>
@@ -360,8 +360,8 @@
 
     <!-- Manager Section -->
     <div class="manager-section mt-4">
-        <div class="card">
-            <div class="card-header">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white border-bottom">
                 <h5 class="mb-0">Financial Overview</h5>
             </div>
             <div class="card-body">
@@ -372,7 +372,7 @@
                                 <i class="fas fa-file-invoice text-primary"></i>
                             </div>
                             <div class="flex-grow-1 ms-3">
-                                <h6 class="mb-0">Total Invoices</h6>
+                                <h6 class="text-muted mb-1">Total Invoices</h6>
                                 <h4 class="mb-0">8</h4>
                             </div>
                         </div>
@@ -383,7 +383,7 @@
                                 <i class="fas fa-check-circle text-success"></i>
                             </div>
                             <div class="flex-grow-1 ms-3">
-                                <h6 class="mb-0">Paid</h6>
+                                <h6 class="text-muted mb-1">Paid</h6>
                                 <h4 class="mb-0">5</h4>
                             </div>
                         </div>
@@ -394,7 +394,7 @@
                                 <i class="fas fa-exclamation-triangle text-warning"></i>
                             </div>
                             <div class="flex-grow-1 ms-3">
-                                <h6 class="mb-0">Pending</h6>
+                                <h6 class="text-muted mb-1">Pending</h6>
                                 <h4 class="mb-0">2</h4>
                             </div>
                         </div>
@@ -405,7 +405,7 @@
                                 <i class="fas fa-times-circle text-danger"></i>
                             </div>
                             <div class="flex-grow-1 ms-3">
-                                <h6 class="mb-0">Overdue</h6>
+                                <h6 class="text-muted mb-1">Overdue</h6>
                                 <h4 class="mb-0">1</h4>
                             </div>
                         </div>
@@ -434,8 +434,8 @@
                                 <td>$1,250.00</td>
                                 <td><span class="badge bg-success">Paid</span></td>
                                 <td>
-                                    <button class="btn btn-sm btn-light"><i class="fas fa-eye"></i></button>
-                                    <button class="btn btn-sm btn-light"><i class="fas fa-download"></i></button>
+                                    <button class="btn btn-sm btn-outline-secondary"><i class="fas fa-eye"></i></button>
+                                    <button class="btn btn-sm btn-outline-secondary"><i class="fas fa-download"></i></button>
                                 </td>
                             </tr>
                             <tr>
@@ -446,8 +446,8 @@
                                 <td>$3,450.00</td>
                                 <td><span class="badge bg-primary">Sent</span></td>
                                 <td>
-                                    <button class="btn btn-sm btn-light"><i class="fas fa-eye"></i></button>
-                                    <button class="btn btn-sm btn-light"><i class="fas fa-download"></i></button>
+                                    <button class="btn btn-sm btn-outline-secondary"><i class="fas fa-eye"></i></button>
+                                    <button class="btn btn-sm btn-outline-secondary"><i class="fas fa-download"></i></button>
                                 </td>
                             </tr>
                             <tr>
@@ -458,8 +458,8 @@
                                 <td>$2,150.00</td>
                                 <td><span class="badge bg-danger">Overdue</span></td>
                                 <td>
-                                    <button class="btn btn-sm btn-light"><i class="fas fa-eye"></i></button>
-                                    <button class="btn btn-sm btn-light"><i class="fas fa-download"></i></button>
+                                    <button class="btn btn-sm btn-outline-secondary"><i class="fas fa-eye"></i></button>
+                                    <button class="btn btn-sm btn-outline-secondary"><i class="fas fa-download"></i></button>
                                 </td>
                             </tr>
                         </tbody>
@@ -473,15 +473,51 @@
 <?php include 'templates/footer.php'; ?>
 
 <style>
+    /* Enhanced Color Scheme */
+    :root {
+        --primary: #3a4f8a;
+        --primary-light: rgba(58, 79, 138, 0.1);
+        --secondary: #6c757d;
+        --success: #28a745;
+        --info: #17a2b8;
+        --warning: #ffc107;
+        --danger: #dc3545;
+        --light: #f8f9fa;
+        --dark: #343a40;
+        --border-color: #e9ecef;
+    }
+    
+    body {
+        background-color: #f5f7fa;
+    }
+    
     .dashboard-header {
         border-bottom: none;
         padding-bottom: 1rem;
     }
     
-    .stat-card {
-        transition: all 0.3s ease;
+    /* Card Styling */
+    .card {
+        border: none;
         border-radius: 10px;
+        transition: all 0.3s ease;
+        background-color: white;
+    }
+    
+    .card:hover {
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+    
+    .card-header {
+        background-color: white;
+        border-bottom: 1px solid var(--border-color);
+        padding: 1.25rem 1.5rem;
+    }
+    
+    /* Stat Cards */
+    .stat-card {
         border-left: 4px solid;
+        transition: all 0.3s ease;
     }
     
     .stat-card:hover {
@@ -496,8 +532,38 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        font-size: 1.25rem;
     }
     
+    /* Progress Bars */
+    .progress {
+        border-radius: 3px;
+        background-color: var(--light);
+    }
+    
+    /* Tables */
+    .table th {
+        border-top: none;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
+        color: var(--secondary);
+    }
+    
+    .table-hover tbody tr:hover {
+        background-color: rgba(0,0,0,0.02);
+    }
+    
+    /* Badges */
+    .badge {
+        font-weight: 500;
+        padding: 0.35em 0.65em;
+        font-size: 0.75em;
+        letter-spacing: 0.5px;
+    }
+    
+    /* Project Icons */
     .project-icon {
         width: 40px;
         height: 40px;
@@ -505,37 +571,27 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        font-size: 1rem;
     }
     
-    .card {
-        border: none;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        border-radius: 10px;
-    }
-    
-    .card-header {
-        background-color: #fff;
-        border-bottom: 1px solid rgba(0,0,0,0.05);
-        padding: 1.25rem 1.5rem;
-    }
-    
+    /* List Group Items */
     .list-group-item {
         padding: 1.25rem 1.5rem;
-        border-color: rgba(0,0,0,0.05);
+        border-color: var(--border-color);
     }
     
-    .table th {
-        border-top: none;
-        font-weight: 600;
-        text-transform: uppercase;
-        font-size: 0.75rem;
-        letter-spacing: 0.5px;
-        color: #6c757d;
+    /* Buttons */
+    .btn-outline-secondary {
+        border-color: var(--border-color);
+        color: var(--secondary);
     }
     
-    .badge {
-        font-weight: 500;
-        padding: 0.35em 0.65em;
-        font-size: 0.75em;
+    .btn-outline-secondary:hover {
+        background-color: var(--light);
+    }
+    
+    /* Shadows */
+    .shadow-sm {
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05) !important;
     }
 </style>
