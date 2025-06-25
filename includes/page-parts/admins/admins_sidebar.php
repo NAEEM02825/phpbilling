@@ -145,7 +145,7 @@
                              <a class="" href="javascript:;">
                                  <a href="index.php?route=modules/profile/profile">
                                      <div class="parent-icon"><i class="material-icons-outlined icon icon-badge" style="color: indigo;">badge</i></div>
-                                     <div class="menu-title">P</div>
+                                     <div class="menu-title">Profile</div>
                                  </a>
                              </a>
                          </li>
