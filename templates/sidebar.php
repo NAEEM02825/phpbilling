@@ -7,7 +7,7 @@
                 <div class="sidebar-header text-center mb-4">
                     <h4 class="text-white font-weight-bold">
                         <i class="fas fa-project-diagram me-2" style="color: #4ECDC4;"></i>
-                        <span style="color: #FFFFFF;">TaskFlow</span>
+                        <span style="color: #FFFFFF;">BILLING</span>
                         <span style="color: #4ECDC4;">Pro</span>
                     </h4>
                 </div>
