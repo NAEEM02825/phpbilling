@@ -6,7 +6,7 @@
     <!-- Dashboard Header -->
     <div class="dashboard-header d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-4 pb-3 mb-4">
         <div>
-            <h1 class="h2">Welcome Back, <span class="text-primary">[User]</span></h1>
+            <h1 class="h2">Welcome Back, <span class="text-primary">ADMIN</span></h1>
             <p class="mb-0 text-muted">Here's what's happening with your projects today</p>
         </div>
         <div class="btn-toolbar mb-2 mb-md-0">
@@ -50,7 +50,7 @@
                     <div class="progress mt-3" style="height: 6px;">
                         <div class="progress-bar bg-primary" role="progressbar" style="width: 75%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
                     </div>
-                    <a href="tasks.php?action=list" class="stretched-link"></a>
+                    <a href="#" class="stretched-link"></a>
                 </div>
             </div>
         </div>
@@ -70,7 +70,7 @@
                     <div class="progress mt-3" style="height: 6px;">
                         <div class="progress-bar bg-success" role="progressbar" style="width: 75%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
                     </div>
-                    <a href="tasks.php?action=list&status=completed" class="stretched-link"></a>
+                    <a href="#" class="stretched-link"></a>
                 </div>
             </div>
         </div>
@@ -90,7 +90,7 @@
                     <div class="progress mt-3" style="height: 6px;">
                         <div class="progress-bar bg-warning" role="progressbar" style="width: 25%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
                     </div>
-                    <a href="tasks.php?action=list&status=pending" class="stretched-link"></a>
+                    <a href="#" class="stretched-link"></a>
                 </div>
             </div>
         </div>
@@ -110,7 +110,7 @@
                     <div class="progress mt-3" style="height: 6px;">
                         <div class="progress-bar bg-danger" role="progressbar" style="width: 10%" aria-valuenow="10" aria-valuemin="0" aria-valuemax="100"></div>
                     </div>
-                    <a href="tasks.php?action=list&status=overdue" class="stretched-link"></a>
+                    <a href="#" class="stretched-link"></a>
                 </div>
             </div>
         </div>
@@ -195,7 +195,7 @@
             <div class="card h-100 shadow-sm">
                 <div class="card-header bg-white d-flex justify-content-between align-items-center border-bottom">
                     <h5 class="mb-0">Recent Tasks</h5>
-                    <a href="tasks.php" class="btn btn-sm btn-outline-primary">View All</a>
+                    <a href="./my_task.php" class="btn btn-sm btn-outline-primary">View All</a>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
