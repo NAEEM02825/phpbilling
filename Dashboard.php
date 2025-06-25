@@ -26,7 +26,9 @@
                     <li><a class="dropdown-item" href="#">Today</a></li>
                     <li><a class="dropdown-item" href="#">This Week</a></li>
                     <li><a class="dropdown-item" href="#">This Month</a></li>
-                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <hr class="dropdown-divider">
+                    </li>
                     <li><a class="dropdown-item" href="#">Custom Range</a></li>
                 </ul>
             </div>
@@ -54,7 +56,7 @@
                 </div>
             </div>
         </div>
-        
+
         <div class="col-xl-3 col-md-6 mb-4">
             <div class="card stat-card border-start-lg border-start-success shadow-sm">
                 <div class="card-body">
@@ -74,7 +76,7 @@
                 </div>
             </div>
         </div>
-        
+
         <div class="col-xl-3 col-md-6 mb-4">
             <div class="card stat-card border-start-lg border-start-warning shadow-sm">
                 <div class="card-body">
@@ -94,7 +96,7 @@
                 </div>
             </div>
         </div>
-        
+
         <div class="col-xl-3 col-md-6 mb-4">
             <div class="card stat-card border-start-lg border-start-danger shadow-sm">
                 <div class="card-body">
@@ -130,24 +132,21 @@
                             <li><a class="dropdown-item" href="#">Today</a></li>
                             <li><a class="dropdown-item" href="#">This Week</a></li>
                             <li><a class="dropdown-item" href="#">This Month</a></li>
-                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
                             <li><a class="dropdown-item" href="#">This Year</a></li>
                         </ul>
                     </div>
                 </div>
                 <div class="card-body">
                     <div class="chart-container" style="height: 300px;">
-                        <div class="d-flex align-items-center justify-content-center h-100">
-                            <div class="text-center">
-                                <i class="fas fa-chart-line fa-3x text-muted mb-3 opacity-25"></i>
-                                <p class="text-muted">Task completion chart will appear here</p>
-                            </div>
-                        </div>
+                        <canvas id="taskActivityChart"></canvas>
                     </div>
                 </div>
             </div>
         </div>
-        
+
         <div class="col-lg-4 mb-4">
             <div class="card h-100 shadow-sm">
                 <div class="card-header bg-white border-bottom">
@@ -155,12 +154,7 @@
                 </div>
                 <div class="card-body">
                     <div class="chart-container" style="height: 220px;">
-                        <div class="d-flex align-items-center justify-content-center h-100">
-                            <div class="text-center">
-                                <i class="fas fa-chart-pie fa-3x text-muted mb-3 opacity-25"></i>
-                                <p class="text-muted">Task distribution chart will appear here</p>
-                            </div>
-                        </div>
+                        <canvas id="taskDistributionChart"></canvas>
                     </div>
                     <div class="mt-4">
                         <div class="d-flex align-items-center mb-3">
@@ -267,7 +261,7 @@
                 </div>
             </div>
         </div>
-        
+
         <div class="col-lg-6 mb-4">
             <div class="card h-100 shadow-sm">
                 <div class="card-header bg-white d-flex justify-content-between align-items-center border-bottom">
@@ -411,7 +405,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="table-responsive">
                     <table class="table table-hover">
                         <thead class="table-light">
@@ -486,16 +480,16 @@
         --dark: #343a40;
         --border-color: #e9ecef;
     }
-    
+
     body {
         background-color: #f5f7fa;
     }
-    
+
     .dashboard-header {
         border-bottom: none;
         padding-bottom: 1rem;
     }
-    
+
     /* Card Styling */
     .card {
         border: none;
@@ -503,28 +497,28 @@
         transition: all 0.3s ease;
         background-color: white;
     }
-    
+
     .card:hover {
-        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
     }
-    
+
     .card-header {
         background-color: white;
         border-bottom: 1px solid var(--border-color);
         padding: 1.25rem 1.5rem;
     }
-    
+
     /* Stat Cards */
     .stat-card {
         border-left: 4px solid;
         transition: all 0.3s ease;
     }
-    
+
     .stat-card:hover {
         transform: translateY(-5px);
-        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
     }
-    
+
     .stat-icon {
         width: 50px;
         height: 50px;
@@ -534,13 +528,13 @@
         justify-content: center;
         font-size: 1.25rem;
     }
-    
+
     /* Progress Bars */
     .progress {
         border-radius: 3px;
         background-color: var(--light);
     }
-    
+
     /* Tables */
     .table th {
         border-top: none;
@@ -550,11 +544,11 @@
         letter-spacing: 0.5px;
         color: var(--secondary);
     }
-    
+
     .table-hover tbody tr:hover {
-        background-color: rgba(0,0,0,0.02);
+        background-color: rgba(0, 0, 0, 0.02);
     }
-    
+
     /* Badges */
     .badge {
         font-weight: 500;
@@ -562,7 +556,7 @@
         font-size: 0.75em;
         letter-spacing: 0.5px;
     }
-    
+
     /* Project Icons */
     .project-icon {
         width: 40px;
@@ -573,25 +567,123 @@
         justify-content: center;
         font-size: 1rem;
     }
-    
+
     /* List Group Items */
     .list-group-item {
         padding: 1.25rem 1.5rem;
         border-color: var(--border-color);
     }
-    
+
     /* Buttons */
     .btn-outline-secondary {
         border-color: var(--border-color);
         color: var(--secondary);
     }
-    
+
     .btn-outline-secondary:hover {
         background-color: var(--light);
     }
-    
+
     /* Shadows */
     .shadow-sm {
-        box-shadow: 0 2px 10px rgba(0,0,0,0.05) !important;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05) !important;
     }
 </style>
+
+<!-- Add Chart.js library (include this in your head or before closing body tag) -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const ctx = document.getElementById('taskActivityChart').getContext('2d');
+
+        const taskActivityChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                datasets: [{
+                        label: 'Tasks Completed',
+                        data: [12, 19, 15, 27],
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        tension: 0.3,
+                        fill: true
+                    },
+                    {
+                        label: 'Tasks Created',
+                        data: [15, 22, 18, 30],
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        tension: 0.3,
+                        fill: true
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 5
+                        }
+                    }
+                }
+            }
+        });
+    });
+      document.addEventListener('DOMContentLoaded', function() {
+        const ctx = document.getElementById('taskDistributionChart').getContext('2d');
+        
+        const taskDistributionChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: ['Development', 'Design', 'Testing', 'Documentation'],
+                datasets: [{
+                    data: [45, 30, 15, 10],
+                    backgroundColor: [
+                        'rgba(13, 110, 253, 0.8)',  // Bootstrap primary (blue)
+                        'rgba(25, 135, 84, 0.8)',   // Bootstrap success (green)
+                        'rgba(13, 202, 240, 0.8)',  // Bootstrap info (cyan)
+                        'rgba(255, 193, 7, 0.8)'    // Bootstrap warning (yellow)
+                    ],
+                    borderColor: [
+                        'rgba(13, 110, 253, 1)',
+                        'rgba(25, 135, 84, 1)',
+                        'rgba(13, 202, 240, 1)',
+                        'rgba(255, 193, 7, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false // We're using the custom legend below the chart
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.label}: ${context.raw}%`;
+                            }
+                        }
+                    }
+                },
+                cutout: '65%' // Makes it a donut chart
+            }
+        });
+    });
+
+</script>
