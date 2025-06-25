@@ -1,0 +1,14 @@
+[29-Mar-2025 12:05:36 america/los_angeles] PHP Fatal error:  Cannot declare class DB, because the name is already in use in C:\xampp\htdocs\craftHiring\includes\classes\meekrodb.2.3.class.php on line 20
+[29-Mar-2025 12:05:39 america/los_angeles] PHP Fatal error:  Cannot declare class DB, because the name is already in use in C:\xampp\htdocs\craftHiring\includes\classes\meekrodb.2.3.class.php on line 20
+[29-Mar-2025 12:05:42 america/los_angeles] PHP Fatal error:  Cannot declare class DB, because the name is already in use in C:\xampp\htdocs\craftHiring\includes\classes\meekrodb.2.3.class.php on line 20
+[29-Mar-2025 12:10:59 america/los_angeles] PHP Fatal error:  Cannot declare class MeekroDB, because the name is already in use in C:\xampp\htdocs\craftHiring\includes\classes\meekrodb.2.3.class.php on line 20
+[29-Mar-2025 12:11:04 america/los_angeles] PHP Fatal error:  Cannot declare class MeekroDB, because the name is already in use in C:\xampp\htdocs\craftHiring\includes\classes\meekrodb.2.3.class.php on line 20
+[29-Mar-2025 12:11:06 america/los_angeles] PHP Fatal error:  Cannot declare class MeekroDB, because the name is already in use in C:\xampp\htdocs\craftHiring\includes\classes\meekrodb.2.3.class.php on line 20
+[29-Mar-2025 12:11:07 america/los_angeles] PHP Fatal error:  Cannot declare class MeekroDB, because the name is already in use in C:\xampp\htdocs\craftHiring\includes\classes\meekrodb.2.3.class.php on line 20
+[29-Mar-2025 12:11:12 america/los_angeles] PHP Fatal error:  Cannot declare class MeekroDB, because the name is already in use in C:\xampp\htdocs\craftHiring\includes\classes\meekrodb.2.3.class.php on line 20
+[29-Mar-2025 12:14:44 america/los_angeles] PHP Fatal error:  Cannot declare class MeekroDB, because the name is already in use in C:\xampp\htdocs\craftHiring\includes\classes\meekrodb.2.3.class.php on line 20
+[29-Mar-2025 12:14:45 america/los_angeles] PHP Fatal error:  Cannot declare class MeekroDB, because the name is already in use in C:\xampp\htdocs\craftHiring\includes\classes\meekrodb.2.3.class.php on line 20
+[29-Mar-2025 12:14:46 america/los_angeles] PHP Fatal error:  Cannot declare class MeekroDB, because the name is already in use in C:\xampp\htdocs\craftHiring\includes\classes\meekrodb.2.3.class.php on line 20
+[29-Mar-2025 12:14:49 america/los_angeles] PHP Fatal error:  Cannot declare class MeekroDB, because the name is already in use in C:\xampp\htdocs\craftHiring\includes\classes\meekrodb.2.3.class.php on line 20
+[29-Mar-2025 12:14:50 america/los_angeles] PHP Fatal error:  Cannot declare class MeekroDB, because the name is already in use in C:\xampp\htdocs\craftHiring\includes\classes\meekrodb.2.3.class.php on line 20
+[29-Mar-2025 12:15:02 america/los_angeles] PHP Fatal error:  Cannot declare class MeekroDB, because the name is already in use in C:\xampp\htdocs\craftHiring\includes\classes\meekrodb.2.3.class.php on line 20

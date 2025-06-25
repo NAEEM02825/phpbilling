@@ -1,520 +1,360 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login | Billing System</title>
-
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-    <!-- SweetAlert2 CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-
+<?php 
+include_once('functions.php');
+include_once('includes/page-parts/header.php');
+?>
+<link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@iconscout/unicons/css/line.css" rel="stylesheet">
+    <link href="https://unicons.iconscout.com/release/v2.1.9/css/unicons.css" rel="stylesheet">
+    
     <style>
-        :root {
-            --primary-color: #4361ee;
-            --primary-dark: #3a56d4;
-            --secondary-color: #2b2d42;
-            --accent-color: #4895ef;
-            --light-color: #f8f9fa;
-            --dark-color: #212529;
-            --text-color: #2b2d42;
-            --text-light: #6c757d;
-            --border-color: #e0e0e0;
-            --success-color: #4cc9f0;
-            --error-color: #f72585;
+        /* Please ❤ this if you like it! */
+        @import url('https://fonts.googleapis.com/css?family=Poppins:400,500,600,700,800,900');
+
+        body{
+            font-family: 'Poppins', sans-serif;
+            font-weight: 300;
+            font-size: 15px;
+            line-height: 1.7;
+            color: #c4c3ca;
+            background: white !important;
+            overflow-x: hidden;
+        }
+        a {
+            cursor: pointer;
+            transition: all 200ms linear;
+        }
+        a:hover {
+            text-decoration: none;
+        }
+        .link {
+            color: #c4c3ca;
+        }
+        .link:hover {
+            color: #ffeba7;
+        }
+        p {
+            font-weight: 500;
+            font-size: 14px;
+            line-height: 1.7;
+        }
+        h4 {
+            font-weight: 600;
+        }
+        h6 span{
+            padding: 0 20px;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+        .section{
+            position: relative;
+            width: 100%;
+            display: block;
+        }
+        .full-height{
+            min-height: 100vh;
+        }
+        .card-3d-wrap {
+            position: relative;
+            width: 440px;
+            max-width: 100%;
+            height: 400px;
+            margin-top: 60px;
+        }
+        .card-3d-wrapper {
+            width: 100%;
+            height: 100%;
+            position:absolute;    
+            top: 0;
+            left: 0;  
+            -webkit-transform-style: preserve-3d;
+            transform-style: preserve-3d;
+            transition: all 600ms ease-out; 
+        }
+        .card-front{
+            width: 100%;
+            height: 100%;
+            background-color: #fe5500;
+            background-position: bottom center;
+            background-repeat: no-repeat;
+            background-size: 300%;
+            position: absolute;
+            border-radius: 6px;
+            left: 0;
+            top: 0;
+            -webkit-transform-style: preserve-3d;
+            transform-style: preserve-3d;
+            -webkit-backface-visibility: hidden;
+            -moz-backface-visibility: hidden;
+            -o-backface-visibility: hidden;
+            backface-visibility: hidden;
         }
 
-        html,
-        body {
+        .checkbox:checked ~ .card-3d-wrap .card-3d-wrapper {
+            transform: rotateY(180deg);
+        }
+        .center-wrap{
+            position: absolute;
+            width: 100%;
+            padding: 0 35px;
+            top: 50%;
+            left: 0;
+            transform: translate3d(0, -50%, 35px) perspective(100px);
+            z-index: 20;
+            display: block;
+        }
+        .form-group{ 
+            position: relative;
+            display: block;
             margin: 0;
             padding: 0;
-            height: 100%;
         }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f8fafc;
-            color: var(--text-color);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-image: url('https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            position: relative;
-        }
-
-        body::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(255, 255, 255, 0.88);
-            z-index: 0;
-        }
-
-        .login-form-container {
-            max-width: 420px;
-            width: 100%;
-            background: white;
-            padding: 2.5rem;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
-            position: relative;
-            z-index: 1;
-            border: 1px solid var(--border-color);
-        }
-
-        .logo-container {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-
-        .logo {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: var(--primary-color);
-            display: inline-flex;
-            align-items: center;
-        }
-
-        .logo-icon {
-            margin-right: 10px;
-            color: var(--primary-color);
-        }
-
-        .form-title {
-            font-weight: 600;
-            color: var(--secondary-color);
-            margin-bottom: 1.5rem;
-            text-align: center;
-            font-size: 1.5rem;
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-            position: relative;
-        }
-
-        .form-label {
-            font-weight: 500;
-            margin-bottom: 0.5rem;
-            font-size: 0.9rem;
-            color: var(--text-color);
-        }
-
-        .form-control {
+        .form-style {
+            padding: 13px 20px;
+            padding-left: 55px;
             height: 48px;
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-            padding: 10px 15px;
-            font-size: 0.95rem;
-            transition: all 0.2s ease;
+            width: 100%;
+            font-weight: 500;
+            border-radius: 4px;
+            font-size: 14px;
+            line-height: 22px;
+            letter-spacing: 0.5px;
+            outline: none;
+            border: none;
+            -webkit-transition: all 200ms linear;
+            transition: all 200ms linear;
+            box-shadow: 0 4px 8px 0 rgba(21,21,21,.2);
         }
-
-        .form-control:focus {
-            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
-            border-color: var(--primary-color);
+        .form-style:focus,
+        .form-style:active {
+            border: none;
+            outline: none;
+            box-shadow: 0 4px 8px 0 rgba(21,21,21,.2);
         }
-
         .input-icon {
             position: absolute;
-            right: 15px;
-            top: 38px;
-            color: var(--text-light);
-            font-size: 1rem;
-        }
-
-        .btn-login {
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
+            top: 0;
+            left: 18px;
             height: 48px;
-            border-radius: 8px;
-            font-weight: 600;
-            width: 100%;
-            transition: all 0.3s;
-            letter-spacing: 0.5px;
+            font-size: 24px;
+            line-height: 48px;
+            text-align: left;
+            color: #838383;
+            -webkit-transition: all 200ms linear;
+            transition: all 200ms linear;
+        }
+
+        .btn{  
+            border-radius: 4px;
+            height: 44px;
+            font-size: 13px;
+            font-weight: 900;
             text-transform: uppercase;
-            font-size: 0.9rem;
-        }
-
-        .btn-login:hover {
-            background-color: var(--primary-dark);
-            color: white;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(67, 97, 238, 0.2);
-        }
-
-        .btn-login:active {
-            transform: translateY(0);
-        }
-
-        .form-options {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-        }
-
-        .form-check-input {
-            width: 16px;
-            height: 16px;
-            margin-top: 0;
-        }
-
-        .form-check-input:checked {
-            background-color: var(--primary-color);
-            border-color: var(--primary-color);
-        }
-
-        .form-check-input:focus {
-            box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25);
-        }
-
-        .form-check-label {
-            color: var(--text-light);
-            font-size: 0.9rem;
-            margin-left: 0.5rem;
-        }
-
-        .forgot-password {
-            color: var(--text-light);
-            font-size: 0.9rem;
-            transition: all 0.3s;
-            text-decoration: none;
-            font-weight: 500;
-        }
-
-        .forgot-password:hover {
-            color: var(--primary-color);
-            text-decoration: underline;
-        }
-
-        .divider {
-            display: flex;
-            align-items: center;
-            margin: 1.5rem 0;
-            color: var(--text-light);
-            font-size: 0.8rem;
-        }
-
-        .divider::before,
-        .divider::after {
-            content: "";
-            flex: 1;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .divider::before {
-            margin-right: 0.5rem;
-        }
-
-        .divider::after {
-            margin-left: 0.5rem;
-        }
-
-        .social-login {
-            display: flex;
-            justify-content: center;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .social-btn {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
+            -webkit-transition : all 200ms linear;
+            transition: all 200ms linear;
+            padding: 0 30px;
+            letter-spacing: 1px;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
-            color: white;
-            font-size: 1rem;
-            transition: all 0.3s;
-            border: none;
-        }
-
-        .social-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .social-btn.google {
-            background-color: #db4437;
-        }
-
-        .social-btn.microsoft {
-            background-color: #0078d4;
-        }
-
-        .social-btn.apple {
-            background-color: #000000;
-        }
-
-        .register-link {
             text-align: center;
-            margin-top: 1.5rem;
-            font-size: 0.9rem;
-            color: var(--text-light);
+            border: none;
+            background-color: #ffffff;
+            box-shadow: 0 8px 24px 0 rgba(255,235,167,.2);
         }
-
-        .register-link a {
-            color: var(--primary-color);
-            font-weight: 500;
-            text-decoration: none;
-            transition: all 0.3s;
+        .btn:active,
+        .btn:focus{  
+            background-color: black;
+            color: #fe5500;
+            box-shadow: 0 8px 24px 0 rgba(16,39,112,.2);
         }
-
-        .register-link a:hover {
-            text-decoration: underline;
-        }
-
-        @media (max-width: 576px) {
-            .login-form-container {
-                padding: 2rem 1.5rem;
-                margin: 0 15px;
-            }
-            
-            body {
-                background-image: none;
-                background-color: #f8fafc;
-            }
-            
-            body::before {
-                display: none;
-            }
+        .btn:hover{  
+            background-color: black;
+            color: #fe5500;
+            box-shadow: 0 8px 24px 0 rgba(16,39,112,.2);
         }
     </style>
-</head>
-
 <body>
-    <div class="login-form-container">
-        <div class="logo-container">
-            <div class="logo">
-                <i class="fas fa-calculator logo-icon"></i>
-                <span>BILLINGPRO</span>
+
+
+<!--authentication-->
+<style>
+    .alert-success {
+        display: none; /* Hidden by default */
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background-color: #4CAF50; /* Green */
+        color: white;
+        padding: 20px;
+        border-radius: 5px;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+        z-index: 1000;
+        font-family: Arial, sans-serif;
+        font-size: 16px;
+    }
+    .alert-error {
+        display: none; /* Hidden by default */
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background-color: #f01414; /* red */
+        color: white;
+        padding: 20px;
+        border-radius: 5px;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+        z-index: 1000;
+        font-family: Arial, sans-serif;
+        font-size: 16px;
+    }
+</style>
+<div id="successAlert" class="alert-success">
+    Success! Your action completed successfully.
+</div>
+<div id="errorAlert" class="alert-error">
+    Error! Your action is not completed.
+</div>
+
+
+<div class="section">
+    <div class="container">
+        <div class="row full-height justify-content-center">
+            <div class="col-12 text-center align-self-center py-5">
+                <div class="section pb-5 pt-5 pt-sm-2 text-center">
+                    <img src="assets/images/craft_logo.png" alt="Logo" style="width:145px">
+                    <div class="card-3d-wrap mx-auto">
+                        <div class="card-3d-wrapper">
+                            <div class="card-front">
+                                <div class="center-wrap">
+                                    <div class="section text-center">
+                                        <form method="POST" role="form" id="login_form">
+                                            <h4 class="mb-4 pb-3" style="color:black">Sign In</h4>
+                                            <div class="form-group">
+                                                <input type="email" name="email" class="form-style" placeholder="Your Email" id="email" autocomplete="off">
+                                                <i class="input-icon uil uil-at"></i>
+                                            </div>	
+                                            <div class="form-group mt-2">
+                                                <input type="password" name="password" class="form-style" placeholder="Your Password" id="password" autocomplete="off">
+                                                <i class="input-icon uil uil-lock-alt"></i>
+                                            </div>
+                                            <a href="#" class="btn mt-4" id="log_in">Log In</a>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-
-        <h2 class="form-title">Welcome Back</h2>
-
-        <form id="login_form" method="POST" role="form">
-            <div class="form-group">
-                <label for="login" class="form-label">Email Address</label>
-                <input type="email" name="login" id="login" class="form-control"
-                    placeholder="Enter your email" autocomplete="off" required>
-                <i class="fas fa-envelope input-icon"></i>
-            </div>
-
-            <div class="form-group">
-                <label for="password" class="form-label">Password</label>
-                <input type="password" name="password" id="password" class="form-control"
-                    placeholder="Enter your password" autocomplete="off" required>
-                <i class="fas fa-lock input-icon"></i>
-            </div>
-
-            <div class="form-options">
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="rememberMe">
-                    <label class="form-check-label" for="rememberMe">Remember me</label>
-                </div>
-                <a href="./forgot_password.php" class="forgot-password">Forgot Password?</a>
-            </div>
-
-            <button type="submit" class="btn btn-login mb-3" id="log_in">
-                <span id="login-text">Sign In</span>
-                <span id="login-spinner" class="spinner-border spinner-border-sm d-none" role="status"
-                    aria-hidden="true"></span>
-            </button>
-
-            <div class="divider">OR</div>
-
-            <div class="social-login">
-                <button type="button" class="social-btn google">
-                    <i class="fab fa-google"></i>
-                </button>
-                <button type="button" class="social-btn microsoft">
-                    <i class="fab fa-microsoft"></i>
-                </button>
-                <button type="button" class="social-btn apple">
-                    <i class="fab fa-apple"></i>
-                </button>
-            </div>
-
-            <div class="register-link">
-                Don't have an account? <a href="./register.php">Sign up</a>
-            </div>
-        </form>
     </div>
+</div>
+        
+<!--authentication-->
 
-    <!-- jQuery and Bootstrap JS -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- SweetAlert2 JS -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <script>
-        $(document).ready(function() {
-            // Form submission handler
-            $('#login_form').on('submit', function(e) {
-                e.preventDefault();
-                attemptLogin();
-            });
+  <!--plugins-->
+  <script src="assets/js/jquery.min.js"></script>
 
-            // Enter key handler
-            $('input').keydown(function(e) {
-                if (e.which === 13) {
-                    e.preventDefault();
-                    attemptLogin();
-                }
-            });
+  <script>
 
-            // Social login button handlers
-            $('.social-btn.google').click(function() {
-                Swal.fire({
-                    title: 'Google Sign In',
-                    text: 'This would redirect to Google authentication in a real application',
-                    icon: 'info',
-                    confirmButtonColor: var(--primary-color)
-                });
-            });
+        function showSuccessMessage(message) {
+            const successAlert = document.getElementById("successAlert");
+            successAlert.textContent = message;
+            successAlert.style.display = "block";
+            // Hide the alert automatically after 3 seconds
+            setTimeout(() => {
+                successAlert.style.display = "none";
+            }, 3000);
+        }
 
-            $('.social-btn.microsoft').click(function() {
-                Swal.fire({
-                    title: 'Microsoft Sign In',
-                    text: 'This would redirect to Microsoft authentication in a real application',
-                    icon: 'info',
-                    confirmButtonColor: var(--primary-color)
-                });
-            });
+        function showErrorMessage(message) {
+            const errorAlert = document.getElementById("errorAlert");
+            errorAlert.textContent = message;
+            errorAlert.style.display = "block";
+            // Hide the alert automatically after 3 seconds
+            setTimeout(() => {
+                errorAlert.style.display = "none";
+            }, 3000);
+        }
 
-            $('.social-btn.apple').click(function() {
-                Swal.fire({
-                    title: 'Apple Sign In',
-                    text: 'This would redirect to Apple authentication in a real application',
-                    icon: 'info',
-                    confirmButtonColor: var(--primary-color)
-                });
-            });
+    $(document).ready(function () {
+        $("#show_hide_password a").on('click', function (event) {
+            event.preventDefault();
+            if ($('#show_hide_password input').attr("type") == "text") {
+                $('#show_hide_password input').attr('type', 'password');
+                $('#show_hide_password i').addClass("bi-eye-slash-fill");
+                $('#show_hide_password i').removeClass("bi-eye-fill");
+            } else if ($('#show_hide_password input').attr("type") == "password") {
+                $('#show_hide_password input').attr('type', 'text');
+                $('#show_hide_password i').removeClass("bi-eye-slash-fill");
+                $('#show_hide_password i').addClass("bi-eye-fill");
+            }
         });
 
-        function attemptLogin() {
-            const login = $('#login').val().trim();
-            const password = $('#password').val().trim();
+        $('body').addClass('login-page').removeClass('sidebar-collapse layout-top-nav').css('background-color', '#bd282f');
+		$('.main-footer').remove();
+		$('.wrapper').removeClass('wrapper').addClass('login-box');
 
-            if (login === '' || password === '') {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'Please fill in all fields',
-                    confirmButtonColor: '#4361ee',
-                    backdrop: 'rgba(0,0,0,0.1)'
-                });
-                return;
+        $('#log_in').click(function (event) {
+            event.preventDefault(); // Prevent normal form submission
+
+            var email = $('#email').val();
+            var password = $('#password').val();
+            if (($.trim(email) != '') && ($.trim(password) != '')) {
+                attempLogin();
+            } else {
+                showErrorMessage("Please enter Email and Password");
             }
-
-            if (!validateEmail(login)) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Invalid Email',
-                    text: 'Please enter a valid email address',
-                    confirmButtonColor: '#4361ee',
-                    backdrop: 'rgba(0,0,0,0.1)'
-                });
-                return;
-            }
-
-            const posted = {
-                'login': login,
-                'password': password
-            };
-
-            $.ajax({
-                type: "POST",
-                url: "ajax_helpers/ajax_check_login.php",
-                data: posted,
-                beforeSend: function() {
-                    $('#log_in').prop('disabled', true);
-                    $('#login-text').text('Signing In...');
-                    $('#login-spinner').removeClass('d-none');
-                },
-                success: function(response) {
-                    if (response.trim() === '1') {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Login Successful',
-                            text: 'Redirecting to your dashboard...',
-                            confirmButtonColor: '#4361ee',
-                            backdrop: 'rgba(0,0,0,0.1)',
-                            timer: 1500,
-                            showConfirmButton: false
-                        }).then(() => {
-                            window.location.href = "dashboard.php";
-                        });
-                    } else if (response.trim() === 'suspended') {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Account Suspended',
-                            text: 'Your account has been suspended. Please contact support.',
-                            confirmButtonColor: '#4361ee',
-                            backdrop: 'rgba(0,0,0,0.1)'
-                        });
-                    } else if (response.trim() === 'fired') {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Account Terminated',
-                            text: 'Your account has been terminated and you cannot login.',
-                            confirmButtonColor: '#4361ee',
-                            backdrop: 'rgba(0,0,0,0.1)'
-                        });
-                    } else {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Login Failed',
-                            text: 'Invalid email or password',
-                            confirmButtonColor: '#4361ee',
-                            backdrop: 'rgba(0,0,0,0.1)'
-                        });
-                    }
-                    resetLoginButton();
-                },
-                error: function() {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: 'Error connecting to server. Please try again later.',
-                        confirmButtonColor: '#4361ee',
-                        backdrop: 'rgba(0,0,0,0.1)'
-                    });
-                    resetLoginButton();
+        });
+			
+		$('input').keydown(function (e) {
+            if (e.which == 13) {
+                e.preventDefault(); // Prevent form submission when pressing Enter
+                var email = $('#email').val();
+                var password = $('#password').val();
+                if (($.trim(email) != '') && ($.trim(password) != '')) {
+                    attempLogin();
+                } else {
+                    showErrorMessage("Please Enter User ID and Password");
                 }
-            });
-        }
-
-        function resetLoginButton() {
-            $('#log_in').prop('disabled', false);
-            $('#login-text').text('Sign In');
-            $('#login-spinner').addClass('d-none');
-        }
-
-        function validateEmail(email) {
-            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            return re.test(email);
-        }
-    </script>
-</body>
-
-</html>
+            }
+        });
+    });
+    function attempLogin() {
+        var email = $('#email').val();
+        var password = $('#password').val();
+        var posted = { 'email': email, 'password': password};
+        $.ajax({
+            type: "POST",
+            url: "ajax_helpers/ajax_check_login.php",
+            data: posted,
+            beforeSend: function () {
+                $('#log_in').attr("value", "Logging In...");
+                $('#log_in').addClass("disabled");
+            },
+            success: function (data) {
+                console.log('Response from server:', data); // Debugging response
+                if ($.trim(data) == '1') {
+                    showSuccessMessage('Login successfully. Redirecting to index page...');
+                    window.location.href = 'index.php'; // Redirect if login is successful
+                } else {
+                    showErrorMessage("Invalid User ID or Password");
+                    $('#log_in').attr("value", "Log In");
+                    $('#log_in').removeClass("disabled");
+                }
+            }
+        });
+	}
+  </script>
+  <style>
+    footer {
+      display: none !important;
+    }
+  </style>
+  <?php
+  include_once('includes/page-parts/content-bottom.php');
+  include_once('includes/page-parts/footer.php');
+  ?>
