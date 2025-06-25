@@ -36,12 +36,12 @@
                                     <div class="accordion-body p-0">
                                         <ul class="nav flex-column">
                                             <li class="nav-item">
-                                                <a class="nav-link ps-4 py-2" href="my" style="color: #BDC3C7;">
+                                                <a class="nav-link ps-4 py-2" href="./my_task.php" style="color: #BDC3C7;">
                                                     <i class="fas fa-list me-2" style="color: #BDC3C7;"></i> My Tasks
                                                 </a>
                                             </li>
                                             <li class="nav-item">
-                                                <a class="nav-link ps-4 py-2" href="tasks.php?action=create" style="color: #BDC3C7;">
+                                                <a class="nav-link ps-4 py-2" href="./add_new_task.php" style="color: #BDC3C7;">
                                                     <i class="fas fa-plus-circle me-2" style="color: #BDC3C7;"></i> New Task
                                                 </a>
                                             </li>
@@ -69,7 +69,7 @@
                                         <div class="accordion-body p-0">
                                             <ul class="nav flex-column">
                                                 <li class="nav-item">
-                                                    <a class="nav-link ps-4 py-2" href="invoices.php?action=list" style="color: #BDC3C7;">
+                                                    <a class="nav-link ps-4 py-2" href="./invoices.php" style="color: #BDC3C7;">
                                                         <i class="fas fa-file-alt me-2" style="color: #BDC3C7;"></i> Invoices
                                                     </a>
                                                 </li>
