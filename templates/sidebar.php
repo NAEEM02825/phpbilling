@@ -74,12 +74,12 @@
                                                     </a>
                                                 </li>
                                                 <li class="nav-item">
-                                                    <a class="nav-link ps-4 py-2" href="payments.php?action=list" style="color: #BDC3C7;">
+                                                    <a class="nav-link ps-4 py-2" href="./payment _history.php" style="color: #BDC3C7;">
                                                         <i class="fas fa-history me-2" style="color: #BDC3C7;"></i> Payment History
                                                     </a>
                                                 </li>
                                                 <li class="nav-item">
-                                                    <a class="nav-link ps-4 py-2" href="ledger.php" style="color: #BDC3C7;">
+                                                    <a class="nav-link ps-4 py-2" href="./ledger.php" style="color: #BDC3C7;">
                                                         <i class="fas fa-book me-2" style="color: #BDC3C7;"></i> Client Ledger
                                                     </a>
                                                 </li>
@@ -105,17 +105,17 @@
                                         <div class="accordion-body p-0">
                                             <ul class="nav flex-column">
                                                 <li class="nav-item">
-                                                    <a class="nav-link ps-4 py-2" href="clients.php" style="color: #BDC3C7;">
+                                                    <a class="nav-link ps-4 py-2" href="./clients.php" style="color: #BDC3C7;">
                                                         <i class="fas fa-users me-2" style="color: #BDC3C7;"></i> Clients
                                                     </a>
                                                 </li>
                                                 <li class="nav-item">
-                                                    <a class="nav-link ps-4 py-2" href="projects.php" style="color: #BDC3C7;">
+                                                    <a class="nav-link ps-4 py-2" href="./projects.php" style="color: #BDC3C7;">
                                                         <i class="fas fa-project-diagram me-2" style="color: #BDC3C7;"></i> Projects
                                                     </a>
                                                 </li>
                                                 <li class="nav-item">
-                                                    <a class="nav-link ps-4 py-2" href="users.php" style="color: #BDC3C7;">
+                                                    <a class="nav-link ps-4 py-2" href="./users.php" style="color: #BDC3C7;">
                                                         <i class="fas fa-user-cog me-2" style="color: #BDC3C7;"></i> Users
                                                     </a>
                                                 </li>
