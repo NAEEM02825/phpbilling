@@ -71,462 +71,94 @@
     </ul>
 
     <!-- Project Content -->
-    <div class="tab-content" id="projectTabsContent">
-        <div class="tab-pane fade show active" id="all-projects" role="tabpanel">
-            <!-- Project List -->
-            <div class="card shadow-sm">
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Project</th>
-                                    <th>From Company</th>
-                                    <th>To Client</th>
-                                    <th>Type</th>
-                                    <th>Rate</th>
-                                    <th>Payment Cycle</th>
-                                    <th>Tasks</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <!-- SF 1 -->
-                                <tr>
-                                    <td>
-                                        <a href="#" class="text-primary fw-bold">SF 1</a>
-                                    </td>
-                                    <td>Your Company</td>
-                                    <td>Client A</td>
-                                    <td><span class="badge bg-info">Recurring</span></td>
-                                    <td>$5,000</td>
-                                    <td>Monthly</td>
-                                    <td>
-                                        <a href="#" class="btn btn-sm btn-outline-primary">View Tasks (3)</a>
-                                    </td>
-                                    <td>
-                                        <div class="dropdown">
-                                            <button class="btn btn-sm btn-light dropdown-toggle" type="button" id="projectActions1" data-bs-toggle="dropdown">
-                                                <i class="fas fa-ellipsis-h"></i>
-                                            </button>
-                                            <ul class="dropdown-menu" aria-labelledby="projectActions1">
-                                                <li><a class="dropdown-item" href="#"><i class="fas fa-eye me-2"></i> View</a></li>
-                                                <li><a class="dropdown-item" href="#"><i class="fas fa-edit me-2"></i> Edit</a></li>
-                                                <li><a class="dropdown-item" href="#"><i class="fas fa-tasks me-2"></i> Tasks</a></li>
-                                            </ul>
-                                        </div>
-                                    </td>
-                                </tr>
-                                
-                                <!-- SF 2 -->
-                                <tr>
-                                    <td>
-                                        <a href="#" class="text-primary fw-bold">SF 2</a>
-                                    </td>
-                                    <td>Your Company</td>
-                                    <td>Client B</td>
-                                    <td><span class="badge bg-warning">Hourly</span></td>
-                                    <td>$75/hr</td>
-                                    <td>Weekly</td>
-                                    <td>
-                                        <a href="#" class="btn btn-sm btn-outline-primary">View Tasks (5)</a>
-                                    </td>
-                                    <td>
-                                        <div class="dropdown">
-                                            <button class="btn btn-sm btn-light dropdown-toggle" type="button" id="projectActions2" data-bs-toggle="dropdown">
-                                                <i class="fas fa-ellipsis-h"></i>
-                                            </button>
-                                            <ul class="dropdown-menu" aria-labelledby="projectActions2">
-                                                <li><a class="dropdown-item" href="#"><i class="fas fa-eye me-2"></i> View</a></li>
-                                                <li><a class="dropdown-item" href="#"><i class="fas fa-edit me-2"></i> Edit</a></li>
-                                                <li><a class="dropdown-item" href="#"><i class="fas fa-tasks me-2"></i> Tasks</a></li>
-                                            </ul>
-                                        </div>
-                                    </td>
-                                </tr>
-                                
-                                <!-- SF 3 -->
-                                <tr>
-                                    <td>
-                                        <a href="#" class="text-primary fw-bold">SF 3</a>
-                                    </td>
-                                    <td>Your Company</td>
-                                    <td>Client C</td>
-                                    <td><span class="badge bg-info">Recurring</span></td>
-                                    <td>$3,500</td>
-                                    <td>15 Days</td>
-                                    <td>
-                                        <a href="#" class="btn btn-sm btn-outline-primary">View Tasks (2)</a>
-                                    </td>
-                                    <td>
-                                        <div class="dropdown">
-                                            <button class="btn btn-sm btn-light dropdown-toggle" type="button" id="projectActions3" data-bs-toggle="dropdown">
-                                                <i class="fas fa-ellipsis-h"></i>
-                                            </button>
-                                            <ul class="dropdown-menu" aria-labelledby="projectActions3">
-                                                <li><a class="dropdown-item" href="#"><i class="fas fa-eye me-2"></i> View</a></li>
-                                                <li><a class="dropdown-item" href="#"><i class="fas fa-edit me-2"></i> Edit</a></li>
-                                                <li><a class="dropdown-item" href="#"><i class="fas fa-tasks me-2"></i> Tasks</a></li>
-                                            </ul>
-                                        </div>
-                                    </td>
-                                </tr>
-                                
-                                <!-- DAL -->
-                                <tr>
-                                    <td>
-                                        <a href="#" class="text-primary fw-bold">DAL</a>
-                                    </td>
-                                    <td>Your Company</td>
-                                    <td>Client D</td>
-                                    <td><span class="badge bg-warning">Hourly</span></td>
-                                    <td>$85/hr</td>
-                                    <td>Monthly</td>
-                                    <td>
-                                        <a href="#" class="btn btn-sm btn-outline-primary">View Tasks (7)</a>
-                                    </td>
-                                    <td>
-                                        <div class="dropdown">
-                                            <button class="btn btn-sm btn-light dropdown-toggle" type="button" id="projectActions4" data-bs-toggle="dropdown">
-                                                <i class="fas fa-ellipsis-h"></i>
-                                            </button>
-                                            <ul class="dropdown-menu" aria-labelledby="projectActions4">
-                                                <li><a class="dropdown-item" href="#"><i class="fas fa-eye me-2"></i> View</a></li>
-                                                <li><a class="dropdown-item" href="#"><i class="fas fa-edit me-2"></i> Edit</a></li>
-                                                <li><a class="dropdown-item" href="#"><i class="fas fa-tasks me-2"></i> Tasks</a></li>
-                                            </ul>
-                                        </div>
-                                    </td>
-                                </tr>
-                                
-                                <!-- CRAFT -->
-                                <tr>
-                                    <td>
-                                        <a href="#" class="text-primary fw-bold">CRAFT</a>
-                                    </td>
-                                    <td>Your Company</td>
-                                    <td>Client E</td>
-                                    <td><span class="badge bg-info">Recurring</span></td>
-                                    <td>$4,200</td>
-                                    <td>Monthly</td>
-                                    <td>
-                                        <a href="#" class="btn btn-sm btn-outline-primary">View Tasks (4)</a>
-                                    </td>
-                                    <td>
-                                        <div class="dropdown">
-                                            <button class="btn btn-sm btn-light dropdown-toggle" type="button" id="projectActions5" data-bs-toggle="dropdown">
-                                                <i class="fas fa-ellipsis-h"></i>
-                                            </button>
-                                            <ul class="dropdown-menu" aria-labelledby="projectActions5">
-                                                <li><a class="dropdown-item" href="#"><i class="fas fa-eye me-2"></i> View</a></li>
-                                                <li><a class="dropdown-item" href="#"><i class="fas fa-edit me-2"></i> Edit</a></li>
-                                                <li><a class="dropdown-item" href="#"><i class="fas fa-tasks me-2"></i> Tasks</a></li>
-                                            </ul>
-                                        </div>
-                                    </td>
-                                </tr>
-                                
-                                <!-- DRD -->
-                                <tr>
-                                    <td>
-                                        <a href="#" class="text-primary fw-bold">DRD</a>
-                                    </td>
-                                    <td>Your Company</td>
-                                    <td>Client F</td>
-                                    <td><span class="badge bg-warning">Hourly</span></td>
-                                    <td>$65/hr</td>
-                                    <td>Weekly</td>
-                                    <td>
-                                        <a href="#" class="btn btn-sm btn-outline-primary">View Tasks (6)</a>
-                                    </td>
-                                    <td>
-                                        <div class="dropdown">
-                                            <button class="btn btn-sm btn-light dropdown-toggle" type="button" id="projectActions6" data-bs-toggle="dropdown">
-                                                <i class="fas fa-ellipsis-h"></i>
-                                            </button>
-                                            <ul class="dropdown-menu" aria-labelledby="projectActions6">
-                                                <li><a class="dropdown-item" href="#"><i class="fas fa-eye me-2"></i> View</a></li>
-                                                <li><a class="dropdown-item" href="#"><i class="fas fa-edit me-2"></i> Edit</a></li>
-                                                <li><a class="dropdown-item" href="#"><i class="fas fa-tasks me-2"></i> Tasks</a></li>
-                                            </ul>
-                                        </div>
-                                    </td>
-                                </tr>
-                                
-                                <!-- PLATINUM -->
-                                <tr>
-                                    <td>
-                                        <a href="#" class="text-primary fw-bold">PLATINUM</a>
-                                    </td>
-                                    <td>Your Company</td>
-                                    <td>Client G</td>
-                                    <td><span class="badge bg-info">Recurring</span></td>
-                                    <td>$6,000</td>
-                                    <td>Monthly</td>
-                                    <td>
-                                        <a href="#" class="btn btn-sm btn-outline-primary">View Tasks (8)</a>
-                                    </td>
-                                    <td>
-                                        <div class="dropdown">
-                                            <button class="btn btn-sm btn-light dropdown-toggle" type="button" id="projectActions7" data-bs-toggle="dropdown">
-                                                <i class="fas fa-ellipsis-h"></i>
-                                            </button>
-                                            <ul class="dropdown-menu" aria-labelledby="projectActions7">
-                                                <li><a class="dropdown-item" href="#"><i class="fas fa-eye me-2"></i> View</a></li>
-                                                <li><a class="dropdown-item" href="#"><i class="fas fa-edit me-2"></i> Edit</a></li>
-                                                <li><a class="dropdown-item" href="#"><i class="fas fa-tasks me-2"></i> Tasks</a></li>
-                                            </ul>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- SF Projects Tab -->
-        <div class="tab-pane fade" id="sf-projects" role="tabpanel">
-            <div class="card shadow-sm">
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Project</th>
-                                    <th>From Company</th>
-                                    <th>To Client</th>
-                                    <th>Type</th>
-                                    <th>Rate</th>
-                                    <th>Payment Cycle</th>
-                                    <th>Tasks</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <!-- SF 1 -->
-                                <tr>
-                                    <td>
-                                        <a href="#" class="text-primary fw-bold">SF 1</a>
-                                    </td>
-                                    <td>Your Company</td>
-                                    <td>Client A</td>
-                                    <td><span class="badge bg-info">Recurring</span></td>
-                                    <td>$5,000</td>
-                                    <td>Monthly</td>
-                                    <td>
-                                        <a href="#" class="btn btn-sm btn-outline-primary">View Tasks (3)</a>
-                                    </td>
-                                    <td>
-                                        <div class="dropdown">
-                                            <button class="btn btn-sm btn-light dropdown-toggle" type="button" id="sf1Actions" data-bs-toggle="dropdown">
-                                                <i class="fas fa-ellipsis-h"></i>
-                                            </button>
-                                            <ul class="dropdown-menu" aria-labelledby="sf1Actions">
-                                                <li><a class="dropdown-item" href="#"><i class="fas fa-eye me-2"></i> View</a></li>
-                                                <li><a class="dropdown-item" href="#"><i class="fas fa-edit me-2"></i> Edit</a></li>
-                                                <li><a class="dropdown-item" href="#"><i class="fas fa-tasks me-2"></i> Tasks</a></li>
-                                            </ul>
-                                        </div>
-                                    </td>
-                                </tr>
-                                
-                                <!-- SF 2 -->
-                                <tr>
-                                    <td>
-                                        <a href="#" class="text-primary fw-bold">SF 2</a>
-                                    </td>
-                                    <td>Your Company</td>
-                                    <td>Client B</td>
-                                    <td><span class="badge bg-warning">Hourly</span></td>
-                                    <td>$75/hr</td>
-                                    <td>Weekly</td>
-                                    <td>
-                                        <a href="#" class="btn btn-sm btn-outline-primary">View Tasks (5)</a>
-                                    </td>
-                                    <td>
-                                        <div class="dropdown">
-                                            <button class="btn btn-sm btn-light dropdown-toggle" type="button" id="sf2Actions" data-bs-toggle="dropdown">
-                                                <i class="fas fa-ellipsis-h"></i>
-                                            </button>
-                                            <ul class="dropdown-menu" aria-labelledby="sf2Actions">
-                                                <li><a class="dropdown-item" href="#"><i class="fas fa-eye me-2"></i> View</a></li>
-                                                <li><a class="dropdown-item" href="#"><i class="fas fa-edit me-2"></i> Edit</a></li>
-                                                <li><a class="dropdown-item" href="#"><i class="fas fa-tasks me-2"></i> Tasks</a></li>
-                                            </ul>
-                                        </div>
-                                    </td>
-                                </tr>
-                                
-                                <!-- SF 3 -->
-                                <tr>
-                                    <td>
-                                        <a href="#" class="text-primary fw-bold">SF 3</a>
-                                    </td>
-                                    <td>Your Company</td>
-                                    <td>Client C</td>
-                                    <td><span class="badge bg-info">Recurring</span></td>
-                                    <td>$3,500</td>
-                                    <td>15 Days</td>
-                                    <td>
-                                        <a href="#" class="btn btn-sm btn-outline-primary">View Tasks (2)</a>
-                                    </td>
-                                    <td>
-                                        <div class="dropdown">
-                                            <button class="btn btn-sm btn-light dropdown-toggle" type="button" id="sf3Actions" data-bs-toggle="dropdown">
-                                                <i class="fas fa-ellipsis-h"></i>
-                                            </button>
-                                            <ul class="dropdown-menu" aria-labelledby="sf3Actions">
-                                                <li><a class="dropdown-item" href="#"><i class="fas fa-eye me-2"></i> View</a></li>
-                                                <li><a class="dropdown-item" href="#"><i class="fas fa-edit me-2"></i> Edit</a></li>
-                                                <li><a class="dropdown-item" href="#"><i class="fas fa-tasks me-2"></i> Tasks</a></li>
-                                            </ul>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Other Projects Tab -->
-        <div class="tab-pane fade" id="other-projects" role="tabpanel">
-            <div class="card shadow-sm">
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Project</th>
-                                    <th>From Company</th>
-                                    <th>To Client</th>
-                                    <th>Type</th>
-                                    <th>Rate</th>
-                                    <th>Payment Cycle</th>
-                                    <th>Tasks</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <!-- DAL -->
-                                <tr>
-                                    <td>
-                                        <a href="#" class="text-primary fw-bold">DAL</a>
-                                    </td>
-                                    <td>Your Company</td>
-                                    <td>Client D</td>
-                                    <td><span class="badge bg-warning">Hourly</span></td>
-                                    <td>$85/hr</td>
-                                    <td>Monthly</td>
-                                    <td>
-                                        <a href="#" class="btn btn-sm btn-outline-primary">View Tasks (7)</a>
-                                    </td>
-                                    <td>
-                                        <div class="dropdown">
-                                            <button class="btn btn-sm btn-light dropdown-toggle" type="button" id="dalActions" data-bs-toggle="dropdown">
-                                                <i class="fas fa-ellipsis-h"></i>
-                                            </button>
-                                            <ul class="dropdown-menu" aria-labelledby="dalActions">
-                                                <li><a class="dropdown-item" href="#"><i class="fas fa-eye me-2"></i> View</a></li>
-                                                <li><a class="dropdown-item" href="#"><i class="fas fa-edit me-2"></i> Edit</a></li>
-                                                <li><a class="dropdown-item" href="#"><i class="fas fa-tasks me-2"></i> Tasks</a></li>
-                                            </ul>
-                                        </div>
-                                    </td>
-                                </tr>
-                                
-                                <!-- CRAFT -->
-                                <tr>
-                                    <td>
-                                        <a href="#" class="text-primary fw-bold">CRAFT</a>
-                                    </td>
-                                    <td>Your Company</td>
-                                    <td>Client E</td>
-                                    <td><span class="badge bg-info">Recurring</span></td>
-                                    <td>$4,200</td>
-                                    <td>Monthly</td>
-                                    <td>
-                                        <a href="#" class="btn btn-sm btn-outline-primary">View Tasks (4)</a>
-                                    </td>
-                                    <td>
-                                        <div class="dropdown">
-                                            <button class="btn btn-sm btn-light dropdown-toggle" type="button" id="craftActions" data-bs-toggle="dropdown">
-                                                <i class="fas fa-ellipsis-h"></i>
-                                            </button>
-                                            <ul class="dropdown-menu" aria-labelledby="craftActions">
-                                                <li><a class="dropdown-item" href="#"><i class="fas fa-eye me-2"></i> View</a></li>
-                                                <li><a class="dropdown-item" href="#"><i class="fas fa-edit me-2"></i> Edit</a></li>
-                                                <li><a class="dropdown-item" href="#"><i class="fas fa-tasks me-2"></i> Tasks</a></li>
-                                            </ul>
-                                        </div>
-                                    </td>
-                                </tr>
-                                
-                                <!-- DRD -->
-                                <tr>
-                                    <td>
-                                        <a href="#" class="text-primary fw-bold">DRD</a>
-                                    </td>
-                                    <td>Your Company</td>
-                                    <td>Client F</td>
-                                    <td><span class="badge bg-warning">Hourly</span></td>
-                                    <td>$65/hr</td>
-                                    <td>Weekly</td>
-                                    <td>
-                                        <a href="#" class="btn btn-sm btn-outline-primary">View Tasks (6)</a>
-                                    </td>
-                                    <td>
-                                        <div class="dropdown">
-                                            <button class="btn btn-sm btn-light dropdown-toggle" type="button" id="drdActions" data-bs-toggle="dropdown">
-                                                <i class="fas fa-ellipsis-h"></i>
-                                            </button>
-                                            <ul class="dropdown-menu" aria-labelledby="drdActions">
-                                                <li><a class="dropdown-item" href="#"><i class="fas fa-eye me-2"></i> View</a></li>
-                                                <li><a class="dropdown-item" href="#"><i class="fas fa-edit me-2"></i> Edit</a></li>
-                                                <li><a class="dropdown-item" href="#"><i class="fas fa-tasks me-2"></i> Tasks</a></li>
-                                            </ul>
-                                        </div>
-                                    </td>
-                                </tr>
-                                
-                                <!-- PLATINUM -->
-                                <tr>
-                                    <td>
-                                        <a href="#" class="text-primary fw-bold">PLATINUM</a>
-                                    </td>
-                                    <td>Your Company</td>
-                                    <td>Client G</td>
-                                    <td><span class="badge bg-info">Recurring</span></td>
-                                    <td>$6,000</td>
-                                    <td>Monthly</td>
-                                    <td>
-                                        <a href="#" class="btn btn-sm btn-outline-primary">View Tasks (8)</a>
-                                    </td>
-                                    <td>
-                                        <div class="dropdown">
-                                            <button class="btn btn-sm btn-light dropdown-toggle" type="button" id="platinumActions" data-bs-toggle="dropdown">
-                                                <i class="fas fa-ellipsis-h"></i>
-                                            </button>
-                                            <ul class="dropdown-menu" aria-labelledby="platinumActions">
-                                                <li><a class="dropdown-item" href="#"><i class="fas fa-eye me-2"></i> View</a></li>
-                                                <li><a class="dropdown-item" href="#"><i class="fas fa-edit me-2"></i> Edit</a></li>
-                                                <li><a class="dropdown-item" href="#"><i class="fas fa-tasks me-2"></i> Tasks</a></li>
-                                            </ul>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+  <!-- Projects Page Header (same as before) -->
+<!-- Week Information (same as before) -->
+<!-- Project Tabs (same as before) -->
+
+<!-- Project Content -->
+<div class="tab-content" id="projectTabsContent">
+    <div class="tab-pane fade show active" id="all-projects" role="tabpanel">
+        <div class="card shadow-sm">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0" id="allProjectsTable">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Project</th>
+                                <th>From Company</th>
+                                <th>To Client</th>
+                                <th>Type</th>
+                                <th>Rate</th>
+                                <th>Payment Cycle</th>
+                                <th>Tasks</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Projects will be loaded dynamically -->
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
     </div>
+    
+    <!-- SF Projects Tab -->
+    <div class="tab-pane fade" id="sf-projects" role="tabpanel">
+        <div class="card shadow-sm">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0" id="sfProjectsTable">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Project</th>
+                                <th>From Company</th>
+                                <th>To Client</th>
+                                <th>Type</th>
+                                <th>Rate</th>
+                                <th>Payment Cycle</th>
+                                <th>Tasks</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- SF Projects will be loaded dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Other Projects Tab -->
+    <div class="tab-pane fade" id="other-projects" role="tabpanel">
+        <div class="card shadow-sm">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0" id="otherProjectsTable">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Project</th>
+                                <th>From Company</th>
+                                <th>To Client</th>
+                                <th>Type</th>
+                                <th>Rate</th>
+                                <th>Payment Cycle</th>
+                                <th>Tasks</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Other Projects will be loaded dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
-<!-- New Project Modal -->
+<!-- New Project Modal (modified form) -->
 <div class="modal fade" id="newProjectModal" tabindex="-1" aria-labelledby="newProjectModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -535,33 +167,33 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form>
+                <form id="projectForm">
                     <div class="row g-3">
                         <div class="col-md-12">
                             <label for="projectName" class="form-label">Project Name</label>
-                            <input type="text" class="form-control" id="projectName" required>
+                            <input type="text" class="form-control" id="projectName" name="name" required>
                         </div>
                         
                         <div class="col-md-6">
                             <label for="fromCompany" class="form-label">From Company</label>
-                            <input type="text" class="form-control" id="fromCompany" required>
+                            <input type="text" class="form-control" id="fromCompany" name="from_company" required>
                         </div>
                         
                         <div class="col-md-6">
                             <label for="toClient" class="form-label">To Client</label>
-                            <input type="text" class="form-control" id="toClient" required>
+                            <input type="text" class="form-control" id="toClient" name="to_client" required>
                         </div>
                         
                         <div class="col-md-6">
                             <label class="form-label">Project Type</label>
                             <div class="form-check">
-                                <input class="form-check-input" type="radio" name="projectType" id="recurringType" checked>
+                                <input class="form-check-input" type="radio" name="type" id="recurringType" value="Recurring" checked>
                                 <label class="form-check-label" for="recurringType">
                                     Recurring
                                 </label>
                             </div>
                             <div class="form-check">
-                                <input class="form-check-input" type="radio" name="projectType" id="hourlyType">
+                                <input class="form-check-input" type="radio" name="type" id="hourlyType" value="Hourly">
                                 <label class="form-check-label" for="hourlyType">
                                     Hourly
                                 </label>
@@ -571,17 +203,17 @@
                         <div class="col-md-6">
                             <div id="recurringRateField">
                                 <label for="recurringRate" class="form-label">Recurring Rate ($)</label>
-                                <input type="number" class="form-control" id="recurringRate">
+                                <input type="number" class="form-control" id="recurringRate" name="rate" step="0.01">
                             </div>
                             <div id="hourlyRateField" style="display: none;">
                                 <label for="hourlyRate" class="form-label">Hourly Rate ($)</label>
-                                <input type="number" class="form-control" id="hourlyRate">
+                                <input type="number" class="form-control" id="hourlyRate" name="rate" step="0.01">
                             </div>
                         </div>
                         
                         <div class="col-md-12">
                             <label for="paymentCycle" class="form-label">Payment Cycle</label>
-                            <select class="form-select" id="paymentCycle">
+                            <select class="form-select" id="paymentCycle" name="payment_cycle">
                                 <option value="weekly">Weekly</option>
                                 <option value="15days">15 Days</option>
                                 <option value="monthly" selected>Monthly</option>
@@ -598,7 +230,7 @@
     </div>
 </div>
 
-<!-- Task Modal (Example) -->
+<!-- Task Modal (dynamic content) -->
 <div class="modal fade" id="taskModal" tabindex="-1" aria-labelledby="taskModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -614,7 +246,7 @@
                 </div>
                 
                 <div class="table-responsive">
-                    <table class="table table-hover">
+                    <table class="table table-hover" id="tasksTable">
                         <thead>
                             <tr>
                                 <th>Date</th>
@@ -626,36 +258,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td>2023-06-01</td>
-                                <td>Initial project setup</td>
-                                <td>4</td>
-                                <td><span class="badge bg-success">Completed</span></td>
-                                <td><a href="#" target="_blank">View in ClickUp</a></td>
-                                <td>
-                                    <button class="btn btn-sm btn-light"><i class="fas fa-edit"></i></button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>2023-06-05</td>
-                                <td>Database design</td>
-                                <td>6</td>
-                                <td><span class="badge bg-success">Completed</span></td>
-                                <td><a href="#" target="_blank">View in ClickUp</a></td>
-                                <td>
-                                    <button class="btn btn-sm btn-light"><i class="fas fa-edit"></i></button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>2023-06-10</td>
-                                <td>API development</td>
-                                <td>8</td>
-                                <td><span class="badge bg-warning">WIP</span></td>
-                                <td><a href="#" target="_blank">View in ClickUp</a></td>
-                                <td>
-                                    <button class="btn btn-sm btn-light"><i class="fas fa-edit"></i></button>
-                                </td>
-                            </tr>
+                            <!-- Tasks will be loaded dynamically -->
                         </tbody>
                     </table>
                 </div>
@@ -664,7 +267,7 @@
     </div>
 </div>
 
-<!-- New Task Modal -->
+<!-- New Task Modal (modified form) -->
 <div class="modal fade" id="newTaskModal" tabindex="-1" aria-labelledby="newTaskModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -673,33 +276,35 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form>
+                <form id="taskForm">
+                    <input type="hidden" id="taskProjectId" name="project_id">
+                    
                     <div class="mb-3">
                         <label for="taskDate" class="form-label">Date</label>
-                        <input type="date" class="form-control" id="taskDate" required>
+                        <input type="date" class="form-control" id="taskDate" name="task_date" required>
                     </div>
                     
                     <div class="mb-3">
                         <label for="taskDetails" class="form-label">Task Details</label>
-                        <textarea class="form-control" id="taskDetails" rows="3" required></textarea>
+                        <textarea class="form-control" id="taskDetails" name="details" rows="3" required></textarea>
                     </div>
                     
                     <div class="mb-3">
                         <label for="taskHours" class="form-label">Hours</label>
-                        <input type="number" class="form-control" id="taskHours" step="0.5" min="0.5" required>
+                        <input type="number" class="form-control" id="taskHours" name="hours" step="0.5" min="0.5" required>
                     </div>
                     
                     <div class="mb-3">
                         <label for="taskStatus" class="form-label">Status</label>
-                        <select class="form-select" id="taskStatus">
-                            <option value="wip">Work in Progress</option>
-                            <option value="completed">Completed</option>
+                        <select class="form-select" id="taskStatus" name="status">
+                            <option value="WIP">Work in Progress</option>
+                            <option value="Completed">Completed</option>
                         </select>
                     </div>
                     
                     <div class="mb-3">
                         <label for="clickupLink" class="form-label">ClickUp Link</label>
-                        <input type="url" class="form-control" id="clickupLink">
+                        <input type="url" class="form-control" id="clickupLink" name="clickup_link">
                     </div>
                     
                     <button type="submit" class="btn btn-primary">Add Task</button>
@@ -709,28 +314,210 @@
     </div>
 </div>
 
-
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-// Toggle between recurring and hourly rate fields
-document.querySelectorAll('input[name="projectType"]').forEach(radio => {
-    radio.addEventListener('change', function() {
-        if (this.id === 'recurringType') {
-            document.getElementById('recurringRateField').style.display = 'block';
-            document.getElementById('hourlyRateField').style.display = 'none';
-        } else {
-            document.getElementById('recurringRateField').style.display = 'none';
-            document.getElementById('hourlyRateField').style.display = 'block';
+$(document).ready(function() {
+    // Load projects when page loads
+    loadProjects('all');
+    
+    // Load projects when tab changes
+    $('button[data-bs-toggle="tab"]').on('shown.bs.tab', function(e) {
+        const target = $(e.target).attr('data-bs-target');
+        if (target === '#all-projects') {
+            loadProjects('all');
+        } else if (target === '#sf-projects') {
+            loadProjects('SF');
+        } else if (target === '#other-projects') {
+            loadProjects('Other');
         }
+    });
+    
+    // Toggle between recurring and hourly rate fields
+    $('input[name="type"]').change(function() {
+        if ($(this).val() === 'Recurring') {
+            $('#recurringRateField').show();
+            $('#hourlyRateField').hide();
+        } else {
+            $('#recurringRateField').hide();
+            $('#hourlyRateField').show();
+        }
+    });
+    
+    // Handle project form submission
+    $('#projectForm').submit(function(e) {
+        e.preventDefault();
+        
+        const formData = $(this).serialize();
+        
+        $.ajax({
+            url: 'ajax_helpers/ajax_add_projects.php?action=create',
+            type: 'POST',
+            data: formData,
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    $('#newProjectModal').modal('hide');
+                    $('#projectForm')[0].reset();
+                    loadProjects('all');
+                    loadProjects('SF');
+                    loadProjects('Other');
+                    alert('Project created successfully!');
+                }
+            },
+            error: function(xhr) {
+                alert('Error: ' + xhr.responseJSON.error);
+            }
+        });
+    });
+    
+    // Handle task form submission
+    $('#taskForm').submit(function(e) {
+        e.preventDefault();
+        
+        const formData = $(this).serialize();
+        
+        $.ajax({
+            url: 'tasks.php?action=create',
+            type: 'POST',
+            data: formData,
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    $('#newTaskModal').modal('hide');
+                    $('#taskForm')[0].reset();
+                    loadTasks($('#taskProjectId').val());
+                    alert('Task added successfully!');
+                }
+            },
+            error: function(xhr) {
+                alert('Error: ' + xhr.responseJSON.error);
+            }
+        });
+    });
+    
+    // When task modal opens, load tasks for the project
+    $('#taskModal').on('show.bs.modal', function(e) {
+        const button = $(e.relatedTarget);
+        const projectId = button.data('project-id');
+        const projectName = button.data('project-name');
+        
+        $('#taskModalLabel').text('Tasks for ' + projectName);
+        $('#taskProjectId').val(projectId);
+        loadTasks(projectId);
     });
 });
 
-// Initialize tooltips
-var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-    return new bootstrap.Tooltip(tooltipTriggerEl);
-});
-</script>
+function loadProjects(category) {
+    let tableId = 'allProjectsTable';
+    if (category === 'SF') tableId = 'sfProjectsTable';
+    else if (category === 'Other') tableId = 'otherProjectsTable';
+    
+    $.ajax({
+        url: 'projects.php?action=list&category=' + category,
+        type: 'GET',
+        dataType: 'json',
+        success: function(response) {
+            if (response.success) {
+                const tbody = $('#' + tableId + ' tbody');
+                tbody.empty();
+                
+                response.data.forEach(function(project) {
+                    const typeBadge = project.type === 'Recurring' ? 
+                        '<span class="badge bg-info">Recurring</span>' : 
+                        '<span class="badge bg-warning">Hourly</span>';
+                    
+                    const rate = project.type === 'Recurring' ? 
+                        '$' + project.rate : 
+                        '$' + project.rate + '/hr';
+                    
+                    const row = `
+                        <tr>
+                            <td>
+                                <a href="#" class="text-primary fw-bold">${project.name}</a>
+                            </td>
+                            <td>${project.from_company}</td>
+                            <td>${project.to_client}</td>
+                            <td>${typeBadge}</td>
+                            <td>${rate}</td>
+                            <td>${project.payment_cycle}</td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary view-tasks" 
+                                    data-bs-toggle="modal" data-bs-target="#taskModal"
+                                    data-project-id="${project.id}"
+                                    data-project-name="${project.name}">
+                                    View Tasks (${project.task_count || 0})
+                                </button>
+                            </td>
+                            <td>
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                        <i class="fas fa-ellipsis-h"></i>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" href="#"><i class="fas fa-eye me-2"></i> View</a></li>
+                                        <li><a class="dropdown-item" href="#"><i class="fas fa-edit me-2"></i> Edit</a></li>
+                                        <li><a class="dropdown-item view-tasks" href="#" data-bs-toggle="modal" data-bs-target="#taskModal"
+                                            data-project-id="${project.id}" data-project-name="${project.name}">
+                                            <i class="fas fa-tasks me-2"></i> Tasks
+                                        </a></li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                    
+                    tbody.append(row);
+                });
+            }
+        },
+        error: function(xhr) {
+            alert('Error loading projects: ' + xhr.responseJSON.error);
+        }
+    });
+}
 
+function loadTasks(projectId) {
+    $.ajax({
+        url: 'tasks.php?action=list&project_id=' + projectId,
+        type: 'GET',
+        dataType: 'json',
+        success: function(response) {
+            if (response.success) {
+                const tbody = $('#tasksTable tbody');
+                tbody.empty();
+                
+                response.data.forEach(function(task) {
+                    const statusBadge = task.status === 'Completed' ? 
+                        '<span class="badge bg-success">Completed</span>' : 
+                        '<span class="badge bg-warning">WIP</span>';
+                    
+                    const clickupLink = task.clickup_link ? 
+                        `<a href="${task.clickup_link}" target="_blank">View in ClickUp</a>` : 
+                        'N/A';
+                    
+                    const row = `
+                        <tr>
+                            <td>${task.task_date}</td>
+                            <td>${task.details}</td>
+                            <td>${task.hours}</td>
+                            <td>${statusBadge}</td>
+                            <td>${clickupLink}</td>
+                            <td>
+                                <button class="btn btn-sm btn-light"><i class="fas fa-edit"></i></button>
+                            </td>
+                        </tr>
+                    `;
+                    
+                    tbody.append(row);
+                });
+            }
+        },
+        error: function(xhr) {
+            alert('Error loading tasks: ' + xhr.responseJSON.error);
+        }
+    });
+}
+</script>
 <style>
     /* Project Page Specific Styles */
     .nav-tabs {
