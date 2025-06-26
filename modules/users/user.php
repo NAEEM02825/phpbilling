@@ -370,44 +370,44 @@
 <Script>
     // Update the add user form submission handler
     $('#submitAddUser').on('click', function() {
-        const form = $('#addUserForm');
-        const formData = form.serializeArray();
-        const data = {};
+    const form = $('#addUserForm');
+    const formData = form.serializeArray();
+    const data = {};
 
-        // Convert form data to object
-        formData.forEach(item => {
-            data[item.name] = item.value;
-        });
-
-        // Validate passwords match
-        if (data.password !== data.confirm_password) {
-            alert('Passwords do not match!');
-            return;
-        }
-
-        // Remove confirm_password from data before sending
-        delete data.confirm_password;
-
-        $.ajax({
-            url: 'ajax_helpers/ajax_add_user.php',
-            type: 'POST',
-            dataType: 'json',
-            data: data,
-            success: function(response) {
-                if (response.success) {
-                    $('#addUserModal').modal('hide');
-                    form[0].reset();
-                    loadUsers();
-                    alert('User added successfully');
-                } else {
-                    alert(response.message);
-                }
-            },
-            error: function(xhr, status, error) {
-                alert('Error adding user: ' + error);
-            }
-        });
+    // Convert form data to object
+    formData.forEach(item => {
+        data[item.name] = item.value;
     });
+
+    // Validate passwords match
+    if (data.password !== data.confirm_password) {
+        alert('Passwords do not match!');
+        return;
+    }
+
+    // Remove confirm_password from data before sending
+    delete data.confirm_password;
+
+    $.ajax({
+        url: 'ajax_helpers/ajax_add_user.php',
+        type: 'POST',
+        dataType: 'json',
+        data: data,
+        success: function(response) {
+            if (response.success) {
+                $('#addUserModal').modal('hide');
+                form[0].reset();
+                alert('User added successfully');
+                window.location.reload(); // Page will refresh
+            } else {
+                alert(response.message);
+            }
+        },
+        error: function(xhr, status, error) {
+            alert('Error adding user: ' + error);
+        }
+    });
+});
     $(document).ready(function() {
         // Load users on page load
         loadUsers();
