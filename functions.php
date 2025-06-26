@@ -8,7 +8,7 @@ include_once('includes/business_functions.php');
 // include_once('includes/security.php');
 include_once('includes/login_functions.php');
 
-// Switch language
+ // Switch language
 if (isset($_GET['lang'])) {
     $lang = $_GET['lang'];
     if (in_array($lang, ['en', 'es'])) { // Supported languages
