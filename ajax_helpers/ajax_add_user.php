@@ -78,10 +78,7 @@ try {
             if (empty($_POST['id']) || empty($_POST['status'])) {
                 throw new Exception("ID and status are required");
             }
- case 'get_roles':
-            $roles = DB::query("SELECT * FROM roles");
-            echo json_encode(['success' => true, 'data' => $roles]);
-            break;
+            
             DB::update(
                 'users',
                 [
@@ -92,6 +89,25 @@ try {
                 $_POST['id']
             );
             echo json_encode(['success' => true, 'message' => 'Status updated successfully']);
+            break;
+
+        case 'get_roles':
+            $roles = DB::query("SELECT * FROM roles");
+            echo json_encode(['success' => true, 'data' => $roles]);
+            break;
+
+        case 'get_user':
+            if (empty($_POST['id'])) {
+                throw new Exception("User ID is required");
+            }
+            
+            $user = DB::queryFirstRow("SELECT * FROM users WHERE id = %i", $_POST['id']);
+            
+            if ($user) {
+                echo json_encode(['success' => true, 'data' => $user]);
+            } else {
+                throw new Exception("User not found");
+            }
             break;
 
         default:

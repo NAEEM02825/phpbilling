@@ -410,9 +410,11 @@
         });
 
         // Edit user modal
-        $(document).on('click', '.edit-user', function() {
+        $(document).on('click', '.edit-user', function(e) {
+            e.preventDefault();
             const userId = $(this).data('id');
             loadUserData(userId);
+            $('#editUserModal').modal('show');
         });
 
         // Update user form
@@ -434,6 +436,32 @@
             const userId = $(this).data('id');
             const status = $(this).data('status');
             changeStatus(userId, status);
+        });
+    });
+    $('#submitEditUser').on('click', function() {
+        const formData = $('#editUserForm').serializeArray();
+        const data = {};
+        formData.forEach(item => {
+            data[item.name] = item.value;
+        });
+
+        $.ajax({
+            url: 'ajax_helpers/ajax_add_user.php',
+            type: 'POST',
+            dataType: 'json',
+            data: data,
+            success: function(response) {
+                if (response.success) {
+                    $('#editUserModal').modal('hide');
+                    loadUsers();
+                    alert('User updated successfully');
+                } else {
+                    alert(response.message);
+                }
+            },
+            error: function(xhr, status, error) {
+                alert('Error updating user: ' + error);
+            }
         });
     });
     $(document).ready(function() {
@@ -675,19 +703,29 @@
             type: 'POST',
             dataType: 'json',
             data: {
-                action: 'get_users',
+                action: 'get_user',
                 id: userId
             },
             success: function(response) {
-                if (response.success && response.data.length > 0) {
-                    const user = response.data[0];
+                if (response.success && response.data) {
+                    const user = response.data;
                     $('#editUserId').val(user.id);
                     $('#editFirstName').val(user.first_name);
                     $('#editLastName').val(user.last_name);
                     $('#editEmail').val(user.email);
                     $('#editUsername').val(user.username);
-                    $('#editRole').val(user.role);
-                    $('#editStatus').val(user.status);
+
+                    // Set the role dropdown
+                    if (user.role_id) {
+                        $('#editRole').val(user.role_id);
+                    }
+
+                    // Set the status dropdown
+                    if (user.status) {
+                        $('#editStatus').val(user.status.toLowerCase());
+                    }
+                } else {
+                    alert(response.message || 'Error loading user data');
                 }
             },
             error: function(xhr, status, error) {
