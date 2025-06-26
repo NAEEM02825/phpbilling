@@ -1,168 +1,180 @@
- <style>
-     .logo-img {
-         width: 140px !important;
-     }
+<style>
+    /* Modern sidebar styling with unique color palette */
+    :root {
+        --primary-color: #04665f; /* Deep teal */
+        --secondary-color: #1a3a3a; /* Dark forest green */
+        --accent-color: #4ECDC4; /* Light teal */
+        --text-color: #ffffff;
+        --hover-gradient: linear-gradient(135deg, #1a3a3a, #04665f);
+        --icon-color: #ffffff;
+        --submenu-indent: #0a5550; /* Slightly darker teal for hierarchy */
+    }
 
-     /* Full sidebar styling */
-     .sidebar-wrapper,
-     .sidebar-wrapper .sidebar-header,
-     .sidebar-wrapper .sidebar-nav,
-     .sidebar-wrapper .metismenu,
-     .metismenu ul,
-     /* Target submenus */
-     .metismenu li,
-     /* Target list items */
-     .metismenu a {
-         /* Target links */
-         background-color: rgb(4, 102, 95) !important;
-         color: #ffffff !important;
-     }
+    /* Sidebar container styling */
+    .sidebar-wrapper,
+    .sidebar-wrapper .sidebar-header,
+    .sidebar-wrapper .sidebar-nav,
+    .sidebar-wrapper .metismenu {
+        background-color: var(--primary-color) !important;
+        color: var(--text-color) !important;
+        transition: all 0.3s ease;
+    }
 
-     /* Hover states */
-     .metismenu a:hover,
-     .metismenu .active>a,
-     .metismenu a:focus {
-         background-color: linear-gradient(135deg, rgb(25, 63, 60), rgb(4, 102, 95)) !important;
-         color: #ffffff !important;
-     }
+    /* Logo styling */
+    .logo-img {
+        width: 140px !important;
+        padding: 10px 0;
+        filter: brightness(0) invert(1); /* Makes logo white */
+    }
 
-     /* Submenu indentation fix */
-     .metismenu ul {
-         padding-left: 0;
-         border-left: none;
-     }
+    /* Menu items */
+    .metismenu li,
+    .metismenu a {
+        background-color: var(--primary-color) !important;
+        color: var(--text-color) !important;
+        transition: all 0.2s ease;
+    }
 
-     /* Menu titles */
-     .menu-title {
-         color: #ffffff !important;
-     }
+    /* Hover and active states */
+    .metismenu a:hover,
+    .metismenu .active>a,
+    .metismenu a:focus {
+        background: var(--hover-gradient) !important;
+        color: var(--text-color) !important;
+        border-left: 4px solid var(--accent-color);
+    }
 
-     /* Icons color */
-     .material-icons-outlined.icon {
-         color: #ffffff !important;
-     }
- </style>
- <!--
-       ###########################################################
-       #                                                         #
-       #                    START OF SIDEBAR                     #
-       #                                                         #
-       ###########################################################
-    -->
- <div class="sticky">
-     <div class="app-sidebar__overlay" data-bs-toggle="sidebar"></div>
-     <div class="app-sidebar">
-         <div class="side-header">
-             <aside class="sidebar-wrapper" data-simplebar="true">
+    /* Submenu styling */
+    .metismenu ul {
+        background-color: var(--submenu-indent) !important;
+        padding-left: 0;
+        border-left: none;
+    }
 
-                 <!--
-           #######################################################
-           #               Sidebar Header Section                #
-           #######################################################
-        -->
-                 <div class="sidebar-header">
-                     <div class="logo-icon">
-                         <?php if (isset($_SESSION['company_logo'])): ?>
-                             <img src="<?php echo $_SESSION['company_logo']; ?>" class="logo-img" alt="<?php echo $_SESSION['company_name']; ?> Logo">
-                         <?php else: ?>
-                             <img src="assets/images/logo.png" class="image_fluid" alt="Default Logo" style="width:150px;height:50px;mix-blend-mode: multiply; color: white;">
-                         <?php endif; ?>
-                     </div>
+    /* Menu titles */
+    .menu-title {
+        color: var(--text-color) !important;
+        font-weight: 500;
+        letter-spacing: 0.5px;
+    }
 
-                     <div class="sidebar-close">
-                         <span class="material-icons-outlined icon" style="color: black;">close</span>
-                     </div>
-                 </div>
-                 <!--
-           #######################################################
-           #             End of Sidebar Header Section           #
-           #######################################################
-        -->
+    /* Icons */
+    .material-icons-outlined.icon,
+    .parent-icon i {
+        color: var(--icon-color) !important;
+        font-size: 1.2rem;
+    }
 
-                 <div class="sidebar-nav">
-                     <!--
-               ###################################################
-               #                Navigation Section               #
-               ###################################################
-            -->
-                     <ul class="metismenu" id="sidenav">
+    /* Submenu icons */
+    .metismenu ul i {
+        color: var(--accent-color) !important;
+    }
 
-                         <!-- Dashboard Link -->
-                         <li>
-                             <a href="index.php" class="">
-                                 <div class="parent-icon"><i class="material-icons-outlined icon icon-home"><?php echo lang(key: "home"); ?></i></div>
-                                 <div class="menu-title"><?php echo lang(key: "dashboard"); ?></div>
-                             </a>
-                         </li>
+    /* Active menu indicator */
+    .metismenu .mm-active > a {
+        background: var(--hover-gradient) !important;
+        box-shadow: inset 3px 0 0 var(--accent-color);
+    }
 
-                         <!-- Manage Users Section with Submenu -->
-                         <li>
-                             <a href="javascript:;" class="has-arrow">
-                                 <div class="parent-icon"><i class="fas fa-tasks me-2" style="color: #4ECDC4;"></i></div>
-                                 <div class="menu-title">Task Management</div>
-                             </a>
-                             <ul>
+    /* Smooth transitions */
+    .metismenu, .metismenu ul, .metismenu li, .metismenu a {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
 
-                                 <!-- Add Users Link -->
-                                 <li><a href="index.php?route=modules/task/my_task"><i class="fas fa-list me-2" style="color: #BDC3C7;"></i> My Tasks</a></li>
+    /* Sidebar header */
+    .sidebar-header {
+        padding: 20px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
 
-                                 <!-- Users Link -->
-                                 <li><a href="index.php?route=modules/task/add_task"><i class="fas fa-plus-circle me-2" style="color: #BDC3C7;"></i> New Task</a></li>
-                             </ul>
-                         </li>
-                         <!-- Position -->
-                         <li>
-                             <a href="javascript:;" class="has-arrow">
-                                 <div class="parent-icon"><i class="material-icons" style="color:white;">business_center</i></div>
-                                 <div class="menu-title">Financial</div>
-                             </a>
-                             <ul>
+    /* Close button */
+    .sidebar-close .material-icons-outlined {
+        color: var(--text-color) !important;
+        transition: transform 0.3s ease;
+    }
 
-                                 <!-- Add Users Link -->
-                                 <li><a href="index.php?route=modules/financial/invoices"><i class="fas fa-file-alt me-2" style="color: #BDC3C7;"></i> Invoices</a></li>
-                                 <li><a href="index.php?route=modules/financial/payment_history"><i class="fas fa-history me-2" style="color: #BDC3C7;"></i> Payment History</a></li>
-                                 <li><a href="index.php?route=modules/financial/client_ledger"><i class="fas fa-book me-2" style="color: #BDC3C7;"></i> Client Ledger</a></li>
+    .sidebar-close .material-icons-outlined:hover {
+        transform: scale(1.1);
+    }
+</style>
 
-                             </ul>
-                         </li>
-                         <!-- TODO: CHECK WHY USER MENU IS OPEN WHEN FRESH LEAD IS CLICKED -->
-                         <li>
-                             <a href="javascript:;" class="has-arrow">
-                                 <div class="parent-icon"><i class="material-icons" style="color:white;">business_center</i></div>
-                                 <div class="menu-title">Administration</div>
-                             </a>
-                             <ul>
+<div class="sticky">
+    <div class="app-sidebar__overlay" data-bs-toggle="sidebar"></div>
+    <div class="app-sidebar">
+        <div class="side-header">
+            <aside class="sidebar-wrapper" data-simplebar="true">
+                <!-- Sidebar Header Section -->
+                <div class="sidebar-header">
+                    <div class="logo-icon">
+                        <?php if (isset($_SESSION['company_logo'])): ?>
+                            <img src="<?php echo $_SESSION['company_logo']; ?>" class="logo-img" alt="<?php echo $_SESSION['company_name']; ?> Logo">
+                        <?php else: ?>
+                            <img src="assets/images/logo1.png" class="logo-img" alt="Default Logo">
+                        <?php endif; ?>
+                    </div>
+                    <div class="sidebar-close">
+                        <span class="material-icons-outlined icon">close</span>
+                    </div>
+                </div>
 
-                                 <!-- Add Users Link -->
-                                 <li><a href="index.php?route=modules/client/client"><i class="fas fa-file-alt me-2" style="color: #BDC3C7;"></i> client</a></li>
-                                 <li><a href="index.php?route=modules/projects/projects"><i class="fas fa-history me-2" style="color: #BDC3C7;"></i>Projects</a></li>
-                                 <li><a href="index.php?route=modules/users/user"><i class="fas fa-user-cog me-2" style="color: #BDC3C7;"></i>Users</a></li>
-                             </ul>
-                         </li>
+                <div class="sidebar-nav">
+                    <ul class="metismenu" id="sidenav">
+                        <!-- Dashboard Link -->
+                        <li>
+                            <a href="index.php" class="">
+                                <div class="parent-icon"><i class="material-icons-outlined icon">home</i></div>
+                                <div class="menu-title"><?php echo lang(key: "dashboard"); ?></div>
+                            </a>
+                        </li>
 
-                         <!-- My Account Link -->
-                         <li>
-                             <a class="" href="javascript:;">
-                                 <a href="index.php?route=modules/profile/profile">
-                                     <div class="parent-icon"><i class="material-icons-outlined icon icon-badge" style="color: indigo;">badge</i></div>
-                                     <div class="menu-title">Profile</div>
-                                 </a>
-                             </a>
-                         </li>
+                        <!-- Task Management Section -->
+                        <li>
+                            <a href="javascript:;" class="has-arrow">
+                                <div class="parent-icon"><i class="material-icons-outlined icon">task</i></div>
+                                <div class="menu-title">Task Management</div>
+                            </a>
+                            <ul>
+                                <li><a href="index.php?route=modules/task/my_task"><i class="material-icons-outlined icon">list_alt</i> My Tasks</a></li>
+                                <li><a href="index.php?route=modules/task/add_task"><i class="material-icons-outlined icon">add_task</i> New Task</a></li>
+                            </ul>
+                        </li>
 
-                     </ul>
-                     <!--
-               ###################################################
-               #               End of Navigation Section          #
-               ###################################################
-            -->
-                 </div>
-             </aside>
+                        <!-- Financial Section -->
+                        <li>
+                            <a href="javascript:;" class="has-arrow">
+                                <div class="parent-icon"><i class="material-icons-outlined icon">payments</i></div>
+                                <div class="menu-title">Financial</div>
+                            </a>
+                            <ul>
+                                <li><a href="index.php?route=modules/financial/invoices"><i class="material-icons-outlined icon">receipt</i> Invoices</a></li>
+                                <li><a href="index.php?route=modules/financial/payment_history"><i class="material-icons-outlined icon">history</i> Payment History</a></li>
+                                <li><a href="index.php?route=modules/financial/client_ledger"><i class="material-icons-outlined icon">book</i> Client Ledger</a></li>
+                            </ul>
+                        </li>
 
-             <!--
-       ###########################################################
-       #                                                         #
-       #                    END OF SIDEBAR                       #
-       #                                                         #
-       ###########################################################
-    -->
+                        <!-- Administration Section -->
+                        <li>
+                            <a href="javascript:;" class="has-arrow">
+                                <div class="parent-icon"><i class="material-icons-outlined icon">admin_panel_settings</i></div>
+                                <div class="menu-title">Administration</div>
+                            </a>
+                            <ul>
+                                <li><a href="index.php?route=modules/client/client"><i class="material-icons-outlined icon">people</i> Clients</a></li>
+                                <li><a href="index.php?route=modules/projects/projects"><i class="material-icons-outlined icon">work</i> Projects</a></li>
+                                <li><a href="index.php?route=modules/users/user"><i class="material-icons-outlined icon">manage_accounts</i> Users</a></li>
+                            </ul>
+                        </li>
+
+                        <!-- Profile Link -->
+                        <li>
+                            <a href="index.php?route=modules/profile/profile">
+                                <div class="parent-icon"><i class="material-icons-outlined icon">account_circle</i></div>
+                                <div class="menu-title">Profile</div>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </aside>
+        </div>
+    </div>
+</div>
