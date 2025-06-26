@@ -33,21 +33,6 @@
             <i class="fas fa-users me-1"></i> All Users
         </button>
     </li>
-    <li class="nav-item" role="presentation">
-        <button class="nav-link" id="active-users-tab" data-bs-toggle="tab" data-bs-target="#active-users" type="button" role="tab">
-            <i class="fas fa-user-check me-1"></i> Active
-        </button>
-    </li>
-    <li class="nav-item" role="presentation">
-        <button class="nav-link" id="inactive-users-tab" data-bs-toggle="tab" data-bs-target="#inactive-users" type="button" role="tab">
-            <i class="fas fa-user-slash me-1"></i> Inactive
-        </button>
-    </li>
-    <li class="nav-item" role="presentation">
-        <button class="nav-link" id="admins-tab" data-bs-toggle="tab" data-bs-target="#admins" type="button" role="tab">
-            <i class="fas fa-user-shield me-1"></i> Administrators
-        </button>
-    </li>
 </ul>
 
 <!-- User Content -->
@@ -56,28 +41,22 @@
         <!-- User Filters -->
         <div class="card mb-4 shadow-sm">
             <div class="card-body">
-                <form class="row g-3">
+                <form class="row g-3" id="userFiltersForm">
                     <div class="col-md-4">
                         <label for="roleFilter" class="form-label">Role</label>
                         <select class="form-select" id="roleFilter">
-                            <option selected>All Roles</option>
-                            <option>Administrator</option>
-                            <option>Manager</option>
-                            <option>Editor</option>
-                            <option>Viewer</option>
+                            <option value="" selected>Loading roles...</option>
                         </select>
                     </div>
                     <div class="col-md-4">
                         <label for="statusFilter" class="form-label">Status</label>
                         <select class="form-select" id="statusFilter">
-                            <option selected>All Statuses</option>
-                            <option>Active</option>
-                            <option>Inactive</option>
-                            <option>Suspended</option>
+                            <option value="" selected>Loading statuses...</option>
                         </select>
                     </div>
-                    <div class="col-md-4 d-flex align-items-end">
-                        <button type="submit" class="btn btn-primary w-100">Apply Filters</button>
+                    <div class="col-md-4 d-flex align-items-end gap-2">
+                        <button type="submit" class="btn btn-primary">Apply Filters</button>
+                        <button type="button" id="resetFilters" class="btn btn-outline-secondary">Reset</button>
                     </div>
                 </form>
             </div>
@@ -370,44 +349,44 @@
 <Script>
     // Update the add user form submission handler
     $('#submitAddUser').on('click', function() {
-    const form = $('#addUserForm');
-    const formData = form.serializeArray();
-    const data = {};
+        const form = $('#addUserForm');
+        const formData = form.serializeArray();
+        const data = {};
 
-    // Convert form data to object
-    formData.forEach(item => {
-        data[item.name] = item.value;
-    });
+        // Convert form data to object
+        formData.forEach(item => {
+            data[item.name] = item.value;
+        });
 
-    // Validate passwords match
-    if (data.password !== data.confirm_password) {
-        alert('Passwords do not match!');
-        return;
-    }
-
-    // Remove confirm_password from data before sending
-    delete data.confirm_password;
-
-    $.ajax({
-        url: 'ajax_helpers/ajax_add_user.php',
-        type: 'POST',
-        dataType: 'json',
-        data: data,
-        success: function(response) {
-            if (response.success) {
-                $('#addUserModal').modal('hide');
-                form[0].reset();
-                alert('User added successfully');
-                window.location.reload(); // Page will refresh
-            } else {
-                alert(response.message);
-            }
-        },
-        error: function(xhr, status, error) {
-            alert('Error adding user: ' + error);
+        // Validate passwords match
+        if (data.password !== data.confirm_password) {
+            alert('Passwords do not match!');
+            return;
         }
+
+        // Remove confirm_password from data before sending
+        delete data.confirm_password;
+
+        $.ajax({
+            url: 'ajax_helpers/ajax_add_user.php',
+            type: 'POST',
+            dataType: 'json',
+            data: data,
+            success: function(response) {
+                if (response.success) {
+                    $('#addUserModal').modal('hide');
+                    form[0].reset();
+                    alert('User added successfully');
+                    window.location.reload(); // Page will refresh
+                } else {
+                    alert(response.message);
+                }
+            },
+            error: function(xhr, status, error) {
+                alert('Error adding user: ' + error);
+            }
+        });
     });
-});
     $(document).ready(function() {
         // Load users on page load
         loadUsers();
@@ -457,121 +436,123 @@
             changeStatus(userId, status);
         });
     });
-$(document).ready(function() {
-    // Load users on page load
-    loadUsers();
-
-    // Handle tab changes
-    $('button[data-bs-toggle="tab"]').on('shown.bs.tab', function(e) {
-        const target = $(e.target).data('bs-target');
-        loadUsers(target.replace('#', ''));
-    });
-
-    // Apply filters
-    $('.btn-primary').on('click', function() {
+    $(document).ready(function() {
+        // Load users on page load
         loadUsers();
+
+        // Handle tab changes
+        $('button[data-bs-toggle="tab"]').on('shown.bs.tab', function(e) {
+            const target = $(e.target).data('bs-target');
+            loadUsers(target.replace('#', ''));
+        });
+
+        // Apply filters
+        $('.btn-primary').on('click', function() {
+            loadUsers();
+        });
+
+        // Load roles for dropdowns
+        loadRoles();
     });
 
-    // Load roles for dropdowns
-    loadRoles();
-});
+    function loadUsers(tab = 'all-users') {
 
-function loadUsers(tab = 'all-users') {
-    $('#usersTable tbody').html('<tr><td colspan="7" class="text-center py-4"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></td></tr>');
-    
-    let roleFilter = $('#roleFilter').val();
-    let statusFilter = $('#statusFilter').val();
+        $('#usersTable tbody').html('<tr><td colspan="7" class="text-center py-4"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></td></tr>');
 
-    // Override status if tab is selected
-    let status = '';
-    if (tab === 'active-users') status = 'active';
-    if (tab === 'inactive-users') status = 'inactive';
+        let roleFilter = $('#roleFilter').val();
+        let statusFilter = $('#statusFilter').val();
 
-    // ⛔️ Don't send filters if they're not real values
-    if (roleFilter === 'All Roles') roleFilter = '';
-    if (statusFilter === 'All Statuses') statusFilter = '';
+        // Override status if tab is selected
+        let status = '';
+        if (tab === 'active-users') status = 'active';
+        if (tab === 'inactive-users') status = 'inactive';
 
-    $.ajax({
-        url: 'ajax_helpers/ajax_get_user.php',
-        type: 'GET',
-        dataType: 'json',
-        data: {
-            action: 'get_users',
-            status_filter: status || statusFilter,
-            role_filter: roleFilter
-        },
-        success: function(response) {
-            console.log('Full response:', response);
-            if (response.success && Array.isArray(response.data)) {
-                if (response.data.length > 0) {
-                    renderUsers(response.data);
+        // ⛔️ Don't send filters if they're not real values
+        if (roleFilter === 'All Roles') roleFilter = '';
+        if (statusFilter === 'All Statuses') statusFilter = '';
+
+        $.ajax({
+            url: 'ajax_helpers/ajax_get_user.php',
+            type: 'GET',
+            dataType: 'json',
+            data: {
+                action: 'get_users',
+                status_filter: status || statusFilter,
+                role_filter: roleFilter
+            },
+            success: function(response) {
+                console.log('Full response:', response);
+                if (response.success && Array.isArray(response.data)) {
+                    if (response.data.length > 0) {
+                        renderUsers(response.data);
+                    } else {
+                        $('#usersTable tbody').html('<tr><td colspan="7" class="text-center py-4">No users found</td></tr>');
+                    }
                 } else {
-                    $('#usersTable tbody').html('<tr><td colspan="7" class="text-center py-4">No users found</td></tr>');
+                    const errorMsg = response.message || 'Invalid response format';
+                    $('#usersTable tbody').html('<tr><td colspan="7" class="text-center py-4">Error: ' + errorMsg + '</td></tr>');
                 }
-            } else {
-                const errorMsg = response.message || 'Invalid response format';
-                $('#usersTable tbody').html('<tr><td colspan="7" class="text-center py-4">Error: ' + errorMsg + '</td></tr>');
+            },
+            error: function(xhr, status, error) {
+                console.error('AJAX Error:', error, xhr.responseText);
+                let errorMsg = 'Error loading users';
+                try {
+                    const response = JSON.parse(xhr.responseText);
+                    errorMsg = response.message || errorMsg;
+                } catch (e) {}
+                $('#usersTable tbody').html('<tr><td colspan="7" class="text-center py-4">' + errorMsg + '</td></tr>');
             }
-        },
-        error: function(xhr, status, error) {
-            console.error('AJAX Error:', error, xhr.responseText);
-            let errorMsg = 'Error loading users';
-            try {
-                const response = JSON.parse(xhr.responseText);
-                errorMsg = response.message || errorMsg;
-            } catch (e) {}
-            $('#usersTable tbody').html('<tr><td colspan="7" class="text-center py-4">' + errorMsg + '</td></tr>');
-        }
-    });
-}
-function renderUsers(users) {
-    console.log('Rendering users:', users); // Debug log
-    
-    const tbody = $('#usersTable tbody');
-    tbody.empty();
-
-    if (!users || users.length === 0) {
-        console.warn('No users data received for rendering');
-        tbody.append('<tr><td colspan="7" class="text-center py-4">No users found</td></tr>');
-        return;
+        });
     }
 
-    // Simple date formatter if not defined
-    window.formatDate = window.formatDate || function(dateString) {
-        if (!dateString) return 'Never';
-        const date = new Date(dateString);
-        return date.toLocaleString();
-    };
+    function renderUsers(users) {
+        console.log('Rendering users:', users); // Debug log
 
-    try {
-        users.forEach(user => {
-            // Debug current user
-            console.log('Processing user:', user.id, user.first_name, user.last_name);
-            
-            // Safely handle username
-            const usernameDisplay = user.username ? `@${user.username}` : 'No username';
-            
-            // Status handling
-            const status = user.status || 'Inactive';
-            const statusClass = status === 'Active' ? 'bg-success' :
-                (status === 'Suspended' ? 'bg-warning' : 'bg-secondary');
+        const tbody = $('#usersTable tbody');
+        tbody.empty();
 
-            // Last active date
-            const lastActive = user.last_active ? formatDate(user.last_active) : 'Never';
-            
-            // Avatar handling
-            let avatar;
-            if (user.avatar) {
-                avatar = `<img src="${user.avatar}" class="avatar-img rounded-circle" alt="${user.first_name}">`;
-            } else {
-                const initials = (user.first_name?.charAt(0) || '') + (user.last_name?.charAt(0) || '');
-                avatar = `<span class="avatar-title rounded-circle bg-primary text-white">${initials}</span>`;
-            }
+        if (!users || users.length === 0) {
+            console.warn('No users data received for rendering');
+            tbody.append('<tr><td colspan="7" class="text-center py-4">No users found</td></tr>');
+            return;
+        }
 
-            // Role handling
-            const roleDisplay = user.role_name || user.role || 'No role';
+        // Simple date formatter if not defined
+        window.formatDate = window.formatDate || function(dateString) {
+            if (!dateString) return 'Never';
+            const date = new Date(dateString);
+            return date.toLocaleString();
+        };
 
-            const row = `
+        try {
+            users.forEach(user => {
+                // Debug current user
+                console.log('Processing user:', user.id, user.first_name, user.last_name);
+
+                // Safely handle username
+                const usernameDisplay = user.username ? `@${user.username}` : 'No username';
+
+                // Status handling
+                const status = user.status || 'Inactive';
+                const statusClass = status === 'Active' ? 'bg-success' :
+                    (status === 'Suspended' ? 'bg-warning' : 'bg-secondary');
+
+                // Last active date
+                const lastActive = user.last_active ? formatDate(user.last_active) : 'Never';
+
+                // Avatar handling
+                let avatar;
+                if (user.avatar) {
+                    avatar = `<img src="${user.avatar}" class="avatar-img rounded-circle" alt="${user.first_name}">`;
+                } else {
+                    const initials = (user.first_name?.charAt(0) || '') + (user.last_name?.charAt(0) || '');
+                    avatar = `<span class="avatar-title rounded-circle bg-primary text-white">${initials}</span>`;
+                }
+
+                // Role handling
+                const roleDisplay = user.role_name || user.role || 'No role';
+
+                const row = `
                 <tr data-user-id="${user.id}">
                     <td>
                         <div class="form-check">
@@ -616,15 +597,16 @@ function renderUsers(users) {
                 </tr>
             `;
 
-            tbody.append(row);
-        });
-        
-        console.log('Successfully rendered', users.length, 'users');
-    } catch (error) {
-        console.error('Error rendering users:', error);
-        tbody.append('<tr><td colspan="7" class="text-center py-4 text-danger">Error displaying users</td></tr>');
+                tbody.append(row);
+            });
+
+            console.log('Successfully rendered', users.length, 'users');
+        } catch (error) {
+            console.error('Error rendering users:', error);
+            tbody.append('<tr><td colspan="7" class="text-center py-4 text-danger">Error displaying users</td></tr>');
+        }
     }
-}
+
     function formatDate(dateString) {
         const date = new Date(dateString);
         const now = new Date();
