@@ -1,3 +1,7 @@
+<?php
+$users = DB::query("SELECT * FROM users");
+
+?>
 <!-- Users Page Header -->
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-4 pb-3 mb-4 border-bottom">
     <div>
@@ -14,7 +18,8 @@
             </button>
         </div>
         <div class="dropdown">
-            <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="exportDropdown" data-bs-toggle="dropdown">
+            <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="exportDropdown"
+                data-bs-toggle="dropdown">
                 <i class="fas fa-download me-1"></i> Export
             </button>
             <ul class="dropdown-menu" aria-labelledby="exportDropdown">
@@ -29,17 +34,20 @@
 <!-- User Status Tabs -->
 <ul class="nav nav-tabs mb-4" id="userTabs" role="tablist">
     <li class="nav-item" role="presentation">
-        <button class="nav-link active" id="all-users-tab" data-bs-toggle="tab" data-bs-target="#all-users" type="button" role="tab">
+        <button class="nav-link active" id="all-users-tab" data-bs-toggle="tab" data-bs-target="#all-users"
+            type="button" role="tab">
             <i class="fas fa-users me-1"></i> All Users
         </button>
     </li>
     <li class="nav-item" role="presentation">
-        <button class="nav-link" id="active-users-tab" data-bs-toggle="tab" data-bs-target="#active-users" type="button" role="tab">
+        <button class="nav-link" id="active-users-tab" data-bs-toggle="tab" data-bs-target="#active-users" type="button"
+            role="tab">
             <i class="fas fa-user-check me-1"></i> Active
         </button>
     </li>
     <li class="nav-item" role="presentation">
-        <button class="nav-link" id="inactive-users-tab" data-bs-toggle="tab" data-bs-target="#inactive-users" type="button" role="tab">
+        <button class="nav-link" id="inactive-users-tab" data-bs-toggle="tab" data-bs-target="#inactive-users"
+            type="button" role="tab">
             <i class="fas fa-user-slash me-1"></i> Inactive
         </button>
     </li>
@@ -83,6 +91,7 @@
             </div>
         </div>
 
+
         <!-- User List -->
         <div class="card shadow-sm">
             <div class="card-body p-0">
@@ -104,7 +113,75 @@
                             </tr>
                         </thead>
                         <tbody>
-
+                            <?php foreach ($users as $user): ?>
+                                <?php
+                                $statusClass = $user['status'] === 'Active' ? 'bg-success' : 'bg-secondary';
+                                $lastActive = $user['last_active'] ? date('M j, Y g:i a', strtotime($user['last_active'])) : 'Never';
+                                $avatar = $user['avatar'] ?
+                                    '<img src="' . $user['avatar'] . '" class="avatar-img rounded-circle" alt="' . $user['first_name'] . '">' :
+                                    '<span class="avatar-title rounded-circle bg-primary text-white">' .
+                                    substr($user['first_name'], 0, 1) . substr($user['last_name'], 0, 1) . '</span>';
+                                $roleName = $user['role_id'] == 1 ? 'Administrator' : 'User';
+                                ?>
+                                <tr>
+                                    <td>
+                                        <div class="form-check">
+                                            <input class="form-check-input user-checkbox" type="checkbox"
+                                                value="<?php echo $user['id']; ?>">
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-sm me-3">
+                                                <?php echo $avatar; ?>
+                                            </div>
+                                            <div>
+                                                <a href="#"
+                                                    class="text-primary fw-bold"><?php echo $user['first_name'] . ' ' . $user['last_name']; ?></a>
+                                                <p class="mb-0 text-muted small">
+                                                    <?php echo $user['username'] ? '@' . $user['username'] : ''; ?></p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><?php echo $user['email']; ?></td>
+                                    <td><span class="badge bg-primary"><?php echo $roleName; ?></span></td>
+                                    <td><?php echo $lastActive; ?></td>
+                                    <td><span
+                                            class="badge <?php echo $statusClass; ?>"><?php echo $user['status']; ?></span>
+                                    </td>
+                                    <td>
+                                        <div class="dropdown">
+                                            <button class="btn btn-sm btn-light dropdown-toggle" type="button"
+                                                data-bs-toggle="dropdown">
+                                                <i class="fas fa-ellipsis-h"></i>
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                                <li><a class="dropdown-item edit-user" href="#"
+                                                        data-id="<?php echo $user['id']; ?>" data-bs-toggle="modal"
+                                                        data-bs-target="#editUserModal"><i class="fas fa-edit me-2"></i>
+                                                        Edit</a></li>
+                                                <li><a class="dropdown-item" href="#"><i class="fas fa-key me-2"></i> Reset
+                                                        Password</a></li>
+                                                <li>
+                                                    <hr class="dropdown-divider">
+                                                </li>
+                                                <li>
+                                                    <a class="dropdown-item <?php echo $user['status'] === 'Active' ? 'text-danger change-status' : 'text-success change-status'; ?>"
+                                                        href="#" data-id="<?php echo $user['id']; ?>"
+                                                        data-status="<?php echo $user['status'] === 'Active' ? 'Inactive' : 'Active'; ?>">
+                                                        <i
+                                                            class="fas <?php echo $user['status'] === 'Active' ? 'fa-user-slash' : 'fa-user-check'; ?> me-2"></i>
+                                                        <?php echo $user['status'] === 'Active' ? 'Deactivate' : 'Activate'; ?>
+                                                    </a>
+                                                </li>
+                                                <li><a class="dropdown-item text-danger delete-user" href="#"
+                                                        data-id="<?php echo $user['id']; ?>"><i
+                                                            class="fas fa-trash me-2"></i> Delete</a></li>
+                                            </ul>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
                         </tbody>
                     </table>
                 </div>
@@ -112,7 +189,9 @@
             <div class="card-footer bg-white">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <p class="mb-0 text-muted">Showing <span class="fw-bold">1</span> to <span class="fw-bold">4</span> of <span class="fw-bold">24</span> users</p>
+                        <p class="mb-0 text-muted">Showing <span class="fw-bold">1</span> to <span
+                                class="fw-bold"><?php echo count($users); ?></span> of <span
+                                class="fw-bold"><?php echo count($users); ?></span> users</p>
                     </div>
                     <nav>
                         <ul class="pagination mb-0">
@@ -189,7 +268,8 @@
                     </div>
                     <div class="mb-3">
                         <label for="userConfirmPassword" class="form-label">Confirm Password</label>
-                        <input type="password" class="form-control" id="userConfirmPassword" name="confirm_password" required>
+                        <input type="password" class="form-control" id="userConfirmPassword" name="confirm_password"
+                            required>
                     </div>
                 </form>
             </div>
@@ -369,7 +449,7 @@
 
 <Script>
     // Update the add user form submission handler
-    $('#submitAddUser').on('click', function() {
+    $('#submitAddUser').on('click', function () {
         const form = $('#addUserForm');
         const formData = form.serializeArray();
         const data = {};
@@ -393,7 +473,7 @@
             type: 'POST',
             dataType: 'json',
             data: data,
-            success: function(response) {
+            success: function (response) {
                 if (response.success) {
                     $('#addUserModal').modal('hide');
                     form[0].reset();
@@ -403,47 +483,47 @@
                     alert(response.message);
                 }
             },
-            error: function(xhr, status, error) {
+            error: function (xhr, status, error) {
                 alert('Error adding user: ' + error);
             }
         });
     });
-    $(document).ready(function() {
+    $(document).ready(function () {
         // Load users on page load
         loadUsers();
 
         // Handle tab changes
-        $('button[data-bs-toggle="tab"]').on('shown.bs.tab', function(e) {
+        $('button[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
             const target = $(e.target).data('bs-target');
             loadUsers(target.replace('#', ''));
         });
 
         // Apply filters
-        $('#userFiltersForm').on('submit', function(e) {
+        $('#userFiltersForm').on('submit', function (e) {
             e.preventDefault();
             loadUsers();
         });
 
         // Add user form
-        $('#addUserForm').on('submit', function(e) {
+        $('#addUserForm').on('submit', function (e) {
             e.preventDefault();
             addUser();
         });
 
         // Edit user modal
-        $(document).on('click', '.edit-user', function() {
+        $(document).on('click', '.edit-user', function () {
             const userId = $(this).data('id');
             loadUserData(userId);
         });
 
         // Update user form
-        $('#editUserForm').on('submit', function(e) {
+        $('#editUserForm').on('submit', function (e) {
             e.preventDefault();
             updateUser();
         });
 
         // Delete user
-        $(document).on('click', '.delete-user', function() {
+        $(document).on('click', '.delete-user', function () {
             const userId = $(this).data('id');
             if (confirm('Are you sure you want to delete this user?')) {
                 deleteUser(userId);
@@ -451,132 +531,34 @@
         });
 
         // Change status
-        $(document).on('click', '.change-status', function() {
+        $(document).on('click', '.change-status', function () {
             const userId = $(this).data('id');
             const status = $(this).data('status');
             changeStatus(userId, status);
         });
     });
-$(document).ready(function() {
-    // Load users on page load
-    loadUsers();
-
-    // Handle tab changes
-    $('button[data-bs-toggle="tab"]').on('shown.bs.tab', function(e) {
-        const target = $(e.target).data('bs-target');
-        loadUsers(target.replace('#', ''));
-    });
-
-    // Apply filters
-    $('.btn-primary').on('click', function() {
+    $(document).ready(function () {
+        // Load users on page load
         loadUsers();
+
+        // Handle tab changes
+        $('button[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
+            const target = $(e.target).data('bs-target');
+            loadUsers(target.replace('#', ''));
+        });
+
+        // Apply filters
+        $('.btn-primary').on('click', function () {
+            loadUsers();
+        });
+
+        // Load roles for dropdowns
+        loadRoles();
     });
 
-    // Load roles for dropdowns
-    loadRoles();
-});
+    
 
-function loadUsers(tab = 'all-users') {
-    const roleFilter = $('#roleFilter').val();
-    const statusFilter = $('#statusFilter').val();
-
-    let status = '';
-    if (tab === 'active-users') status = 'Active';
-    if (tab === 'inactive-users') status = 'Inactive';
-    if (tab === 'admins') status = 'Administrator';
-
-    $.ajax({
-        url: 'ajax_helpers/ajax_get_user.php',
-        type: 'POST',
-        dataType: 'json',
-        data: {
-            action: 'get_users',
-            status_filter: status || statusFilter,
-            role_filter: roleFilter
-        },
-        success: function(response) {
-            console.log('Response:', response); // Debug log
-            if (response.success && response.data) {
-                renderUsers(response.data);
-            } else {
-                console.error('Error:', response.message);
-                $('#usersTable tbody').html('<tr><td colspan="7" class="text-center py-4">No users found</td></tr>');
-            }
-        },
-        error: function(xhr, status, error) {
-            console.error('AJAX Error:', error);
-            $('#usersTable tbody').html('<tr><td colspan="7" class="text-center py-4">Error loading users</td></tr>');
-        }
-    });
-}
-
-function renderUsers(users) {
-    const tbody = $('#usersTable tbody');
-    tbody.empty();
-
-    if (users.length === 0) {
-        tbody.append('<tr><td colspan="7" class="text-center py-4">No users found</td></tr>');
-        return;
-    }
-
-    users.forEach(user => {
-        const statusClass = user.status === 'Active' ? 'bg-success' :
-            (user.status === 'Suspended' ? 'bg-warning' : 'bg-secondary');
-
-        const lastActive = user.last_active ? formatDate(user.last_active) : 'Never';
-
-        const avatar = user.avatar ?
-            `<img src="${user.avatar}" class="avatar-img rounded-circle" alt="${user.first_name}">` :
-            `<span class="avatar-title rounded-circle bg-primary text-white">${user.first_name.charAt(0)}${user.last_name.charAt(0)}</span>`;
-
-        const row = `
-            <tr>
-                <td>
-                    <div class="form-check">
-                        <input class="form-check-input user-checkbox" type="checkbox" value="${user.id}">
-                    </div>
-                </td>
-                <td>
-                    <div class="d-flex align-items-center">
-                        <div class="avatar-sm me-3">
-                            ${avatar}
-                        </div>
-                        <div>
-                            <a href="#" class="text-primary fw-bold">${user.first_name} ${user.last_name}</a>
-                            <p class="mb-0 text-muted small">@${user.username}</p>
-                        </div>
-                    </div>
-                </td>
-                <td>${user.email}</td>
-                <td><span class="badge bg-primary">${user.role_name || user.role}</span></td>
-                <td>${lastActive}</td>
-                <td><span class="badge ${statusClass}">${user.status}</span></td>
-                <td>
-                    <div class="dropdown">
-                        <button class="btn btn-sm btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-ellipsis-h"></i>
-                        </button>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item edit-user" href="#" data-id="${user.id}" data-bs-toggle="modal" data-bs-target="#editUserModal"><i class="fas fa-edit me-2"></i> Edit</a></li>
-                            <li><a class="dropdown-item" href="#"><i class="fas fa-key me-2"></i> Reset Password</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li>
-                                <a class="dropdown-item ${user.status === 'Active' ? 'text-danger change-status' : 'text-success change-status'}" 
-                                   href="#" data-id="${user.id}" data-status="${user.status === 'Active' ? 'Inactive' : 'Active'}">
-                                    <i class="fas ${user.status === 'Active' ? 'fa-user-slash' : 'fa-user-check'} me-2"></i> 
-                                    ${user.status === 'Active' ? 'Deactivate' : 'Activate'}
-                                </a>
-                            </li>
-                            <li><a class="dropdown-item text-danger delete-user" href="#" data-id="${user.id}"><i class="fas fa-trash me-2"></i> Delete</a></li>
-                        </ul>
-                    </div>
-                </td>
-            </tr>
-        `;
-
-        tbody.append(row);
-    });
-}
+    
 
     function formatDate(dateString) {
         const date = new Date(dateString);
@@ -624,7 +606,7 @@ function renderUsers(users) {
                 action: 'add_user',
                 ...data
             },
-            success: function(response) {
+            success: function (response) {
                 if (response.success) {
                     $('#addUserModal').modal('hide');
                     $('#addUserForm')[0].reset();
@@ -634,7 +616,7 @@ function renderUsers(users) {
                     alert(response.message);
                 }
             },
-            error: function(xhr, status, error) {
+            error: function (xhr, status, error) {
                 alert('Error adding user: ' + error);
             }
         });
@@ -649,7 +631,7 @@ function renderUsers(users) {
                 action: 'get_users',
                 id: userId
             },
-            success: function(response) {
+            success: function (response) {
                 if (response.success && response.data.length > 0) {
                     const user = response.data[0];
                     $('#editUserId').val(user.id);
@@ -661,7 +643,7 @@ function renderUsers(users) {
                     $('#editStatus').val(user.status);
                 }
             },
-            error: function(xhr, status, error) {
+            error: function (xhr, status, error) {
                 alert('Error loading user data: ' + error);
             }
         });
@@ -687,7 +669,7 @@ function renderUsers(users) {
                 action: 'update_user',
                 ...data
             },
-            success: function(response) {
+            success: function (response) {
                 if (response.success) {
                     $('#editUserModal').modal('hide');
                     loadUsers();
@@ -696,7 +678,7 @@ function renderUsers(users) {
                     alert(response.message);
                 }
             },
-            error: function(xhr, status, error) {
+            error: function (xhr, status, error) {
                 alert('Error updating user: ' + error);
             }
         });
@@ -711,7 +693,7 @@ function renderUsers(users) {
                 action: 'delete_user',
                 id: userId
             },
-            success: function(response) {
+            success: function (response) {
                 if (response.success) {
                     loadUsers();
                     alert('User deleted successfully');
@@ -719,7 +701,7 @@ function renderUsers(users) {
                     alert(response.message);
                 }
             },
-            error: function(xhr, status, error) {
+            error: function (xhr, status, error) {
                 alert('Error deleting user: ' + error);
             }
         });
@@ -735,7 +717,7 @@ function renderUsers(users) {
                 id: userId,
                 status: status
             },
-            success: function(response) {
+            success: function (response) {
                 if (response.success) {
                     loadUsers();
                     alert('Status updated successfully');
@@ -743,7 +725,7 @@ function renderUsers(users) {
                     alert(response.message);
                 }
             },
-            error: function(xhr, status, error) {
+            error: function (xhr, status, error) {
                 alert('Error changing status: ' + error);
             }
         });
@@ -760,14 +742,14 @@ function renderUsers(users) {
             data: {
                 action: 'get_roles'
             },
-            success: function(response) {
+            success: function (response) {
                 if (response.success) {
                     populateRoleDropdowns(response.data);
                 } else {
                     console.error('Error loading roles:', response.message);
                 }
             },
-            error: function(xhr, status, error) {
+            error: function (xhr, status, error) {
                 console.error('AJAX error loading roles:', error);
             }
         });
