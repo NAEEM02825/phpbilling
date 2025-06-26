@@ -1,14 +1,11 @@
     <!-- Project/Task Page Header -->
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-4 pb-3 mb-4 border-bottom">
         <div>
-            <h1 class="h2">Project & Task Management</h1>
-            <p class="mb-0 text-muted">Manage projects and their associated tasks</p>
+            <h1 class="h2">Task Management</h1>
+            <p class="mb-0 text-muted">Manage Tasks and their associated projects</p>
         </div>
         <div class="btn-toolbar mb-2 mb-md-0">
             <div class="btn-group me-2">
-                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newProjectModal">
-                    <i class="fas fa-plus me-1"></i> New Project
-                </button>
                 <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newTaskModal">
                     <i class="fas fa-plus me-1"></i> New Task
                 </button>
@@ -327,80 +324,6 @@
     </div>
 
 
-<!-- New Project Modal -->
-<div class="modal fade" id="newProjectModal" tabindex="-1" aria-labelledby="newProjectModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title" id="newProjectModalLabel">Create New Project</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="projectForm">
-                    <div class="row g-3">
-                        <div class="col-md-12">
-                            <label for="projectName" class="form-label">Project Name</label>
-                            <input type="text" class="form-control" id="projectName" placeholder="e.g. SF 1, DAL, etc." required>
-                        </div>
-                        
-                        <div class="col-md-12">
-                            <label for="projectDescription" class="form-label">Description</label>
-                            <textarea class="form-control" id="projectDescription" rows="3" placeholder="Brief project description"></textarea>
-                        </div>
-                        
-                        <div class="col-md-6">
-                            <label for="clientName" class="form-label">Client Name</label>
-                            <input type="text" class="form-control" id="clientName" placeholder="Client or company name" required>
-                        </div>
-                        
-                        <div class="col-md-6">
-                            <label for="projectStatus" class="form-label">Status</label>
-                            <select class="form-select" id="projectStatus" required>
-                                <option value="active">Active</option>
-                                <option value="on-hold">On Hold</option>
-                                <option value="completed">Completed</option>
-                                <option value="archived">Archived</option>
-                            </select>
-                        </div>
-                        
-                        <div class="col-12">
-                            <label class="form-label">Assign Team Members</label>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" value="1" id="assignUser1" checked>
-                                <label class="form-check-label" for="assignUser1">
-                                    John Doe (Project Manager)
-                                </label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" value="2" id="assignUser2">
-                                <label class="form-check-label" for="assignUser2">
-                                    Jane Smith (Developer)
-                                </label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" value="3" id="assignUser3">
-                                <label class="form-check-label" for="assignUser3">
-                                    Mike Johnson (Designer)
-                                </label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" value="4" id="assignUser4">
-                                <label class="form-check-label" for="assignUser4">
-                                    Sarah Williams (QA)
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" id="saveProject">Create Project</button>
-            </div>
-        </div>
-    </div>
-</div>
-
 <!-- Assign Users Modal -->
 <div class="modal fade" id="assignUsersModal" tabindex="-1" aria-labelledby="assignUsersModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -620,26 +543,7 @@
 
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Save project button functionality
-    document.getElementById('saveProject').addEventListener('click', function() {
-        var projectForm = document.getElementById('projectForm');
-        if (projectForm.checkValidity()) {
-            // Form is valid, proceed with saving
-            var bootstrapModal = bootstrap.Modal.getInstance(document.getElementById('newProjectModal'));
-            bootstrapModal.hide();
-            
-            // Show success message
-            alert('Project created successfully!');
-            
-            // Reset form
-            projectForm.reset();
-        } else {
-            // Form is invalid, show validation messages
-            projectForm.reportValidity();
-        }
-    });
-    
+document.addEventListener('DOMContentLoaded', function() {    
     // Save task button functionality
     document.getElementById('saveTask').addEventListener('click', function() {
         var taskForm = document.getElementById('taskForm');
