@@ -389,7 +389,7 @@
         delete data.confirm_password;
 
         $.ajax({
-            url: 'ajax_helpers/ajax_get_user.php',
+            url: 'ajax_helpers/ajax_add_user.php',
             type: 'POST',
             dataType: 'json',
             data: data,
@@ -477,17 +477,23 @@ $(document).ready(function() {
 });
 
 function loadUsers(tab = 'all-users') {
-    const roleFilter = $('#roleFilter').val();
-    const statusFilter = $('#statusFilter').val();
+    $('#usersTable tbody').html('<tr><td colspan="7" class="text-center py-4"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></td></tr>');
+    
+    let roleFilter = $('#roleFilter').val();
+    let statusFilter = $('#statusFilter').val();
 
+    // Override status if tab is selected
     let status = '';
-    if (tab === 'active-users') status = 'Active';
-    if (tab === 'inactive-users') status = 'Inactive';
-    if (tab === 'admins') status = 'Administrator';
+    if (tab === 'active-users') status = 'active';
+    if (tab === 'inactive-users') status = 'inactive';
+
+    // ⛔️ Don't send filters if they're not real values
+    if (roleFilter === 'All Roles') roleFilter = '';
+    if (statusFilter === 'All Statuses') statusFilter = '';
 
     $.ajax({
         url: 'ajax_helpers/ajax_get_user.php',
-        type: 'POST',
+        type: 'GET',
         dataType: 'json',
         data: {
             action: 'get_users',
@@ -495,89 +501,130 @@ function loadUsers(tab = 'all-users') {
             role_filter: roleFilter
         },
         success: function(response) {
-            console.log('Response:', response); // Debug log
-            if (response.success && response.data) {
-                renderUsers(response.data);
+            console.log('Full response:', response);
+            if (response.success && Array.isArray(response.data)) {
+                if (response.data.length > 0) {
+                    renderUsers(response.data);
+                } else {
+                    $('#usersTable tbody').html('<tr><td colspan="7" class="text-center py-4">No users found</td></tr>');
+                }
             } else {
-                console.error('Error:', response.message);
-                $('#usersTable tbody').html('<tr><td colspan="7" class="text-center py-4">No users found</td></tr>');
+                const errorMsg = response.message || 'Invalid response format';
+                $('#usersTable tbody').html('<tr><td colspan="7" class="text-center py-4">Error: ' + errorMsg + '</td></tr>');
             }
         },
         error: function(xhr, status, error) {
-            console.error('AJAX Error:', error);
-            $('#usersTable tbody').html('<tr><td colspan="7" class="text-center py-4">Error loading users</td></tr>');
+            console.error('AJAX Error:', error, xhr.responseText);
+            let errorMsg = 'Error loading users';
+            try {
+                const response = JSON.parse(xhr.responseText);
+                errorMsg = response.message || errorMsg;
+            } catch (e) {}
+            $('#usersTable tbody').html('<tr><td colspan="7" class="text-center py-4">' + errorMsg + '</td></tr>');
         }
     });
 }
-
 function renderUsers(users) {
+    console.log('Rendering users:', users); // Debug log
+    
     const tbody = $('#usersTable tbody');
     tbody.empty();
 
-    if (users.length === 0) {
+    if (!users || users.length === 0) {
+        console.warn('No users data received for rendering');
         tbody.append('<tr><td colspan="7" class="text-center py-4">No users found</td></tr>');
         return;
     }
 
-    users.forEach(user => {
-        const statusClass = user.status === 'Active' ? 'bg-success' :
-            (user.status === 'Suspended' ? 'bg-warning' : 'bg-secondary');
+    // Simple date formatter if not defined
+    window.formatDate = window.formatDate || function(dateString) {
+        if (!dateString) return 'Never';
+        const date = new Date(dateString);
+        return date.toLocaleString();
+    };
 
-        const lastActive = user.last_active ? formatDate(user.last_active) : 'Never';
+    try {
+        users.forEach(user => {
+            // Debug current user
+            console.log('Processing user:', user.id, user.first_name, user.last_name);
+            
+            // Safely handle username
+            const usernameDisplay = user.username ? `@${user.username}` : 'No username';
+            
+            // Status handling
+            const status = user.status || 'Inactive';
+            const statusClass = status === 'Active' ? 'bg-success' :
+                (status === 'Suspended' ? 'bg-warning' : 'bg-secondary');
 
-        const avatar = user.avatar ?
-            `<img src="${user.avatar}" class="avatar-img rounded-circle" alt="${user.first_name}">` :
-            `<span class="avatar-title rounded-circle bg-primary text-white">${user.first_name.charAt(0)}${user.last_name.charAt(0)}</span>`;
+            // Last active date
+            const lastActive = user.last_active ? formatDate(user.last_active) : 'Never';
+            
+            // Avatar handling
+            let avatar;
+            if (user.avatar) {
+                avatar = `<img src="${user.avatar}" class="avatar-img rounded-circle" alt="${user.first_name}">`;
+            } else {
+                const initials = (user.first_name?.charAt(0) || '') + (user.last_name?.charAt(0) || '');
+                avatar = `<span class="avatar-title rounded-circle bg-primary text-white">${initials}</span>`;
+            }
 
-        const row = `
-            <tr>
-                <td>
-                    <div class="form-check">
-                        <input class="form-check-input user-checkbox" type="checkbox" value="${user.id}">
-                    </div>
-                </td>
-                <td>
-                    <div class="d-flex align-items-center">
-                        <div class="avatar-sm me-3">
-                            ${avatar}
+            // Role handling
+            const roleDisplay = user.role_name || user.role || 'No role';
+
+            const row = `
+                <tr data-user-id="${user.id}">
+                    <td>
+                        <div class="form-check">
+                            <input class="form-check-input user-checkbox" type="checkbox" value="${user.id}">
                         </div>
-                        <div>
-                            <a href="#" class="text-primary fw-bold">${user.first_name} ${user.last_name}</a>
-                            <p class="mb-0 text-muted small">@${user.username}</p>
+                    </td>
+                    <td>
+                        <div class="d-flex align-items-center">
+                            <div class="avatar-sm me-3">
+                                ${avatar}
+                            </div>
+                            <div>
+                                <a href="#" class="text-primary fw-bold">${user.first_name || ''} ${user.last_name || ''}</a>
+                                <p class="mb-0 text-muted small">${usernameDisplay}</p>
+                            </div>
                         </div>
-                    </div>
-                </td>
-                <td>${user.email}</td>
-                <td><span class="badge bg-primary">${user.role_name || user.role}</span></td>
-                <td>${lastActive}</td>
-                <td><span class="badge ${statusClass}">${user.status}</span></td>
-                <td>
-                    <div class="dropdown">
-                        <button class="btn btn-sm btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-ellipsis-h"></i>
-                        </button>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item edit-user" href="#" data-id="${user.id}" data-bs-toggle="modal" data-bs-target="#editUserModal"><i class="fas fa-edit me-2"></i> Edit</a></li>
-                            <li><a class="dropdown-item" href="#"><i class="fas fa-key me-2"></i> Reset Password</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li>
-                                <a class="dropdown-item ${user.status === 'Active' ? 'text-danger change-status' : 'text-success change-status'}" 
-                                   href="#" data-id="${user.id}" data-status="${user.status === 'Active' ? 'Inactive' : 'Active'}">
-                                    <i class="fas ${user.status === 'Active' ? 'fa-user-slash' : 'fa-user-check'} me-2"></i> 
-                                    ${user.status === 'Active' ? 'Deactivate' : 'Activate'}
-                                </a>
-                            </li>
-                            <li><a class="dropdown-item text-danger delete-user" href="#" data-id="${user.id}"><i class="fas fa-trash me-2"></i> Delete</a></li>
-                        </ul>
-                    </div>
-                </td>
-            </tr>
-        `;
+                    </td>
+                    <td>${user.email || 'No email'}</td>
+                    <td><span class="badge bg-primary">${roleDisplay}</span></td>
+                    <td>${lastActive}</td>
+                    <td><span class="badge ${statusClass}">${status}</span></td>
+                    <td>
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-ellipsis-h"></i>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item edit-user" href="#" data-id="${user.id}"><i class="fas fa-edit me-2"></i> Edit</a></li>
+                                <li><a class="dropdown-item" href="#"><i class="fas fa-key me-2"></i> Reset Password</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <a class="dropdown-item ${status === 'Active' ? 'text-danger change-status' : 'text-success change-status'}" 
+                                       href="#" data-id="${user.id}" data-status="${status === 'Active' ? 'Inactive' : 'Active'}">
+                                        <i class="fas ${status === 'Active' ? 'fa-user-slash' : 'fa-user-check'} me-2"></i> 
+                                        ${status === 'Active' ? 'Deactivate' : 'Activate'}
+                                    </a>
+                                </li>
+                                <li><a class="dropdown-item text-danger delete-user" href="#" data-id="${user.id}"><i class="fas fa-trash me-2"></i> Delete</a></li>
+                            </ul>
+                        </div>
+                    </td>
+                </tr>
+            `;
 
-        tbody.append(row);
-    });
+            tbody.append(row);
+        });
+        
+        console.log('Successfully rendered', users.length, 'users');
+    } catch (error) {
+        console.error('Error rendering users:', error);
+        tbody.append('<tr><td colspan="7" class="text-center py-4 text-danger">Error displaying users</td></tr>');
+    }
 }
-
     function formatDate(dateString) {
         const date = new Date(dateString);
         const now = new Date();
@@ -617,7 +664,7 @@ function renderUsers(users) {
         }
 
         $.ajax({
-            url: 'ajax_helpers/ajax_get_user.php',
+            url: 'ajax_helpers/ajax_add_user.php',
             type: 'POST',
             dataType: 'json',
             data: {
@@ -642,7 +689,7 @@ function renderUsers(users) {
 
     function loadUserData(userId) {
         $.ajax({
-            url: 'ajax_helpers/ajax_get_user.php',
+            url: 'ajax_helpers/ajax_add_user.php',
             type: 'POST',
             dataType: 'json',
             data: {
@@ -680,7 +727,7 @@ function renderUsers(users) {
         }
 
         $.ajax({
-            url: 'ajax_helpers/ajax_get_user.php',
+            url: 'ajax_helpers/ajax_add_user.php',
             type: 'POST',
             dataType: 'json',
             data: {
@@ -704,7 +751,7 @@ function renderUsers(users) {
 
     function deleteUser(userId) {
         $.ajax({
-            url: 'ajax_helpers/ajax_get_user.php',
+            url: 'ajax_helpers/ajax_add_user.php',
             type: 'POST',
             dataType: 'json',
             data: {
@@ -727,7 +774,7 @@ function renderUsers(users) {
 
     function changeStatus(userId, status) {
         $.ajax({
-            url: 'ajax_helpers/ajax_get_user.php',
+            url: 'ajax_helpers/ajax_add_user.php',
             type: 'POST',
             dataType: 'json',
             data: {
@@ -754,7 +801,7 @@ function renderUsers(users) {
     // Add this new function
     function loadRoles() {
         $.ajax({
-            url: 'ajax_helpers/ajax_get_user.php',
+            url: 'ajax_helpers/ajax_add_user.php',
             type: 'POST',
             dataType: 'json',
             data: {
