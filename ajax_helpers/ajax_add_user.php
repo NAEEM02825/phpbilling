@@ -78,7 +78,10 @@ try {
             if (empty($_POST['id']) || empty($_POST['status'])) {
                 throw new Exception("ID and status are required");
             }
-
+ case 'get_roles':
+            $roles = DB::query("SELECT * FROM roles");
+            echo json_encode(['success' => true, 'data' => $roles]);
+            break;
             DB::update(
                 'users',
                 [
