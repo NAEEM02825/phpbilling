@@ -377,7 +377,7 @@ $(document).ready(function() {
         const formData = $(this).serialize();
         
         $.ajax({
-            url: 'tasks.php?action=create',
+            url: 'ajax_helpers/ajax_add_tasks.php?action=create',
             type: 'POST',
             data: formData,
             dataType: 'json',
@@ -413,7 +413,7 @@ function loadProjects(category) {
     else if (category === 'Other') tableId = 'otherProjectsTable';
     
     $.ajax({
-        url: 'projects.php?action=list&category=' + category,
+        url: 'ajax_helpers/ajax_add_projects.php?action=list&category=' + category,
         type: 'GET',
         dataType: 'json',
         success: function(response) {
@@ -478,7 +478,7 @@ function loadProjects(category) {
 
 function loadTasks(projectId) {
     $.ajax({
-        url: 'tasks.php?action=list&project_id=' + projectId,
+        url: 'ajax_helpers/ajax_add_tasks.php?action=list&project_id=' + projectId,
         type: 'GET',
         dataType: 'json',
         success: function(response) {
@@ -518,6 +518,8 @@ function loadTasks(projectId) {
     });
 }
 </script>
+
+<!-- Keep your existing styles -->
 <style>
     /* Project Page Specific Styles */
     .nav-tabs {
