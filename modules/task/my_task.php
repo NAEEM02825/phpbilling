@@ -540,37 +540,6 @@
         </div>
     </div>
 </div>
-
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {    
-    // Save task button functionality
-    document.getElementById('saveTask').addEventListener('click', function() {
-        var taskForm = document.getElementById('taskForm');
-        if (taskForm.checkValidity()) {
-            // Form is valid, proceed with saving
-            var bootstrapModal = bootstrap.Modal.getInstance(document.getElementById('newTaskModal'));
-            bootstrapModal.hide();
-            
-            // Show success message
-            alert('Task created successfully!');
-            
-            // Reset form
-            taskForm.reset();
-        } else {
-            // Form is invalid, show validation messages
-            taskForm.reportValidity();
-        }
-    });
-    
-    // Initialize tooltips
-    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl);
-    });
-});
-</script>
-
 <style>
     /* Project/Task Page Specific Styles */
     .nav-tabs {
@@ -708,3 +677,387 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 </style>
+
+
+<script>
+
+    document.addEventListener('DOMContentLoaded', function() {
+    // Initialize modals and tooltips
+    const newTaskModal = new bootstrap.Modal(document.getElementById('newTaskModal'));
+    const viewTaskModal = new bootstrap.Modal(document.getElementById('viewTaskModal'));
+    
+    // Initialize tooltips
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+    
+    // Load initial data
+    loadProjects();
+    loadTasks();
+    
+    // Save task button functionality
+    document.getElementById('saveTask').addEventListener('click', function() {
+        const taskForm = document.getElementById('taskForm');
+        if (taskForm.checkValidity()) {
+            saveTask();
+        } else {
+            taskForm.reportValidity();
+        }
+    });
+    
+    // Tab change event listeners
+    document.getElementById('projects-tab').addEventListener('click', loadProjects);
+    document.getElementById('tasks-tab').addEventListener('click', loadTasks);
+    document.getElementById('my-tasks-tab').addEventListener('click', loadMyTasks);
+    
+    // View task modal event
+    document.getElementById('viewTaskModal').addEventListener('show.bs.modal', function(event) {
+        const button = event.relatedTarget;
+        const taskId = button.getAttribute('data-task-id');
+        loadTaskDetails(taskId);
+    });
+});
+
+function saveTask() {
+    const formData = {
+        action: 'create_task',
+        title: document.getElementById('taskTitle').value,
+        project_id: document.getElementById('taskProject').value,
+        task_date: document.getElementById('taskDate').value,
+        estimated_hours: document.getElementById('taskHours').value,
+        assignee_id: document.getElementById('taskAssignee').value,
+        status: document.getElementById('taskStatus').value,
+        description: document.getElementById('taskDetails').value,
+        clickup_link: document.getElementById('clickupLink').value
+    };
+    
+    fetch('ajax_handlers.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams(formData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const modal = bootstrap.Modal.getInstance(document.getElementById('newTaskModal'));
+            modal.hide();
+            
+            // Show success toast/alert
+            showAlert('Task created successfully!', 'success');
+            
+            // Reset form
+            document.getElementById('taskForm').reset();
+            
+            // Reload tasks
+            loadTasks();
+        } else {
+            throw new Error(data.error || 'Failed to create task');
+        }
+    })
+    .catch(error => {
+        showAlert(error.message, 'danger');
+    });
+}
+
+function loadProjects() {
+    fetch('ajax_handlers.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: 'action=get_projects'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            renderProjectsTable(data.data);
+        } else {
+            throw new Error(data.error || 'Failed to load projects');
+        }
+    })
+    .catch(error => {
+        showAlert(error.message, 'danger');
+    });
+}
+
+function loadTasks() {
+    fetch('ajax_handlers.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: 'action=get_tasks'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            renderTasksTable(data.data, 'tasks');
+        } else {
+            throw new Error(data.error || 'Failed to load tasks');
+        }
+    })
+    .catch(error => {
+        showAlert(error.message, 'danger');
+    });
+}
+
+function loadMyTasks() {
+    // In a real app, you would pass the current user's ID
+    const userId = 1; // This should come from session or similar
+    
+    fetch('ajax_handlers.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `action=get_tasks&assignee_id=${userId}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            renderTasksTable(data.data, 'my-tasks');
+        } else {
+            throw new Error(data.error || 'Failed to load my tasks');
+        }
+    })
+    .catch(error => {
+        showAlert(error.message, 'danger');
+    });
+}
+
+function loadTaskDetails(taskId) {
+    fetch('ajax_handlers.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `action=get_task_details&task_id=${taskId}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            renderTaskDetails(data.data);
+        } else {
+            throw new Error(data.error || 'Failed to load task details');
+        }
+    })
+    .catch(error => {
+        showAlert(error.message, 'danger');
+    });
+}
+
+function renderProjectsTable(projects) {
+    const tbody = document.querySelector('#projects tbody');
+    tbody.innerHTML = '';
+    
+    projects.forEach(project => {
+        const progress = project.task_count > 0 
+            ? Math.round((project.completed_tasks / project.task_count) * 100)
+            : 0;
+            
+        const statusBadge = project.status === 'completed' ? 'bg-success' : 
+                          (project.status === 'on-hold' ? 'bg-warning' : 'bg-primary');
+        
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>
+                <a href="#" class="text-primary fw-bold">${project.name}</a>
+                <p class="mb-0 text-muted small">${project.client || 'No client specified'}</p>
+            </td>
+            <td>
+                <div class="avatar-group">
+                    <span class="avatar avatar-sm rounded-circle bg-primary text-white">JD</span>
+                    <span class="avatar avatar-sm rounded-circle bg-success text-white">JS</span>
+                </div>
+            </td>
+            <td>
+                <div class="progress" style="height: 6px;">
+                    <div class="progress-bar bg-success" role="progressbar" style="width: ${progress}%" 
+                        aria-valuenow="${progress}" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <small class="text-muted">${project.completed_tasks}/${project.task_count} tasks completed</small>
+            </td>
+            <td><span class="badge ${statusBadge}">${project.status}</span></td>
+            <td>
+                <div class="dropdown">
+                    <button class="btn btn-sm btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-ellipsis-h"></i>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#viewProjectModal"><i class="fas fa-eye me-2"></i> View</a></li>
+                        <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#editProjectModal"><i class="fas fa-edit me-2"></i> Edit</a></li>
+                        <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#assignUsersModal"><i class="fas fa-users me-2"></i> Assign Users</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-trash me-2"></i> Delete</a></li>
+                    </ul>
+                </div>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
+function renderTasksTable(tasks, tabId) {
+    const tbody = document.querySelector(`#${tabId} tbody`);
+    tbody.innerHTML = '';
+    
+    tasks.forEach(task => {
+        const statusBadge = task.status === 'completed' ? 'bg-success' : 
+                          (task.status === 'in-progress' ? 'bg-primary' : 'bg-warning');
+        
+        const row = document.createElement('tr');
+        
+        if (tabId === 'my-tasks') {
+            row.innerHTML = `
+                <td>
+                    <a href="#" class="text-primary fw-bold">${task.title}</a>
+                    <p class="mb-0 text-muted small">${task.description || 'No description'}</p>
+                </td>
+                <td>${task.project_name}</td>
+                <td>${task.task_date}</td>
+                <td>${task.estimated_hours}</td>
+                <td><span class="badge ${statusBadge}">${task.status.replace('-', ' ')}</span></td>
+                <td><a href="${task.clickup_link || '#'}" target="_blank" class="text-info">${task.clickup_link ? 'View in ClickUp' : 'No link'}</a></td>
+                <td>
+                    <button class="btn btn-sm btn-success me-1">Complete</button>
+                    <button class="btn btn-sm btn-outline-secondary">Log Time</button>
+                </td>
+            `;
+        } else {
+            row.innerHTML = `
+                <td>
+                    <a href="#" class="text-primary fw-bold">${task.title}</a>
+                    <p class="mb-0 text-muted small">${task.description || 'No description'}</p>
+                </td>
+                <td>${task.project_name}</td>
+                <td>${task.task_date}</td>
+                <td>${task.estimated_hours}</td>
+                <td><span class="badge ${statusBadge}">${task.status.replace('-', ' ')}</span></td>
+                <td><a href="${task.clickup_link || '#'}" target="_blank" class="text-info">${task.clickup_link ? 'View in ClickUp' : 'No link'}</a></td>
+                <td>
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-ellipsis-h"></i>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#viewTaskModal" data-task-id="${task.id}"><i class="fas fa-eye me-2"></i> View</a></li>
+                            <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#editTaskModal"><i class="fas fa-edit me-2"></i> Edit</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-trash me-2"></i> Delete</a></li>
+                        </ul>
+                    </div>
+                </td>
+            `;
+        }
+        
+        tbody.appendChild(row);
+    });
+}
+
+function renderTaskDetails(data) {
+    const task = data.task;
+    const timeLogs = data.time_logs;
+    
+    const statusBadge = task.status === 'completed' ? 'bg-success' : 
+                       (task.status === 'in-progress' ? 'bg-primary' : 'bg-warning');
+    
+    // Update modal title
+    document.getElementById('viewTaskModalLabel').textContent = task.title;
+    
+    // Update main content
+    const modalBody = document.querySelector('#viewTaskModal .modal-body');
+    modalBody.innerHTML = `
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <h4>${task.title}</h4>
+                <p class="text-muted">${task.description || 'No description provided'}</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <span class="badge ${statusBadge} fs-6">${task.status.replace('-', ' ')}</span>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <h6 class="text-muted">Project</h6>
+                    <p>${task.project_name}</p>
+                </div>
+                <div class="mb-3">
+                    <h6 class="text-muted">Date</h6>
+                    <p>${new Date(task.task_date).toLocaleDateString()}</p>
+                </div>
+                <div class="mb-3">
+                    <h6 class="text-muted">Hours Logged</h6>
+                    <p>${task.estimated_hours} estimated</p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <h6 class="text-muted">Assignee</h6>
+                    <div class="d-flex align-items-center">
+                        <span class="avatar avatar-sm rounded-circle bg-primary text-white me-2">${task.assignee_initials}</span>
+                        <span>${task.assignee_name}</span>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <h6 class="text-muted">ClickUp Link</h6>
+                    <p><a href="${task.clickup_link || '#'}" target="_blank">${task.clickup_link || 'No ClickUp link'}</a></p>
+                </div>
+                <div class="mb-3">
+                    <h6 class="text-muted">Created</h6>
+                    <p>${new Date(task.created_at).toLocaleDateString()}</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-4">
+            <h5 class="mb-3">Time Logs</h5>
+            <div class="table-responsive">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>User</th>
+                            <th>Hours</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${timeLogs.length > 0 ? 
+                            timeLogs.map(log => `
+                                <tr>
+                                    <td>${new Date(log.log_date).toLocaleDateString()}</td>
+                                    <td>${log.user_name}</td>
+                                    <td>${log.hours}</td>
+                                    <td>${log.description || ''}</td>
+                                </tr>
+                            `).join('') : 
+                            '<tr><td colspan="4" class="text-center">No time logs recorded</td></tr>'}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    `;
+}
+
+function showAlert(message, type) {
+    const alert = document.createElement('div');
+    alert.className = `alert alert-${type} alert-dismissible fade show position-fixed top-0 end-0 m-3`;
+    alert.style.zIndex = '1100';
+    alert.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(alert);
+    
+    setTimeout(() => {
+        alert.classList.remove('show');
+        setTimeout(() => alert.remove(), 150);
+    }, 3000);
+}
+</script>
