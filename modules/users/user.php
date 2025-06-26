@@ -868,4 +868,12 @@
             $('#userRole, #editRole').append(`<option value="${role.id}">${role.name}</option>`);
         });
     }
+
+    // Reset Filters button functionality
+    $(document).on('click', '#resetFilters', function(e) {
+        e.preventDefault();
+        $('#roleFilter').val('');
+        $('#statusFilter').val('');
+        loadUsers(); // Reload users with default filters
+    });
 </Script>
