@@ -625,7 +625,7 @@
                                 <i class="fas fa-ellipsis-h"></i>
                             </button>
                             <ul class="dropdown-menu">
-                                <li><a class="dropdown-item edit-user" href="#" data-id="${user.id}"><i class="fas fa-edit me-2"></i> Edit</a></li>
+                                <li><a class="dropdown-item edit-user" href="#" data-id="${user.user_id}"><i class="fas fa-edit me-2"></i> Edit</a></li>
                                 <li><a class="dropdown-item" href="#"><i class="fas fa-key me-2"></i> Reset Password</a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
@@ -635,7 +635,7 @@
                                         ${status === 'Active' ? 'Deactivate' : 'Activate'}
                                     </a>
                                 </li>
-                                <li><a class="dropdown-item text-danger delete-user" href="#" data-id="${user.id}"><i class="fas fa-trash me-2"></i> Delete</a></li>
+                                <li><a class="dropdown-item text-danger delete-user" href="#" data-id="${user.user_id}"><i class="fas fa-trash me-2"></i> Delete</a></li>
                             </ul>
                         </div>
                     </td>
@@ -721,7 +721,7 @@
             dataType: 'json',
             data: {
                 action: 'get_user',
-                id: userId
+                user_id: userId
             },
             success: function(response) {
                 if (response.success && response.data) {
@@ -793,7 +793,7 @@
             dataType: 'json',
             data: {
                 action: 'delete_user',
-                id: userId
+                user_id: userId
             },
             success: function(response) {
                 if (response.success) {
