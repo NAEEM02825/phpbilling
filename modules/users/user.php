@@ -572,7 +572,7 @@
         try {
             users.forEach(user => {
                 // Debug current user
-                console.log('Processing user:', user.id, user.first_name, user.last_name);
+                console.log('Processing user:', user.user_id, user.first_name, user.last_name);
 
                 // Safely handle username
                 const usernameDisplay = user.username ? `@${user.username}` : 'No username';
@@ -598,7 +598,7 @@
                 const roleDisplay = user.role_name || user.role || 'No role';
 
                 const row = `
-                <tr data-user-id="${user.id}">
+                <tr data-user-id="${user.user_id}">
                     <td>
                         <div class="form-check">
                             <input class="form-check-input user-checkbox" type="checkbox" value="${user.user_id}">
