@@ -378,7 +378,13 @@
 
     async function loadProjects() {
         try {
-            const response = await fetch('ajax_helpers/task_handler.php?action=get_projects');
+            const response = await fetch('ajax_helpers/task_handler.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'action=get_projects'
+            });
             const data = await response.json();
 
             if (!data.success) {
@@ -434,7 +440,13 @@
 
     async function loadTasks() {
         try {
-            const response = await fetch('ajax_helpers/task_handler.php?action=get_tasks');
+            const response = await fetch('ajax_helpers/task_handler.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'action=get_tasks'
+            });
             const data = await response.json();
 
             if (!data.success) {
@@ -486,11 +498,17 @@
 
     async function loadMyTasks() {
         try {
-            const response = await fetch('ajax_helpers/task_handler.php?action=get_my_tasks');
+            const response = await fetch('ajax_helpers/task_handler.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'action=get_my_tasks'
+            });
             const data = await response.json();
 
-            if (!data.success) {
-                throw new Error(data.error || 'Failed to load your tasks');
+            if (!data.success || !data.tasks) { // Added check for data.tasks
+                throw new Error(data.error || 'No tasks data received');
             }
 
             const tbody = document.querySelector('#myTasksTable tbody');
@@ -532,7 +550,13 @@
         select.innerHTML = '<option value="" selected disabled>Loading projects...</option>';
 
         try {
-            const response = await fetch('ajax_helpers/task_handler.php?action=get_projects');
+            const response = await fetch('ajax_helpers/task_handler.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'action=get_projects'
+            });
             const data = await response.json();
 
             if (!data.success) {
@@ -557,7 +581,13 @@
         select.innerHTML = '<option value="" selected disabled>Loading users...</option>';
 
         try {
-            const response = await fetch('ajax_helpers/task_handler.php?action=get_users');
+            const response = await fetch('ajax_helpers/task_handler.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'action=get_users'
+            });
             const data = await response.json();
 
             if (!data.success) {

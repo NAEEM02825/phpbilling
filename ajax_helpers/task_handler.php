@@ -28,7 +28,7 @@ try {
             $assigneeId = $_POST['assignee_id'] ?? null;
             $query = "
                 SELECT t.*, p.name as project_name, u.name as assignee_name, 
-                       CONCAT(LEFT(u.name, 1), LEFT(u.lastname, 1)) as assignee_initials
+                       CONCAT(LEFT(u.name, 1), LEFT(u.last_name, 1)) as assignee_initials
                 FROM tasks t
                 LEFT JOIN projects p ON p.id = t.project_id
                 LEFT JOIN users u ON u.user_id = t.assignee_id  -- Changed from u.id to u.user_id
@@ -48,7 +48,7 @@ try {
             break;
 
         case 'get_users':
-            $users = DB::query("SELECT user_id, CONCAT(name, ' ', lastname) as name FROM users WHERE role_id = 3");  // Changed id to user_id
+            $users = DB::query("SELECT user_id, CONCAT(name, ' ', last_name) as name FROM users WHERE role_id = 3");  // Changed id to user_id
             $response = [
                 'success' => true,
                 'users' => $users
@@ -59,7 +59,7 @@ try {
             $taskId = $_POST['task_id'];
             $task = DB::queryFirstRow("
                 SELECT t.*, p.name as project_name, u.name as assignee_name, 
-                       CONCAT(LEFT(u.name, 1), LEFT(u.lastname, 1)) as assignee_initials
+                       CONCAT(LEFT(u.name, 1), LEFT(u.last_name, 1)) as assignee_initials
                 FROM tasks t
                 LEFT JOIN projects p ON p.id = t.project_id
                 LEFT JOIN users u ON u.user_id = t.assignee_id  -- Changed from u.id to u.user_id
@@ -110,6 +110,17 @@ try {
             $response = [
                 'success' => true,
                 'data' => $user
+            ];
+            break;
+            
+        case 'get_my_tasks':
+            $userId = $_SESSION['user_id'] ?? 0;
+
+            $tasks = DB::query("SELECT t.*, p.name as project_name FROM tasks t LEFT JOIN projects p ON p.id = t.project_id WHERE t.assignee_id = %i", $userId);
+
+            $response = [
+                'success' => true,
+                'tasks' => $tasks // Make sure this matches what frontend expects
             ];
             break;
 
