@@ -31,7 +31,7 @@ try {
                        CONCAT(LEFT(u.name, 1), LEFT(u.lastname, 1)) as assignee_initials
                 FROM tasks t
                 LEFT JOIN projects p ON p.id = t.project_id
-                LEFT JOIN users u ON u.id = t.assignee_id
+                LEFT JOIN users u ON u.user_id = t.assignee_id  -- Changed from u.id to u.user_id
             ";
 
             if ($assigneeId) {
@@ -46,8 +46,9 @@ try {
                 'data' => $tasks
             ];
             break;
+
         case 'get_users':
-            $users = DB::query("SELECT id, CONCAT(name, ' ', lastname) as name FROM users WHERE role_id = 3");
+            $users = DB::query("SELECT user_id, CONCAT(name, ' ', lastname) as name FROM users WHERE role_id = 3");  // Changed id to user_id
             $response = [
                 'success' => true,
                 'users' => $users
@@ -61,14 +62,14 @@ try {
                        CONCAT(LEFT(u.name, 1), LEFT(u.lastname, 1)) as assignee_initials
                 FROM tasks t
                 LEFT JOIN projects p ON p.id = t.project_id
-                LEFT JOIN users u ON u.id = t.assignee_id
+                LEFT JOIN users u ON u.user_id = t.assignee_id  -- Changed from u.id to u.user_id
                 WHERE t.id = %i
             ", $taskId);
 
             $timeLogs = DB::query("
                 SELECT tl.*, u.name as user_name
                 FROM time_logs tl
-                LEFT JOIN users u ON u.id = tl.user_id
+                LEFT JOIN users u ON u.user_id = tl.user_id  -- Changed from u.id to u.user_id
                 WHERE tl.task_id = %i
                 ORDER BY tl.log_date DESC
             ", $taskId);
@@ -104,7 +105,7 @@ try {
 
         case 'get_user_data':
             $userId = $_POST['user_id'] ?? 3; // Default to user ID 3 as requested
-            $user = DB::queryFirstRow("SELECT * FROM users WHERE id = %i", $userId);
+            $user = DB::queryFirstRow("SELECT * FROM users WHERE user_id = %i", $userId);  // Changed id to user_id
 
             $response = [
                 'success' => true,
