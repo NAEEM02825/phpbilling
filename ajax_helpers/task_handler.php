@@ -31,7 +31,7 @@ try {
                        CONCAT(LEFT(u.name, 1), LEFT(u.last_name, 1)) as assignee_initials
                 FROM tasks t
                 LEFT JOIN projects p ON p.id = t.project_id
-                LEFT JOIN users u ON u.user_id = t.assignee_id  -- Changed from u.id to u.user_id
+                LEFT JOIN users u ON u.user_id = t.assignee_id
             ";
 
             if ($assigneeId) {
@@ -48,9 +48,7 @@ try {
             break;
 
         case 'get_users':
-            // $users = DB::query("SELECT user_id, CONCAT(name, ' ', last_name) as name FROM users WHERE role_id = 3");  // this query can be run if tasks are to be assigned only to users and not managers or admins
-            $users = DB::query("SELECT user_id, CONCAT(name, ' ', last_name) as name FROM users");  // this query can be run if tasks are to be assigned only to users and not managers or admins
-
+            $users = DB::query("SELECT user_id, CONCAT(name, ' ', last_name) as name FROM users");
             $response = [
                 'success' => true,
                 'users' => $users
@@ -64,17 +62,35 @@ try {
                        CONCAT(LEFT(u.name, 1), LEFT(u.last_name, 1)) as assignee_initials
                 FROM tasks t
                 LEFT JOIN projects p ON p.id = t.project_id
-                LEFT JOIN users u ON u.user_id = t.assignee_id  -- Changed from u.id to u.user_id
+                LEFT JOIN users u ON u.user_id = t.assignee_id
                 WHERE t.id = %i
             ", $taskId);
 
-            $timeLogs = DB::query("
-                SELECT tl.*, u.name as user_name
-                FROM time_logs tl
-                LEFT JOIN users u ON u.user_id = tl.user_id  -- Changed from u.id to u.user_id
-                WHERE tl.task_id = %i
-                ORDER BY tl.log_date DESC
-            ", $taskId);
+            // Initialize time_logs as empty array
+            $timeLogs = [];
+            
+            // Check if time_logs table exists before querying
+            try {
+                $tableExists = DB::queryFirstField("
+                    SELECT COUNT(*) 
+                    FROM information_schema.tables 
+                    WHERE table_schema = DATABASE() 
+                    AND table_name = 'time_logs'
+                ");
+                
+                if ($tableExists) {
+                    $timeLogs = DB::query("
+                        SELECT tl.*, u.name as user_name
+                        FROM time_logs tl
+                        LEFT JOIN users u ON u.user_id = tl.user_id
+                        WHERE tl.task_id = %i
+                        ORDER BY tl.log_date DESC
+                    ", $taskId);
+                }
+            } catch (Exception $e) {
+                // Silently ignore if time_logs table doesn't exist
+                $timeLogs = [];
+            }
 
             $response = [
                 'success' => true,
@@ -105,9 +121,39 @@ try {
             ];
             break;
 
+        case 'update_task':
+            $taskId = $_POST['task_id'];
+            $taskData = [
+                'title' => $_POST['title'],
+                'project_id' => $_POST['project_id'],
+                'task_date' => $_POST['task_date'],
+                'hours' => $_POST['hours'],
+                'assignee_id' => $_POST['assignee_id'],
+                'status' => $_POST['status'],
+                'details' => $_POST['details'] ?? '',
+                'clickup_link' => $_POST['clickup_link'] ?? '',
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+
+            DB::update('tasks', $taskData, 'id = %i', $taskId);
+            $response = [
+                'success' => true,
+                'message' => 'Task updated successfully'
+            ];
+            break;
+
+        case 'delete_task':
+            $taskId = $_POST['task_id'];
+            DB::delete('tasks', 'id = %i', $taskId);
+            $response = [
+                'success' => true,
+                'message' => 'Task deleted successfully'
+            ];
+            break;
+
         case 'get_user_data':
-            $userId = $_POST['user_id'] ?? 3; // Default to user ID 3 as requested
-            $user = DB::queryFirstRow("SELECT * FROM users WHERE user_id = %i", $userId);  // Changed id to user_id
+            $userId = $_POST['user_id'] ?? 3;
+            $user = DB::queryFirstRow("SELECT * FROM users WHERE user_id = %i", $userId);
 
             $response = [
                 'success' => true,
@@ -122,7 +168,7 @@ try {
 
             $response = [
                 'success' => true,
-                'tasks' => $tasks // Make sure this matches what frontend expects
+                'tasks' => $tasks
             ];
             break;
 
