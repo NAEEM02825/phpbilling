@@ -207,7 +207,7 @@
     </div>
 </div>
 
-<!-- Add this new modal for editing tasks -->
+<!-- Modal for Editing Tasks -->
 <div class="modal fade" id="editTaskModal" tabindex="-1" aria-labelledby="editTaskModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -406,12 +406,13 @@
 </style>
 
 <script>
+    // Main Initialization Function
     document.addEventListener('DOMContentLoaded', function () {
-        // Initialize the page
+        // Load initial data
         loadProjects();
         loadTasks();
 
-        // Set up modal event listeners
+        // New Task Modal Event Listeners
         const newTaskModal = document.getElementById('newTaskModal');
         if (newTaskModal) {
             newTaskModal.addEventListener('show.bs.modal', function () {
@@ -420,7 +421,7 @@
             });
         }
 
-        // Add event listener for edit modal show
+        // Edit Task Modal Event Listeners
         const editTaskModal = document.getElementById('editTaskModal');
         if (editTaskModal) {
             editTaskModal.addEventListener('show.bs.modal', function () {
@@ -429,7 +430,7 @@
             });
         }
 
-        // Set up save task button
+        // Save Task Button Handler
         const saveTaskBtn = document.getElementById('saveTask');
         if (saveTaskBtn) {
             saveTaskBtn.addEventListener('click', function () {
@@ -442,7 +443,7 @@
             });
         }
 
-        // Set up tab change events
+        // Tab Change Event Handlers
         const tabEls = document.querySelectorAll('button[data-bs-toggle="tab"]');
         tabEls.forEach(tabEl => {
             tabEl.addEventListener('shown.bs.tab', function (event) {
@@ -458,6 +459,7 @@
         });
     });
 
+    // Load Projects Data
     async function loadProjects() {
         try {
             const response = await fetch('ajax_helpers/task_handler.php', {
@@ -484,40 +486,40 @@
             data.data.forEach(project => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                <td>
-                    <a href="#" class="text-primary fw-bold">${project.name}</a>
-                    <small class="text-muted d-block">${project.from_company}</small>
-                </td>
-                <td>${project.to_client}</td>
-                <td>${project.type}</td>
-                <td>
-                    <div class="progress" style="height: 6px;">
-                        <div class="progress-bar bg-success" role="progressbar" 
-                             style="width: ${(project.completed_tasks / project.task_count) * 100 || 0}%" 
-                             aria-valuenow="${project.completed_tasks}" 
-                             aria-valuemin="0" 
-                             aria-valuemax="${project.task_count}">
+                    <td>
+                        <a href="#" class="text-primary fw-bold">${project.name}</a>
+                        <small class="text-muted d-block">${project.from_company}</small>
+                    </td>
+                    <td>${project.to_client}</td>
+                    <td>${project.type}</td>
+                    <td>
+                        <div class="progress" style="height: 6px;">
+                            <div class="progress-bar bg-success" role="progressbar" 
+                                 style="width: ${(project.completed_tasks / project.task_count) * 100 || 0}%" 
+                                 aria-valuenow="${project.completed_tasks}" 
+                                 aria-valuemin="0" 
+                                 aria-valuemax="${project.task_count}">
+                            </div>
                         </div>
-                    </div>
-                    <small class="text-muted">${project.completed_tasks} of ${project.task_count} tasks</small>
-                </td>
-                <td><span class="badge ${project.completed_tasks == project.task_count ? 'bg-success' : 'bg-primary'}">
-                    ${project.completed_tasks == project.task_count ? 'Completed' : 'In Progress'}
-                </span></td>
-                <td>
-                    <div class="dropdown">
-                        <button class="btn btn-sm btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-ellipsis-h"></i>
-                        </button>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="#"><i class="fas fa-eye me-2"></i> View</a></li>
-                            <li><a class="dropdown-item" href="#"><i class="fas fa-edit me-2"></i> Edit</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-trash me-2"></i> Delete</a></li>
-                        </ul>
-                    </div>
-                </td>
-            `;
+                        <small class="text-muted">${project.completed_tasks} of ${project.task_count} tasks</small>
+                    </td>
+                    <td><span class="badge ${project.completed_tasks == project.task_count ? 'bg-success' : 'bg-primary'}">
+                        ${project.completed_tasks == project.task_count ? 'Completed' : 'In Progress'}
+                    </span></td>
+                    <td>
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-ellipsis-h"></i>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#"><i class="fas fa-eye me-2"></i> View</a></li>
+                                <li><a class="dropdown-item" href="#"><i class="fas fa-edit me-2"></i> Edit</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-trash me-2"></i> Delete</a></li>
+                            </ul>
+                        </div>
+                    </td>
+                `;
                 tbody.appendChild(row);
             });
         } catch (error) {
@@ -525,6 +527,7 @@
         }
     }
 
+    // Load All Tasks Data
     async function loadTasks() {
         try {
             const response = await fetch('ajax_helpers/task_handler.php', {
@@ -593,6 +596,7 @@
         }
     }
 
+    // Load Current User's Tasks
     async function loadMyTasks() {
         try {
             const response = await fetch('ajax_helpers/task_handler.php', {
@@ -619,22 +623,22 @@
             data.tasks.forEach(task => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                <td>
-                    <a href="#" class="text-primary fw-bold">${task.title}</a>
-                    <p class="mb-0 text-muted small">${task.details || 'No description'}</p>
-                </td>
-                <td>${task.project_name || 'No project'}</td>
-                <td>${task.task_date}</td>
-                <td>${task.hours || '0'}</td>
-                <td><span class="badge ${getStatusClass(task.status)}">${formatStatus(task.status)}</span></td>
-                <td>
-                    ${task.clickup_link ? `<a href="${task.clickup_link}" target="_blank" class="text-info">View in ClickUp</a>` : 'No link'}
-                </td>
-                <td>
-                    <button class="btn btn-sm btn-success me-1">Complete</button>
-                    <button class="btn btn-sm btn-outline-secondary">Log Time</button>
-                </td>
-            `;
+                    <td>
+                        <a href="#" class="text-primary fw-bold">${task.title}</a>
+                        <p class="mb-0 text-muted small">${task.details || 'No description'}</p>
+                    </td>
+                    <td>${task.project_name || 'No project'}</td>
+                    <td>${task.task_date}</td>
+                    <td>${task.hours || '0'}</td>
+                    <td><span class="badge ${getStatusClass(task.status)}">${formatStatus(task.status)}</span></td>
+                    <td>
+                        ${task.clickup_link ? `<a href="${task.clickup_link}" target="_blank" class="text-info">View in ClickUp</a>` : 'No link'}
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-success me-1">Complete</button>
+                        <button class="btn btn-sm btn-outline-secondary">Log Time</button>
+                    </td>
+                `;
                 tbody.appendChild(row);
             });
         } catch (error) {
@@ -642,7 +646,7 @@
         }
     }
 
-    // Modified loadProjectOptions to accept target select element
+    // Load Project Options for Select Dropdowns
     async function loadProjectOptions(targetId = 'taskProject') {
         const select = document.getElementById(targetId);
         select.innerHTML = '<option value="" selected disabled>Loading projects...</option>';
@@ -674,7 +678,7 @@
         }
     }
 
-    // Modified loadUserOptions to accept target select element
+    // Load User Options for Select Dropdowns
     async function loadUserOptions(targetId = 'taskAssignee') {
         const select = document.getElementById(targetId);
         select.innerHTML = '<option value="" selected disabled>Loading users...</option>';
@@ -706,6 +710,7 @@
         }
     }
 
+    // Save New Task
     async function saveTask() {
         const form = document.getElementById('taskForm');
         const formData = new FormData(form);
@@ -741,7 +746,7 @@
         }
     }
 
-    // New function to handle task deletion
+    // Delete Task
     async function deleteTask(taskId) {
         if (!confirm('Are you sure you want to delete this task?')) return;
 
@@ -766,7 +771,7 @@
         }
     }
 
-    // New function to handle task editing
+    // Edit Task - Load Data into Modal
     async function editTask(taskId) {
         try {
             // First fetch task details
@@ -804,8 +809,7 @@
         }
     }
 
-
-    // New function to handle task update
+    // Update Task
     async function updateTask() {
         const form = document.getElementById('editTaskForm');
         const formData = new FormData(form);
@@ -833,6 +837,7 @@
         }
     }
 
+    // Helper Functions
     function getStatusClass(status) {
         switch (status.toLowerCase()) {
             case 'pending': return 'bg-warning';
@@ -853,9 +858,9 @@
         alert.className = `alert alert-${type} alert-dismissible fade show position-fixed top-0 end-0 m-3`;
         alert.style.zIndex = '1100';
         alert.innerHTML = `
-        ${message}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    `;
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        `;
 
         document.body.appendChild(alert);
 
