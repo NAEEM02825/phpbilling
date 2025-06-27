@@ -164,7 +164,7 @@
                     </div>
                     <div class="mb-3">
                         <label for="userUsername" class="form-label">Username</label>
-                        <input type="text" class="form-control" id="userUsername" name="username" required>
+                        <input type="text" class="form-control" id="userUsername" name="name" required>
                     </div>
                     <div class="mb-3">
                         <label for="userRole" class="form-label">Role</label>
@@ -210,7 +210,7 @@
             <div class="modal-body">
                 <form id="editUserForm">
                     <input type="hidden" name="action" value="update_user">
-                    <input type="hidden" id="editUserId" name="id">
+                    <input type="hidden" id="editUserId" name="user_id">
                     <div class="mb-3">
                         <label for="editFirstName" class="form-label">First Name</label>
                         <input type="text" class="form-control" id="editFirstName" name="first_name" required>
@@ -225,7 +225,7 @@
                     </div>
                     <div class="mb-3">
                         <label for="editUsername" class="form-label">Username</label>
-                        <input type="text" class="form-control" id="editUsername" name="username" required>
+                        <input type="text" class="form-control" id="editUsername" name="name" required>
                     </div>
                     <div class="mb-3">
                         <label for="editRole" class="form-label">Role</label>
@@ -572,10 +572,10 @@
         try {
             users.forEach(user => {
                 // Debug current user
-                console.log('Processing user:', user.id, user.first_name, user.last_name);
+                console.log('Processing user:', user.user_id, user.first_name, user.last_name);
 
                 // Safely handle username
-                const usernameDisplay = user.username ? `@${user.username}` : 'No username';
+                const usernameDisplay = user.name ? `@${user.name}` : 'No username';
 
                 // Status handling
                 const status = user.status || 'Inactive';
@@ -598,7 +598,7 @@
                 const roleDisplay = user.role_name || user.role || 'No role';
 
                 const row = `
-                <tr data-user-id="${user.id}">
+                <tr data-user-id="${user.user_id}">
                     <td>
                         <div class="form-check">
                             <input class="form-check-input user-checkbox" type="checkbox" value="${user.user_id}">
@@ -625,7 +625,7 @@
                                 <i class="fas fa-ellipsis-h"></i>
                             </button>
                             <ul class="dropdown-menu">
-                                <li><a class="dropdown-item edit-user" href="#" data-id="${user.id}"><i class="fas fa-edit me-2"></i> Edit</a></li>
+                                <li><a class="dropdown-item edit-user" href="#" data-id="${user.user_id}"><i class="fas fa-edit me-2"></i> Edit</a></li>
                                 <li><a class="dropdown-item" href="#"><i class="fas fa-key me-2"></i> Reset Password</a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
@@ -635,7 +635,7 @@
                                         ${status === 'Active' ? 'Deactivate' : 'Activate'}
                                     </a>
                                 </li>
-                                <li><a class="dropdown-item text-danger delete-user" href="#" data-id="${user.id}"><i class="fas fa-trash me-2"></i> Delete</a></li>
+                                <li><a class="dropdown-item text-danger delete-user" href="#" data-id="${user.user_id}"><i class="fas fa-trash me-2"></i> Delete</a></li>
                             </ul>
                         </div>
                     </td>
@@ -721,7 +721,7 @@
             dataType: 'json',
             data: {
                 action: 'get_user',
-                id: userId
+                user_id: userId
             },
             success: function(response) {
                 if (response.success && response.data) {
@@ -730,7 +730,7 @@
                     $('#editFirstName').val(user.first_name);
                     $('#editLastName').val(user.last_name);
                     $('#editEmail').val(user.email);
-                    $('#editUsername').val(user.username);
+                    $('#editUsername').val(user.name);
 
                     // Set the role dropdown
                     if (user.role_id) {
@@ -793,7 +793,7 @@
             dataType: 'json',
             data: {
                 action: 'delete_user',
-                id: userId
+                user_id: userId
             },
             success: function(response) {
                 if (response.success) {
