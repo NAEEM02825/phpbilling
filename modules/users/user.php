@@ -9,9 +9,6 @@
             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUserModal">
                 <i class="fas fa-user-plus me-1"></i> Add User
             </button>
-            <button type="button" class="btn btn-outline-secondary">
-                <i class="fas fa-filter me-1"></i> Filter
-            </button>
         </div>
         <div class="dropdown">
             <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="exportDropdown" data-bs-toggle="dropdown">
