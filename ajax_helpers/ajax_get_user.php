@@ -13,13 +13,13 @@ try {
         case 'get_users':
             $status_filter = $_GET['status_filter'] ?? '';
             $role_filter = $_GET['role_filter'] ?? '';
-            $id = $_GET['id'] ?? null;
+            $id = $_GET['user_id'] ?? null;
 
             $where = [];
             $params = [];
 
             if (!empty($id)) {
-                $where[] = 'u.id = %i';
+                $where[] = 'u.user_id = %i';
                 $params[] = $id;
             }
 
@@ -34,11 +34,11 @@ try {
             }
 
             $query = "SELECT 
-                u.id,
+                u.user_id,
                 u.first_name,
                 u.last_name,
                 u.email,
-                u.username,
+                u.name,
                 u.status,
                 u.last_active,
                 u.avatar,

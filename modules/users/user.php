@@ -38,20 +38,40 @@
 <!-- User Content -->
 <div class="tab-content" id="userTabsContent">
     <div class="tab-pane fade show active" id="all-users" role="tabpanel">
-        <!-- User Filters -->
         <div class="card mb-4 shadow-sm">
             <div class="card-body">
                 <form class="row g-3" id="userFiltersForm">
                     <div class="col-md-4">
                         <label for="roleFilter" class="form-label">Role</label>
                         <select class="form-select" id="roleFilter">
-                            <option value="" selected>Loading roles...</option>
+                            <?php
+                            try {
+                                $roles = DB::query("SELECT id, name FROM roles ORDER BY name");
+                                echo '<option value="" selected>All Roles</option>';
+                                foreach ($roles as $role) {
+                                    echo '<option value="' . htmlspecialchars($role['id']) . '">' . htmlspecialchars($role['name']) . '</option>';
+                                }
+                            } catch (Exception $e) {
+                                echo '<option value="" selected>Error loading roles</option>';
+                            }
+                            ?>
                         </select>
                     </div>
                     <div class="col-md-4">
                         <label for="statusFilter" class="form-label">Status</label>
                         <select class="form-select" id="statusFilter">
-                            <option value="" selected>Loading statuses...</option>
+                            <?php
+                            try {
+                                $statuses = DB::query("SELECT DISTINCT status FROM users ORDER BY status");
+                                echo '<option value="" selected>All Statuses</option>';
+                                foreach ($statuses as $status) {
+                                    $formattedStatus = ucfirst($status['status']);
+                                    echo '<option value="' . htmlspecialchars($status['status']) . '">' . htmlspecialchars($formattedStatus) . '</option>';
+                                }
+                            } catch (Exception $e) {
+                                echo '<option value="" selected>Error loading statuses</option>';
+                            }
+                            ?>
                         </select>
                     </div>
                     <div class="col-md-4 d-flex align-items-end gap-2">
@@ -848,4 +868,12 @@
             $('#userRole, #editRole').append(`<option value="${role.id}">${role.name}</option>`);
         });
     }
+
+    // Reset Filters button functionality
+    $(document).on('click', '#resetFilters', function(e) {
+        e.preventDefault();
+        $('#roleFilter').val('');
+        $('#statusFilter').val('');
+        loadUsers(); // Reload users with default filters
+    });
 </Script>
