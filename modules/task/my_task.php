@@ -471,7 +471,14 @@
                 const row = document.createElement('tr');
                 row.innerHTML = `
                 <td>
-                    <a href="#" class="text-primary fw-bold">${task.details.substring(0, 30)}${task.details.length > 30 ? '...' : ''}</a>
+                    <a href="#" class="text-primary fw-bold">
+                        ${task.title ? task.title.substring(0, 30) : ''}
+                        ${task.title && task.title.length > 30 ? '...' : ''}
+                    </a>
+                    <p class="mb-0 text-muted small">Details:
+                        ${task.details ? task.details.substring(0, 50) : ''}
+                        ${task.details && task.details.length > 50 ? '...' : ''}
+                    </p>
                     <p class="mb-0 text-muted small">Created: ${new Date(task.created_at).toLocaleDateString()}</p>
                 </td>
                 <td>${task.project_name || 'No project'}</td>
@@ -537,8 +544,8 @@
                     <p class="mb-0 text-muted small">${task.details || 'No description'}</p>
                 </td>
                 <td>${task.project_name || 'No project'}</td>
-                <td>${task.due_date}</td>
-                <td>${task.estimated_hours || '0'}</td>
+                <td>${task.task_date}</td>
+                <td>${task.hours || '0'}</td>
                 <td><span class="badge ${getStatusClass(task.status)}">${formatStatus(task.status)}</span></td>
                 <td>
                     ${task.clickup_link ? `<a href="${task.clickup_link}" target="_blank" class="text-info">View in ClickUp</a>` : 'No link'}

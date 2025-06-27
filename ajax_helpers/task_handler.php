@@ -87,8 +87,8 @@ try {
             $taskData = [
                 'title' => $_POST['title'],
                 'project_id' => $_POST['project_id'],
-                'due_date' => $_POST['due_date'],
-                'estimated_hours' => $_POST['estimated_hours'],
+                'task_date' => $_POST['task_date'],
+                'hours' => $_POST['hours'],
                 'assignee_id' => $_POST['assignee_id'],
                 'status' => $_POST['status'],
                 'details' => $_POST['details'] ?? '',
