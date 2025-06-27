@@ -164,7 +164,7 @@
                     </div>
                     <div class="mb-3">
                         <label for="userUsername" class="form-label">Username</label>
-                        <input type="text" class="form-control" id="userUsername" name="username" required>
+                        <input type="text" class="form-control" id="userUsername" name="name" required>
                     </div>
                     <div class="mb-3">
                         <label for="userRole" class="form-label">Role</label>
@@ -210,7 +210,7 @@
             <div class="modal-body">
                 <form id="editUserForm">
                     <input type="hidden" name="action" value="update_user">
-                    <input type="hidden" id="editUserId" name="id">
+                    <input type="hidden" id="editUserId" name="user_id">
                     <div class="mb-3">
                         <label for="editFirstName" class="form-label">First Name</label>
                         <input type="text" class="form-control" id="editFirstName" name="first_name" required>
@@ -225,7 +225,7 @@
                     </div>
                     <div class="mb-3">
                         <label for="editUsername" class="form-label">Username</label>
-                        <input type="text" class="form-control" id="editUsername" name="username" required>
+                        <input type="text" class="form-control" id="editUsername" name="name" required>
                     </div>
                     <div class="mb-3">
                         <label for="editRole" class="form-label">Role</label>
@@ -575,7 +575,7 @@
                 console.log('Processing user:', user.user_id, user.first_name, user.last_name);
 
                 // Safely handle username
-                const usernameDisplay = user.username ? `@${user.username}` : 'No username';
+                const usernameDisplay = user.name ? `@${user.name}` : 'No username';
 
                 // Status handling
                 const status = user.status || 'Inactive';
@@ -730,7 +730,7 @@
                     $('#editFirstName').val(user.first_name);
                     $('#editLastName').val(user.last_name);
                     $('#editEmail').val(user.email);
-                    $('#editUsername').val(user.username);
+                    $('#editUsername').val(user.name);
 
                     // Set the role dropdown
                     if (user.role_id) {
