@@ -726,7 +726,7 @@
             success: function(response) {
                 if (response.success && response.data) {
                     const user = response.data;
-                    $('#editUserId').val(user.id);
+                    $('#editUserId').val(user.user_id);
                     $('#editFirstName').val(user.first_name);
                     $('#editLastName').val(user.last_name);
                     $('#editEmail').val(user.email);

@@ -16,7 +16,7 @@ try {
             }
 
             $existing = DB::queryFirstRow(
-                "SELECT id FROM users WHERE email = %s OR username = %s",
+                "SELECT user_id FROM users WHERE email = %s OR username = %s",
                 $_POST['email'],
                 $_POST['username']
             );
@@ -42,7 +42,7 @@ try {
             break;
 
         case 'update_user':
-            if (empty($_POST['id'])) {
+            if (empty($_POST['user_id'])) {
                 throw new Exception("User ID is required");
             }
 
@@ -61,22 +61,22 @@ try {
                 $data['password'] = password_hash($_POST['password'], PASSWORD_DEFAULT);
             }
 
-            DB::update('users', $data, 'id=%i', $_POST['id']);
+            DB::update('users', $data, 'user_id=%i', $_POST['user_id']);
             echo json_encode(['success' => true, 'message' => 'User updated successfully']);
             break;
 
         case 'delete_user':
-            if (empty($_POST['id'])) {
+            if (empty($_POST['user_id'])) {
                 throw new Exception("User ID is required");
             }
 
-            DB::delete('users', 'id=%i', $_POST['id']);
+            DB::delete('users', 'user_id=%i', $_POST['user_id']);
             echo json_encode(['success' => true, 'message' => 'User deleted successfully']);
             break;
 
         case 'change_status':
-            if (empty($_POST['id']) || empty($_POST['status'])) {
-                throw new Exception("ID and status are required");
+            if (empty($_POST['user_id']) || empty($_POST['status'])) {
+                throw new Exception("User ID and status are required");
             }
             
             DB::update(
@@ -85,8 +85,8 @@ try {
                     'status' => $_POST['status'],
                     'updated_at' => date('Y-m-d H:i:s')
                 ],
-                'id=%i',
-                $_POST['id']
+                'user_id=%i',
+                $_POST['user_id']
             );
             echo json_encode(['success' => true, 'message' => 'Status updated successfully']);
             break;
@@ -97,11 +97,11 @@ try {
             break;
 
         case 'get_user':
-            if (empty($_POST['id'])) {
+            if (empty($_POST['user_id'])) {
                 throw new Exception("User ID is required");
             }
             
-            $user = DB::queryFirstRow("SELECT * FROM users WHERE id = %i", $_POST['id']);
+            $user = DB::queryFirstRow("SELECT * FROM users WHERE user_id = %i", $_POST['user_id']);
             
             if ($user) {
                 echo json_encode(['success' => true, 'data' => $user]);
