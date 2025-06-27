@@ -45,7 +45,8 @@
                         <thead class="table-light">
                             <tr>
                                 <th>Project</th>
-                                <th>Assigned Users</th>
+                                <th>Client</th>
+                                <th>Type</th>
                                 <th>Tasks</th>
                                 <th>Status</th>
                                 <th>Actions</th>
@@ -53,7 +54,7 @@
                         </thead>
                         <tbody>
                             <tr>
-                                <td colspan="5" class="text-center py-4">
+                                <td colspan="6" class="text-center py-4">
                                     <div class="spinner-border text-primary" role="status">
                                         <span class="visually-hidden">Loading...</span>
                                     </div>
@@ -78,6 +79,7 @@
                                 <th>Project</th>
                                 <th>Date</th>
                                 <th>Hours</th>
+                                <th>Assignee</th>
                                 <th>Status</th>
                                 <th>ClickUp Link</th>
                                 <th>Actions</th>
@@ -85,7 +87,7 @@
                         </thead>
                         <tbody>
                             <tr>
-                                <td colspan="7" class="text-center py-4">
+                                <td colspan="8" class="text-center py-4">
                                     <div class="spinner-border text-primary" role="status">
                                         <span class="visually-hidden">Loading...</span>
                                     </div>
@@ -158,12 +160,12 @@
 
                         <div class="col-md-6">
                             <label for="taskDate" class="form-label">Date</label>
-                            <input type="date" class="form-control" id="taskDate" name="due_date" required>
+                            <input type="date" class="form-control" id="taskDate" name="task_date" required>
                         </div>
 
                         <div class="col-md-6">
                             <label for="taskHours" class="form-label">Estimated Hours</label>
-                            <input type="number" class="form-control" id="taskHours" name="estimated_hours" step="0.5"
+                            <input type="number" class="form-control" id="taskHours" name="hours" step="0.5"
                                 min="0.5" placeholder="0.0" required>
                         </div>
 
@@ -177,9 +179,9 @@
                         <div class="col-md-6">
                             <label for="taskStatus" class="form-label">Status</label>
                             <select class="form-select" id="taskStatus" name="status" required>
-                                <option value="pending" selected>Pending</option>
-                                <option value="in-progress">In Progress</option>
-                                <option value="completed">Completed</option>
+                                <option value="Pending" selected>Pending</option>
+                                <option value="In Progress">In Progress</option>
+                                <option value="Completed">Completed</option>
                             </select>
                         </div>
 
@@ -375,7 +377,6 @@
         });
     });
 
-
     async function loadProjects() {
         try {
             const response = await fetch('ajax_helpers/task_handler.php', {
@@ -394,29 +395,34 @@
             const tbody = document.querySelector('#projectsTable tbody');
             tbody.innerHTML = '';
 
-            if (data.projects.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4">No projects found</td></tr>';
+            if (data.data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4">No projects found</td></tr>';
                 return;
             }
 
-            data.projects.forEach(project => {
+            data.data.forEach(project => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
                 <td>
                     <a href="#" class="text-primary fw-bold">${project.name}</a>
+                    <small class="text-muted d-block">${project.from_company}</small>
                 </td>
-                <td>
-                    <div class="avatar-group">
-                        <span class="avatar avatar-sm rounded-circle bg-primary text-white">${project.name.charAt(0)}</span>
-                    </div>
-                </td>
+                <td>${project.to_client}</td>
+                <td>${project.type}</td>
                 <td>
                     <div class="progress" style="height: 6px;">
-                        <div class="progress-bar bg-success" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                        <div class="progress-bar bg-success" role="progressbar" 
+                             style="width: ${(project.completed_tasks / project.task_count) * 100 || 0}%" 
+                             aria-valuenow="${project.completed_tasks}" 
+                             aria-valuemin="0" 
+                             aria-valuemax="${project.task_count}">
+                        </div>
                     </div>
-                    <small class="text-muted">0 tasks</small>
+                    <small class="text-muted">${project.completed_tasks} of ${project.task_count} tasks</small>
                 </td>
-                <td><span class="badge bg-secondary">No tasks</span></td>
+                <td><span class="badge ${project.completed_tasks == project.task_count ? 'bg-success' : 'bg-primary'}">
+                    ${project.completed_tasks == project.task_count ? 'Completed' : 'In Progress'}
+                </span></td>
                 <td>
                     <div class="dropdown">
                         <button class="btn btn-sm btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
@@ -456,24 +462,28 @@
             const tbody = document.querySelector('#tasksTable tbody');
             tbody.innerHTML = '';
 
-            if (data.tasks.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4">No tasks found</td></tr>';
+            if (data.data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4">No tasks found</td></tr>';
                 return;
             }
 
-            data.tasks.forEach(task => {
+            data.data.forEach(task => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
                 <td>
-                    <a href="#" class="text-primary fw-bold">${task.title}</a>
-                    <p class="mb-0 text-muted small">${task.details || 'No description'}</p>
+                    <a href="#" class="text-primary fw-bold">${task.details.substring(0, 30)}${task.details.length > 30 ? '...' : ''}</a>
+                    <p class="mb-0 text-muted small">Created: ${new Date(task.created_at).toLocaleDateString()}</p>
                 </td>
                 <td>${task.project_name || 'No project'}</td>
-                <td>${task.due_date}</td>
-                <td>${task.estimated_hours || '0'}</td>
-                <td><span class="badge ${getStatusClass(task.status)}">${formatStatus(task.status)}</span></td>
+                <td>${new Date(task.task_date).toLocaleDateString()}</td>
+                <td>${task.hours || '0'}</td>
                 <td>
-                    ${task.clickup_link ? `<a href="${task.clickup_link}" target="_blank" class="text-info">View in ClickUp</a>` : 'No link'}
+                    <span class="avatar avatar-sm rounded-circle bg-primary text-white">${task.assignee_initials}</span>
+                    <span class="ms-2">${task.assignee_name}</span>
+                </td>
+                <td><span class="badge ${getStatusClass(task.status)}">${task.status}</span></td>
+                <td>
+                    ${task.clickup_link ? `<a href="${task.clickup_link}" target="_blank" class="text-info">View</a>` : 'No link'}
                 </td>
                 <td>
                     <div class="dropdown">
@@ -507,7 +517,7 @@
             });
             const data = await response.json();
 
-            if (!data.success || !data.tasks) { // Added check for data.tasks
+            if (!data.success || !data.tasks) {
                 throw new Error(data.error || 'No tasks data received');
             }
 
@@ -564,7 +574,7 @@
             }
 
             select.innerHTML = '<option value="" selected disabled>Select project</option>';
-            data.projects.forEach(project => {
+            data.data.forEach(project => {
                 const option = document.createElement('option');
                 option.value = project.id;
                 option.textContent = project.name;
@@ -597,7 +607,7 @@
             select.innerHTML = '<option value="" selected disabled>Select assignee</option>';
             data.users.forEach(user => {
                 const option = document.createElement('option');
-                option.value = user.user_id;  // Changed from user.id to user.user_id
+                option.value = user.user_id;
                 option.textContent = user.name;
                 select.appendChild(option);
             });
@@ -613,7 +623,7 @@
         formData.append('action', 'create_task');
 
         // Validate required fields
-        if (!formData.get('title') || !formData.get('project_id') || !formData.get('due_date') ||
+        if (!formData.get('title') || !formData.get('project_id') || !formData.get('task_date') ||
             !formData.get('assignee_id') || !formData.get('status')) {
             showError('Please fill all required fields');
             return;
@@ -643,9 +653,9 @@
     }
 
     function getStatusClass(status) {
-        switch (status) {
+        switch (status.toLowerCase()) {
             case 'pending': return 'bg-warning';
-            case 'in-progress': return 'bg-primary';
+            case 'in progress': return 'bg-primary';
             case 'completed': return 'bg-success';
             default: return 'bg-secondary';
         }
