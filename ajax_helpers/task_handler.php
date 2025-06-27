@@ -48,7 +48,9 @@ try {
             break;
 
         case 'get_users':
-            $users = DB::query("SELECT user_id, CONCAT(name, ' ', last_name) as name FROM users WHERE role_id = 3");  // Changed id to user_id
+            // $users = DB::query("SELECT user_id, CONCAT(name, ' ', last_name) as name FROM users WHERE role_id = 3");  // this query can be run if tasks are to be assigned only to users and not managers or admins
+            $users = DB::query("SELECT user_id, CONCAT(name, ' ', last_name) as name FROM users");  // this query can be run if tasks are to be assigned only to users and not managers or admins
+
             $response = [
                 'success' => true,
                 'users' => $users
