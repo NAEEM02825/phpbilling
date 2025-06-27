@@ -601,7 +601,7 @@
                 <tr data-user-id="${user.id}">
                     <td>
                         <div class="form-check">
-                            <input class="form-check-input user-checkbox" type="checkbox" value="${user.id}">
+                            <input class="form-check-input user-checkbox" type="checkbox" value="${user.user_id}">
                         </div>
                     </td>
                     <td>
@@ -630,7 +630,7 @@
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
                                     <a class="dropdown-item ${status === 'Active' ? 'text-danger change-status' : 'text-success change-status'}" 
-                                       href="#" data-id="${user.id}" data-status="${status === 'Active' ? 'Inactive' : 'Active'}">
+                                       href="#" data-id="${user.user_id}" data-status="${status === 'Active' ? 'Inactive' : 'Active'}">
                                         <i class="fas ${status === 'Active' ? 'fa-user-slash' : 'fa-user-check'} me-2"></i> 
                                         ${status === 'Active' ? 'Deactivate' : 'Activate'}
                                     </a>
