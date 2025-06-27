@@ -19,7 +19,7 @@ try {
             $params = [];
 
             if (!empty($id)) {
-                $where[] = 'u.id = %i';
+                $where[] = 'u.user_id = %i';
                 $params[] = $id;
             }
 
