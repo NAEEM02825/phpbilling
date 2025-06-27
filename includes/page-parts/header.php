@@ -8,7 +8,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>CraftHr</title>
+  <title>Bixisoft</title>
   <!--favicon-->
   <link rel="icon" href="assets/images/favicon-32x32.png" type="image/png">
 
