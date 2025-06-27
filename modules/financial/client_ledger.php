@@ -1,8 +1,3 @@
-<?php include 'templates/header.php'; ?>
-<?php include 'templates/sidebar.php'; ?>
-
-<!-- Main Content -->
-<main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
     <!-- Ledger Page Header -->
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-4 pb-3 mb-4 border-bottom">
         <div>
@@ -370,9 +365,6 @@
             <!-- Expenses content would go here -->
         </div>
     </div>
-</main>
-
-<?php include 'templates/footer.php'; ?>
 
 <style>
     /* Ledger Page Specific Styles */

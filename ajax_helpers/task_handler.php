@@ -6,7 +6,7 @@ header('Content-Type: application/json');
 try {
     $action = $_POST['action'] ?? '';
     $response = ['success' => false];
-    
+
     switch ($action) {
         case 'get_projects':
             $projects = DB::query("
@@ -17,13 +17,13 @@ try {
                 LEFT JOIN tasks t ON t.project_id = p.id
                 GROUP BY p.id
             ");
-            
+
             $response = [
                 'success' => true,
                 'data' => $projects
             ];
             break;
-            
+
         case 'get_tasks':
             $assigneeId = $_POST['assignee_id'] ?? null;
             $query = "
@@ -33,20 +33,27 @@ try {
                 LEFT JOIN projects p ON p.id = t.project_id
                 LEFT JOIN users u ON u.id = t.assignee_id
             ";
-            
+
             if ($assigneeId) {
                 $query .= " WHERE t.assignee_id = %i";
                 $tasks = DB::query($query, $assigneeId);
             } else {
                 $tasks = DB::query($query);
             }
-            
+
             $response = [
                 'success' => true,
                 'data' => $tasks
             ];
             break;
-            
+        case 'get_users':
+            $users = DB::query("SELECT id, CONCAT(name, ' ', lastname) as name FROM users WHERE role_id = 3");
+            $response = [
+                'success' => true,
+                'users' => $users
+            ];
+            break;
+
         case 'get_task_details':
             $taskId = $_POST['task_id'];
             $task = DB::queryFirstRow("
@@ -57,7 +64,7 @@ try {
                 LEFT JOIN users u ON u.id = t.assignee_id
                 WHERE t.id = %i
             ", $taskId);
-            
+
             $timeLogs = DB::query("
                 SELECT tl.*, u.name as user_name
                 FROM time_logs tl
@@ -65,7 +72,7 @@ try {
                 WHERE tl.task_id = %i
                 ORDER BY tl.log_date DESC
             ", $taskId);
-            
+
             $response = [
                 'success' => true,
                 'data' => [
@@ -74,44 +81,42 @@ try {
                 ]
             ];
             break;
-            
+
         case 'create_task':
             $taskData = [
                 'title' => $_POST['title'],
                 'project_id' => $_POST['project_id'],
-                'task_date' => $_POST['task_date'],
+                'due_date' => $_POST['due_date'],
                 'estimated_hours' => $_POST['estimated_hours'],
                 'assignee_id' => $_POST['assignee_id'],
                 'status' => $_POST['status'],
-                'description' => $_POST['description'],
-                'clickup_link' => $_POST['clickup_link'],
+                'details' => $_POST['details'] ?? '',
+                'clickup_link' => $_POST['clickup_link'] ?? '',
                 'created_at' => date('Y-m-d H:i:s')
             ];
-            
+
             DB::insert('tasks', $taskData);
             $response = [
                 'success' => true,
                 'message' => 'Task created successfully'
             ];
             break;
-            
+
         case 'get_user_data':
             $userId = $_POST['user_id'] ?? 3; // Default to user ID 3 as requested
             $user = DB::queryFirstRow("SELECT * FROM users WHERE id = %i", $userId);
-            
+
             $response = [
                 'success' => true,
                 'data' => $user
             ];
             break;
-            
+
         default:
             $response['error'] = 'Invalid action';
     }
-    
 } catch (Exception $e) {
     $response['error'] = $e->getMessage();
 }
 
 echo json_encode($response);
-?>

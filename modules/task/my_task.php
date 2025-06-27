@@ -381,7 +381,7 @@
 });
 
 function loadProjects() {
-    fetch('task_handler.php?action=get_projects')
+    fetch('ajax_helpers/task_handler.php?action=get_projects')
         .then(response => response.json())
         .then(data => {
             if (data.success) {
@@ -437,7 +437,7 @@ function loadProjects() {
 }
 
 function loadTasks() {
-    fetch('task_handler.php?action=get_tasks')
+    fetch('ajax_helpers/task_handler.php?action=get_tasks')
         .then(response => response.json())
         .then(data => {
             if (data.success) {
@@ -490,7 +490,7 @@ function loadTasks() {
 
 function loadMyTasks() {
     // Similar to loadTasks but filtered for current user
-    fetch('task_handler.php?action=get_tasks')
+    fetch('ajax_helpers/task_handler.php?action=get_tasks')
         .then(response => response.json())
         .then(data => {
             if (data.success) {
@@ -539,7 +539,7 @@ function loadProjectOptions() {
     const select = document.getElementById('taskProject');
     select.innerHTML = '<option value="" selected disabled>Loading projects...</option>';
     
-    fetch('task_handler.php?action=get_projects')
+    fetch('ajax_helpers/task_handler.php?action=get_projects')
         .then(response => response.json())
         .then(data => {
             if (data.success) {
@@ -552,10 +552,12 @@ function loadProjectOptions() {
                 });
             } else {
                 select.innerHTML = '<option value="" selected disabled>Failed to load projects</option>';
+                showError('Failed to load projects: ' + (data.error || 'Unknown error'));
             }
         })
         .catch(error => {
             select.innerHTML = '<option value="" selected disabled>Error loading projects</option>';
+            showError('Error loading projects: ' + error);
         });
 }
 
@@ -563,7 +565,7 @@ function loadUserOptions() {
     const select = document.getElementById('taskAssignee');
     select.innerHTML = '<option value="" selected disabled>Loading users...</option>';
     
-    fetch('task_handler.php?action=get_users')
+    fetch('ajax_helpers/task_handler.php?action=get_users')
         .then(response => response.json())
         .then(data => {
             if (data.success) {
@@ -588,7 +590,14 @@ function saveTask() {
     const formData = new FormData(form);
     formData.append('action', 'create_task');
     
-    fetch('task_handler.php', {
+    // Validate required fields
+    if (!formData.get('title') || !formData.get('project_id') || !formData.get('due_date') || 
+        !formData.get('assignee_id') || !formData.get('status')) {
+        showError('Please fill all required fields');
+        return;
+    }
+    
+    fetch('ajax_helpers/task_handler.php', {
         method: 'POST',
         body: formData
     })
@@ -597,24 +606,17 @@ function saveTask() {
         if (data.success) {
             const modal = bootstrap.Modal.getInstance(document.getElementById('newTaskModal'));
             modal.hide();
-            
-            // Show success message
             showAlert('Task created successfully!', 'success');
-            
-            // Reset form
             form.reset();
-            
-            // Reload tasks
-            loadTasks();
+            loadTasks(); // Refresh the tasks list
         } else {
-            showError('Failed to create task: ' + data.error);
+            showError('Failed to create task: ' + (data.error || 'Unknown error'));
         }
     })
     .catch(error => {
         showError('Error creating task: ' + error);
     });
 }
-
 function getStatusClass(status) {
     switch(status) {
         case 'pending': return 'bg-warning';
@@ -690,7 +692,7 @@ function showError(message) {
 });
 
 function loadProjects() {
-    fetch('task_handler.php?action=get_projects')
+    fetch('ajax_helpers/task_handler.php?action=get_projects')
         .then(response => response.json())
         .then(data => {
             if (data.success) {
@@ -746,7 +748,7 @@ function loadProjects() {
 }
 
 function loadTasks() {
-    fetch('task_handler.php?action=get_tasks')
+    fetch('ajax_helpers/task_handler.php?action=get_tasks')
         .then(response => response.json())
         .then(data => {
             if (data.success) {
@@ -799,7 +801,7 @@ function loadTasks() {
 
 function loadMyTasks() {
     // Similar to loadTasks but filtered for current user
-    fetch('task_handler.php?action=get_tasks')
+    fetch('ajax_helpers/task_handler.php?action=get_tasks')
         .then(response => response.json())
         .then(data => {
             if (data.success) {
@@ -848,7 +850,7 @@ function loadProjectOptions() {
     const select = document.getElementById('taskProject');
     select.innerHTML = '<option value="" selected disabled>Loading projects...</option>';
     
-    fetch('task_handler.php?action=get_projects')
+    fetch('ajax_helpers/task_handler.php?action=get_projects')
         .then(response => response.json())
         .then(data => {
             if (data.success) {
@@ -872,7 +874,7 @@ function loadUserOptions() {
     const select = document.getElementById('taskAssignee');
     select.innerHTML = '<option value="" selected disabled>Loading users...</option>';
     
-    fetch('task_handler.php?action=get_users')
+    fetch('ajax_helpers/task_handler.php?action=get_users')
         .then(response => response.json())
         .then(data => {
             if (data.success) {
@@ -885,19 +887,20 @@ function loadUserOptions() {
                 });
             } else {
                 select.innerHTML = '<option value="" selected disabled>Failed to load users</option>';
+                showError('Failed to load users: ' + (data.error || 'Unknown error'));
             }
         })
         .catch(error => {
             select.innerHTML = '<option value="" selected disabled>Error loading users</option>';
+            showError('Error loading users: ' + error);
         });
 }
-
 function saveTask() {
     const form = document.getElementById('taskForm');
     const formData = new FormData(form);
     formData.append('action', 'create_task');
     
-    fetch('task_handler.php', {
+    fetch('ajax_helpers/task_handler.php', {
         method: 'POST',
         body: formData
     })
