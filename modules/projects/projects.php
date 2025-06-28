@@ -269,46 +269,73 @@
 
 <!-- New Task Modal (modified form) -->
 <div class="modal fade" id="newTaskModal" tabindex="-1" aria-labelledby="newTaskModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="newTaskModalLabel">Add New Task</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="newTaskModalLabel">Create New Task</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <form id="taskForm">
-                    <input type="hidden" id="taskProjectId" name="project_id">
-                    
-                    <div class="mb-3">
-                        <label for="taskDate" class="form-label">Date</label>
-                        <input type="date" class="form-control" id="taskDate" name="task_date" required>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="taskTitle" class="form-label">Task Title</label>
+                            <input type="text" class="form-control" id="taskTitle" name="title"
+                                placeholder="Enter task title" required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="taskProject" class="form-label">Project</label>
+                            <select class="form-select" id="taskProject" name="project_id" required>
+                                <option value="" selected disabled>Loading projects...</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="taskDate" class="form-label">Date</label>
+                            <input type="date" class="form-control" id="taskDate" name="task_date" required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="taskHours" class="form-label">Estimated Hours</label>
+                            <input type="number" class="form-control" id="taskHours" name="hours" step="0.5" min="0.5"
+                                placeholder="0.0" required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="taskAssignee" class="form-label">Assignee</label>
+                            <select class="form-select" id="taskAssignee" name="assignee_id" required>
+                                <option value="" selected disabled>Loading users...</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="taskStatus" class="form-label">Status</label>
+                            <select class="form-select" id="taskStatus" name="status" required>
+                                <option value="Pending" selected>Pending</option>
+                                <option value="In Progress">In Progress</option>
+                                <option value="Completed">Completed</option>
+                            </select>
+                        </div>
+
+                        <div class="col-12">
+                            <label for="taskDetails" class="form-label">Task Details</label>
+                            <textarea class="form-control" id="taskDetails" name="details" rows="3"
+                                placeholder="Detailed description of the task"></textarea>
+                        </div>
+
+                        <div class="col-12">
+                            <label for="clickupLink" class="form-label">ClickUp Link</label>
+                            <input type="url" class="form-control" id="clickupLink" name="clickup_link"
+                                placeholder="https://app.clickup.com/t/xxxxxx">
+                        </div>
                     </div>
-                    
-                    <div class="mb-3">
-                        <label for="taskDetails" class="form-label">Task Details</label>
-                        <textarea class="form-control" id="taskDetails" name="details" rows="3" required></textarea>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="taskHours" class="form-label">Hours</label>
-                        <input type="number" class="form-control" id="taskHours" name="hours" step="0.5" min="0.5" required>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="taskStatus" class="form-label">Status</label>
-                        <select class="form-select" id="taskStatus" name="status">
-                            <option value="WIP">Work in Progress</option>
-                            <option value="Completed">Completed</option>
-                        </select>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="clickupLink" class="form-label">ClickUp Link</label>
-                        <input type="url" class="form-control" id="clickupLink" name="clickup_link">
-                    </div>
-                    
-                    <button type="submit" class="btn btn-primary">Add Task</button>
                 </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="saveTask">Create Task</button>
             </div>
         </div>
     </div>
@@ -475,7 +502,195 @@ function loadProjects(category) {
         }
     });
 }
+  async function loadProjectOptions(targetId = 'taskProject') {
+        const select = document.getElementById(targetId);
+        select.innerHTML = '<option value="" selected disabled>Loading projects...</option>';
 
+        try {
+            const response = await fetch('ajax_helpers/task_handler.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'action=get_projects'
+            });
+            const data = await response.json();
+
+            if (!data.success) {
+                throw new Error(data.error || 'Failed to load projects');
+            }
+
+            select.innerHTML = '<option value="" selected disabled>Select project</option>';
+            data.data.forEach(project => {
+                const option = document.createElement('option');
+                option.value = project.id;
+                option.textContent = project.name;
+                select.appendChild(option);
+            });
+        } catch (error) {
+            select.innerHTML = '<option value="" selected disabled>Error loading projects</option>';
+            showError('Error loading projects: ' + error.message);
+        }
+    }
+
+    // Load User Options for Select Dropdowns
+    async function loadUserOptions(targetId = 'taskAssignee') {
+        const select = document.getElementById(targetId);
+        select.innerHTML = '<option value="" selected disabled>Loading users...</option>';
+
+        try {
+            const response = await fetch('ajax_helpers/task_handler.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'action=get_users'
+            });
+            const data = await response.json();
+
+            if (!data.success) {
+                throw new Error(data.error || 'Failed to load users');
+            }
+
+            select.innerHTML = '<option value="" selected disabled>Select assignee</option>';
+            data.users.forEach(user => {
+                const option = document.createElement('option');
+                option.value = user.user_id;
+                option.textContent = user.name;
+                select.appendChild(option);
+            });
+        } catch (error) {
+            select.innerHTML = '<option value="" selected disabled>Error loading users</option>';
+            showError('Error loading users: ' + error.message);
+        }
+    }
+
+    // Save New Task
+    async function saveTask() {
+        const form = document.getElementById('taskForm');
+        const formData = new FormData(form);
+        formData.append('action', 'create_task');
+
+        // Validate required fields
+        if (!formData.get('title') || !formData.get('project_id') || !formData.get('task_date') ||
+            !formData.get('assignee_id') || !formData.get('status')) {
+            showError('Please fill all required fields');
+            return;
+        }
+
+        try {
+            const response = await fetch('ajax_helpers/task_handler.php', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (!data.success) {
+                throw new Error(data.error || 'Failed to create task');
+            }
+
+            const modal = bootstrap.Modal.getInstance(document.getElementById('newTaskModal'));
+            modal.hide();
+
+            showAlert('Task created successfully!', 'success');
+            form.reset();
+            loadTasks();
+        } catch (error) {
+            showError('Error creating task: ' + error.message);
+        }
+    }
+
+    // Delete Task
+    async function deleteTask(taskId) {
+        if (!confirm('Are you sure you want to delete this task?')) return;
+
+        try {
+            const response = await fetch('ajax_helpers/task_handler.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `action=delete_task&task_id=${taskId}`
+            });
+            const data = await response.json();
+
+            if (!data.success) {
+                throw new Error(data.error || 'Failed to delete task');
+            }
+
+            showAlert('Task deleted successfully!', 'success');
+            loadTasks();
+        } catch (error) {
+            showError('Error deleting task: ' + error.message);
+        }
+    }
+
+    // Edit Task - Load Data into Modal
+    async function editTask(taskId) {
+        try {
+            // First fetch task details
+            const response = await fetch('ajax_helpers/task_handler.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `action=get_task_details&task_id=${taskId}`
+            });
+            const data = await response.json();
+
+            if (!data.success) {
+                throw new Error(data.error || 'Failed to load task details');
+            }
+
+            const task = data.data.task;
+
+            // Populate the edit modal
+            document.getElementById('editTaskTitle').value = task.title;
+            document.getElementById('editTaskProject').value = task.project_id;
+            document.getElementById('editTaskDate').value = task.task_date;
+            document.getElementById('editTaskHours').value = task.hours;
+            document.getElementById('editTaskAssignee').value = task.assignee_id;
+            document.getElementById('editTaskStatus').value = task.status;
+            document.getElementById('editTaskDetails').value = task.details || '';
+            document.getElementById('editClickupLink').value = task.clickup_link || '';
+            document.getElementById('editTaskId').value = task.id;
+
+            // Show the modal
+            const editModal = new bootstrap.Modal(document.getElementById('editTaskModal'));
+            editModal.show();
+        } catch (error) {
+            showError('Error loading task details: ' + error.message);
+        }
+    }
+
+    // Update Task
+    async function updateTask() {
+        const form = document.getElementById('editTaskForm');
+        const formData = new FormData(form);
+        formData.append('action', 'update_task');
+
+        try {
+            const response = await fetch('ajax_helpers/task_handler.php', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (!data.success) {
+                throw new Error(data.error || 'Failed to update task');
+            }
+
+            const modal = bootstrap.Modal.getInstance(document.getElementById('editTaskModal'));
+            modal.hide();
+
+            showAlert('Task updated successfully!', 'success');
+            loadTasks();
+        } catch (error) {
+            showError('Error updating task: ' + error.message);
+        }
+    }
 function loadTasks(projectId) {
     $.ajax({
         url: 'ajax_helpers/ajax_add_tasks.php?action=list&project_id=' + projectId,
