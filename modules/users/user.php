@@ -429,7 +429,7 @@
         // Edit user modal
         $(document).on('click', '.edit-user', function(e) {
             e.preventDefault();
-            const userId = $(this).data('id');
+            const userId = $(this).data('user_id');
             loadUserData(userId);
             $('#editUserModal').modal('show');
         });
@@ -442,7 +442,7 @@
 
         // Delete user
         $(document).on('click', '.delete-user', function() {
-            const userId = $(this).data('id');
+            const userId = $(this).data('user_id');
             if (confirm('Are you sure you want to delete this user?')) {
                 deleteUser(userId);
             }
@@ -450,7 +450,7 @@
 
         // Change status
         $(document).on('click', '.change-status', function() {
-            const userId = $(this).data('id');
+            const userId = $(this).data('user_id');
             const status = $(this).data('status');
             changeStatus(userId, status);
         });
