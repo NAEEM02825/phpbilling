@@ -1,4 +1,5 @@
 
+
     <!-- Invoices Page Header -->
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-4 pb-3 mb-4 border-bottom">
         <div>
@@ -91,7 +92,76 @@
             </form>
         </div>
     </div>
-
+<!-- New Invoice Modal -->
+<div class="modal fade" id="newInvoiceModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Create New Invoice</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="newInvoiceForm">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Client</label>
+                            <select class="form-select" id="invoiceClient" required>
+                                <option value="">Select Client</option>
+                                <!-- Dynamically populated -->
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Project</label>
+                            <select class="form-select" id="invoiceProject" required disabled>
+                                <option value="">Select Project</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Issue Date</label>
+                            <input type="date" class="form-control" id="invoiceIssueDate" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Due Date</label>
+                            <input type="date" class="form-control" id="invoiceDueDate" required>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Notes</label>
+                        <textarea class="form-control" id="invoiceNotes" rows="2"></textarea>
+                    </div>
+                    
+                    <h6 class="mb-3">Select Tasks to Invoice</h6>
+                    <div class="table-responsive">
+                        <table class="table" id="tasksTable">
+                            <thead>
+                                <tr>
+                                    <th width="40"><input type="checkbox" id="selectAllTasks"></th>
+                                    <th>Task</th>
+                                    <th>Description</th>
+                                    <th>Hours/Qty</th>
+                                    <th>Rate</th>
+                                    <th>Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Dynamically populated -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <div class="fw-bold">Total: $<span id="invoiceTotal">0.00</span></div>
+                        <button type="submit" class="btn btn-primary">Create Invoice</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
     <!-- Invoice Content -->
     <div class="tab-content" id="invoiceTabsContent">
         <div class="tab-pane fade show active" id="all" role="tabpanel">
@@ -392,35 +462,264 @@
         color: #3a4f8a;
     }
 </style>
-
 <script>
-    // Initialize invoice page functionality
-    document.addEventListener('DOMContentLoaded', function() {
-        // Tab functionality
-        const invoiceTabs = document.querySelectorAll('#invoiceTabs button[data-bs-toggle="tab"]');
-        invoiceTabs.forEach(tab => {
-            tab.addEventListener('click', function() {
-                // This would load the appropriate invoice data for the tab
-                console.log('Loading invoices for:', this.id);
+document.addEventListener('DOMContentLoaded', function() {
+    const invoiceManager = {
+        currentTab: 'all',
+        currentPage: 1,
+        itemsPerPage: 10,
+        filters: {},
+        
+        init: function() {
+            this.bindEvents();
+            this.loadInvoices();
+            this.loadClientsDropdown();
+        },
+        
+        bindEvents: function() {
+            // Tab switching
+            document.querySelectorAll('#invoiceTabs button[data-bs-toggle="tab"]').forEach(tab => {
+                tab.addEventListener('click', (e) => {
+                    this.currentTab = e.target.getAttribute('data-bs-target').substring(1);
+                    this.currentPage = 1;
+                    this.updateFilters();
+                    this.loadInvoices();
+                });
             });
-        });
-        
-        // Select all checkbox functionality
-        const selectAllCheckbox = document.getElementById('selectAllInvoices');
-        const invoiceCheckboxes = document.querySelectorAll('tbody .form-check-input');
-        
-        selectAllCheckbox.addEventListener('change', function() {
-            invoiceCheckboxes.forEach(checkbox => {
-                checkbox.checked = selectAllCheckbox.checked;
+            
+            // Select all checkbox
+            document.getElementById('selectAllInvoices').addEventListener('change', function() {
+                document.querySelectorAll('tbody .form-check-input').forEach(checkbox => {
+                    checkbox.checked = this.checked;
+                });
             });
-        });
+            
+            // Filter form submission
+            document.querySelector('.card-body form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.updateFilters();
+                this.currentPage = 1;
+                this.loadInvoices();
+            });
+            
+            // Pagination
+            document.querySelector('.pagination').addEventListener('click', (e) => {
+                if (e.target.classList.contains('page-link')) {
+                    e.preventDefault();
+                    
+                    if (e.target.textContent === 'Previous') {
+                        if (this.currentPage > 1) {
+                            this.currentPage--;
+                            this.loadInvoices();
+                        }
+                    } else if (e.target.textContent === 'Next') {
+                        this.currentPage++;
+                        this.loadInvoices();
+                    } else {
+                        this.currentPage = parseInt(e.target.textContent);
+                        this.loadInvoices();
+                    }
+                }
+            });
+            
+            // New invoice button
+            document.querySelector('.btn-primary .fa-plus').closest('button').addEventListener('click', (e) => {
+                this.showNewInvoiceModal();
+            });
+        },
         
-        // Filter form submission
-        const filterForm = document.querySelector('.card-body form');
-        filterForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            console.log('Applying filters...');
-            // This would apply the filters and reload the invoice data
-        });
-    });
+        updateFilters: function() {
+            const form = document.querySelector('.card-body form');
+            this.filters = {
+                status: this.currentTab === 'all' ? '' : this.currentTab,
+                client_id: form.querySelector('#clientFilter').value === 'All Clients' ? '' : form.querySelector('#clientFilter').value,
+                date_from: form.querySelector('#dateFrom').value,
+                date_to: form.querySelector('#dateTo').value,
+                amount_from: form.querySelector('#amountFrom').value,
+                amount_to: form.querySelector('#amountTo').value
+            };
+        },
+        
+        loadInvoices: function() {
+            fetch('api/invoices.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    action: 'get_invoices',
+                    filters: this.filters,
+                    page: this.currentPage,
+                    per_page: this.itemsPerPage
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                this.renderInvoices(data.invoices);
+                this.updatePagination(data.total, data.per_page, data.page);
+            })
+            .catch(error => console.error('Error:', error));
+        },
+        
+        loadClientsDropdown: function() {
+            fetch('api/invoices.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    action: 'get_clients'
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const dropdown = document.getElementById('clientFilter');
+                dropdown.innerHTML = '<option selected>All Clients</option>';
+                
+                data.clients.forEach(client => {
+                    const option = document.createElement('option');
+                    option.value = client.id;
+                    option.textContent = client.name;
+                    dropdown.appendChild(option);
+                });
+            })
+            .catch(error => console.error('Error:', error));
+        },
+        
+        renderInvoices: function(invoices) {
+            const tbody = document.querySelector('tbody');
+            tbody.innerHTML = '';
+            
+            invoices.forEach(invoice => {
+                const row = document.createElement('tr');
+                
+                // Status badge
+                let statusBadge;
+                switch(invoice.status) {
+                    case 'paid':
+                        statusBadge = '<span class="badge bg-success">Paid</span>';
+                        break;
+                    case 'sent':
+                        statusBadge = '<span class="badge bg-primary">Pending</span>';
+                        break;
+                    case 'overdue':
+                        statusBadge = '<span class="badge bg-danger">Overdue</span>';
+                        break;
+                    default:
+                        statusBadge = '<span class="badge bg-secondary">Draft</span>';
+                }
+                
+                // Actions dropdown
+                const actionsDropdown = `
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-ellipsis-h"></i>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item view-invoice" href="#" data-id="${invoice.id}"><i class="fas fa-eye me-2"></i> View</a></li>
+                            <li><a class="dropdown-item edit-invoice" href="#" data-id="${invoice.id}"><i class="fas fa-edit me-2"></i> Edit</a></li>
+                            <li><a class="dropdown-item download-invoice" href="api/invoices.php?action=download_pdf&id=${invoice.id}"><i class="fas fa-file-pdf me-2"></i> Download PDF</a></li>
+                            <li><a class="dropdown-item send-invoice" href="#" data-id="${invoice.id}"><i class="fas fa-envelope me-2"></i> Send to Client</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger delete-invoice" href="#" data-id="${invoice.id}"><i class="fas fa-trash me-2"></i> Delete</a></li>
+                        </ul>
+                    </div>
+                `;
+                
+                row.innerHTML = `
+                    <td>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" data-id="${invoice.id}">
+                        </div>
+                    </td>
+                    <td>
+                        <a href="#" class="text-primary fw-bold view-invoice" data-id="${invoice.id}">${invoice.invoice_number}</a>
+                    </td>
+                    <td>${invoice.client_name}</td>
+                    <td>${new Date(invoice.issue_date).toLocaleDateString()}</td>
+                    <td>${new Date(invoice.due_date).toLocaleDateString()}</td>
+                    <td>$${parseFloat(invoice.total_amount).toFixed(2)}</td>
+                    <td>${statusBadge}</td>
+                    <td>${actionsDropdown}</td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+            
+            // Bind event listeners to action buttons
+            document.querySelectorAll('.view-invoice').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.viewInvoice(e.target.closest('[data-id]').getAttribute('data-id'));
+                });
+            });
+            
+            // Similar bindings for edit, send, delete actions...
+        },
+        
+        updatePagination: function(totalItems, perPage, currentPage) {
+            const totalPages = Math.ceil(totalItems / perPage);
+            const pagination = document.querySelector('.pagination');
+            pagination.innerHTML = '';
+            
+            // Previous button
+            const prevLi = document.createElement('li');
+            prevLi.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
+            prevLi.innerHTML = `<a class="page-link" href="#">Previous</a>`;
+            pagination.appendChild(prevLi);
+            
+            // Page numbers
+            for (let i = 1; i <= totalPages; i++) {
+                const li = document.createElement('li');
+                li.className = `page-item ${i === currentPage ? 'active' : ''}`;
+                li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+                pagination.appendChild(li);
+            }
+            
+            // Next button
+            const nextLi = document.createElement('li');
+            nextLi.className = `page-item ${currentPage === totalPages ? 'disabled' : ''}`;
+            nextLi.innerHTML = `<a class="page-link" href="#">Next</a>`;
+            pagination.appendChild(nextLi);
+            
+            // Update showing text
+            const startItem = (currentPage - 1) * perPage + 1;
+            const endItem = Math.min(currentPage * perPage, totalItems);
+            document.querySelector('.card-footer p').textContent = 
+                `Showing ${startItem} to ${endItem} of ${totalItems} invoices`;
+        },
+        
+        viewInvoice: function(invoiceId) {
+            fetch('api/invoices.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    action: 'get_invoice',
+                    id: invoiceId
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                this.showInvoiceModal(data.invoice);
+            })
+            .catch(error => console.error('Error:', error));
+        },
+        
+        showInvoiceModal: function(invoice) {
+            // Implement modal to show invoice details
+            console.log('Show invoice:', invoice);
+            // You would create a modal here with invoice details
+        },
+        
+        showNewInvoiceModal: function() {
+            // Implement modal to create new invoice
+            console.log('Show new invoice modal');
+            // You would create a form here to select project/tasks for new invoice
+        }
+    };
+    
+    invoiceManager.init();
+});
 </script>
