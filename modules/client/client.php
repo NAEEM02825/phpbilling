@@ -34,21 +34,6 @@
                 <i class="fas fa-users me-1"></i> All Clients
             </button>
         </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link" id="active-clients-tab" data-bs-toggle="tab" data-bs-target="#active-clients" type="button" role="tab">
-                <i class="fas fa-user-check me-1"></i> Active
-            </button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link" id="inactive-clients-tab" data-bs-toggle="tab" data-bs-target="#inactive-clients" type="button" role="tab">
-                <i class="fas fa-user-times me-1"></i> Inactive
-            </button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link" id="vip-clients-tab" data-bs-toggle="tab" data-bs-target="#vip-clients" type="button" role="tab">
-                <i class="fas fa-crown me-1"></i> VIP
-            </button>
-        </li>
     </ul>
 
     <!-- Client Content -->
@@ -117,117 +102,6 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox">
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <div class="avatar-sm me-3">
-                                                <img src="https://randomuser.me/api/portraits/men/32.jpg" class="avatar-img rounded-circle" alt="Robert Chen">
-                                            </div>
-                                            <div>
-                                                <a href="#" class="text-primary fw-bold">Robert Chen</a>
-                                                <p class="mb-0 text-muted small">robert.chen@example.com</p>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>TechSolutions Inc.</td>
-                                    <td>Technology</td>
-                                    <td>(415) 555-0123</td>
-                                    <td>12</td>
-                                    <td><span class="badge bg-success">Active</span></td>
-                                    <td>
-                                        <div class="dropdown">
-                                            <button class="btn btn-sm btn-light dropdown-toggle" type="button" id="clientActions1" data-bs-toggle="dropdown">
-                                                <i class="fas fa-ellipsis-h"></i>
-                                            </button>
-                                            <ul class="dropdown-menu" aria-labelledby="clientActions1">
-                                                <li><a class="dropdown-item" href="#"><i class="fas fa-eye me-2"></i> View</a></li>
-                                                <li><a class="dropdown-item" href="#"><i class="fas fa-edit me-2"></i> Edit</a></li>
-                                                <li><a class="dropdown-item" href="#"><i class="fas fa-file-invoice me-2"></i> Projects</a></li>
-                                                <li><hr class="dropdown-divider"></li>
-                                                <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-trash me-2"></i> Delete</a></li>
-                                            </ul>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox">
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <div class="avatar-sm me-3">
-                                                <span class="avatar-title rounded-circle bg-primary text-white">SM</span>
-                                            </div>
-                                            <div>
-                                                <a href="#" class="text-primary fw-bold">Sarah Miller</a>
-                                                <p class="mb-0 text-muted small">sarah.m@financetech.com</p>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>FinanceTech LLC</td>
-                                    <td>Finance</td>
-                                    <td>(212) 555-0187</td>
-                                    <td>8</td>
-                                    <td><span class="badge bg-primary">VIP</span></td>
-                                    <td>
-                                        <div class="dropdown">
-                                            <button class="btn btn-sm btn-light dropdown-toggle" type="button" id="clientActions2" data-bs-toggle="dropdown">
-                                                <i class="fas fa-ellipsis-h"></i>
-                                            </button>
-                                            <ul class="dropdown-menu" aria-labelledby="clientActions2">
-                                                <li><a class="dropdown-item" href="#"><i class="fas fa-eye me-2"></i> View</a></li>
-                                                <li><a class="dropdown-item" href="#"><i class="fas fa-edit me-2"></i> Edit</a></li>
-                                                <li><a class="dropdown-item" href="#"><i class="fas fa-file-invoice me-2"></i> Projects</a></li>
-                                                <li><hr class="dropdown-divider"></li>
-                                                <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-trash me-2"></i> Delete</a></li>
-                                            </ul>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox">
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <div class="avatar-sm me-3">
-                                                <img src="https://randomuser.me/api/portraits/women/45.jpg" class="avatar-img rounded-circle" alt="Lisa Wong">
-                                            </div>
-                                            <div>
-                                                <a href="#" class="text-primary fw-bold">Lisa Wong</a>
-                                                <p class="mb-0 text-muted small">lisa.wong@healthcare.org</p>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>Healthcare Systems</td>
-                                    <td>Healthcare</td>
-                                    <td>(310) 555-0155</td>
-                                    <td>5</td>
-                                    <td><span class="badge bg-success">Active</span></td>
-                                    <td>
-                                        <div class="dropdown">
-                                            <button class="btn btn-sm btn-light dropdown-toggle" type="button" id="clientActions3" data-bs-toggle="dropdown">
-                                                <i class="fas fa-ellipsis-h"></i>
-                                            </button>
-                                            <ul class="dropdown-menu" aria-labelledby="clientActions3">
-                                                <li><a class="dropdown-item" href="#"><i class="fas fa-eye me-2"></i> View</a></li>
-                                                <li><a class="dropdown-item" href="#"><i class="fas fa-edit me-2"></i> Edit</a></li>
-                                                <li><a class="dropdown-item" href="#"><i class="fas fa-file-invoice me-2"></i> Projects</a></li>
-                                                <li><hr class="dropdown-divider"></li>
-                                                <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-trash me-2"></i> Delete</a></li>
-                                            </ul>
-                                        </div>
-                                    </td>
-                                </tr>
                                 <tr>
                                     <td>
                                         <div class="form-check">
@@ -341,23 +215,10 @@
                             <input type="text" class="form-control" id="clientPosition">
                         </div>
                         <div class="col-md-6">
-                            <label for="clientIndustry" class="form-label">Industry</label>
-                            <select class="form-select" id="clientIndustry">
-                                <option selected>Select Industry</option>
-                                <option>Technology</option>
-                                <option>Finance</option>
-                                <option>Healthcare</option>
-                                <option>Retail</option>
-                                <option>Education</option>
-                                <option>Other</option>
-                            </select>
-                        </div>
-                        <div class="col-md-6">
                             <label for="clientStatus" class="form-label">Status</label>
                             <select class="form-select" id="clientStatus">
                                 <option selected value="active">Active</option>
                                 <option value="inactive">Inactive</option>
-                                <option value="vip">VIP</option>
                             </select>
                         </div>
                         <div class="col-12">
