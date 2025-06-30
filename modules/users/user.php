@@ -623,6 +623,7 @@
                         <div class="d-flex gap-2">
                             <a href="#" 
                                class="btn btn-outline-primary p-0 d-flex align-items-center justify-content-center edit-user" 
+                               data-user_id="${user.user_id}"
                                style="width:32px;height:32px;border-radius:6px;border:1px solid #3a4f8a;" 
                                title="Edit" data-id="${user.user_id}">
                                 <i class="fas fa-edit"></i>
@@ -772,7 +773,7 @@
             dataType: 'json',
             data: {
                 action: 'update_user',
-                ...data
+                ...data // includes user_id
             },
             success: function(response) {
                 if (response.success) {
