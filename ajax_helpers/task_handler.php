@@ -107,7 +107,7 @@ try {
                 'project_id' => $_POST['project_id'],
                 'task_date' => $_POST['task_date'],
                 'hours' => $_POST['hours'],
-                'assignee_id' => $_POST['assignee_id'],
+                'assignee_id' => $_POST['assignee_id'] ?? '',
                 'status' => $_POST['status'],
                 'details' => $_POST['details'] ?? '',
                 'clickup_link' => $_POST['clickup_link'] ?? '',
