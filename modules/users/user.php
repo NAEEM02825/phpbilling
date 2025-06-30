@@ -623,6 +623,7 @@
                         <div class="d-flex gap-2">
                             <a href="#" 
                                class="btn btn-outline-primary p-0 d-flex align-items-center justify-content-center edit-user" 
+                               data-user_id="${user.user_id}"
                                style="width:32px;height:32px;border-radius:6px;border:1px solid #3a4f8a;" 
                                title="Edit" data-id="${user.user_id}">
                                 <i class="fas fa-edit"></i>
@@ -631,13 +632,13 @@
                                class="btn ${status === 'Active' ? 'btn-outline-danger' : 'btn-outline-success'} p-0 d-flex align-items-center justify-content-center change-status" 
                                style="width:32px;height:32px;border-radius:6px;border:1px solid ${status === 'Active' ? '#dc3545' : '#198754'};" 
                                title="${status === 'Active' ? 'Deactivate' : 'Activate'}" 
-                               data-id="${user.user_id}" data-status="${status === 'Active' ? 'Inactive' : 'Active'}">
+                               data-user_id="${user.user_id}" data-status="${status === 'Active' ? 'Inactive' : 'Active'}">
                                 <i class="fas ${status === 'Active' ? 'fa-user-slash' : 'fa-user-check'}"></i>
                             </a>
                             <a href="#" 
                                class="btn btn-outline-danger p-0 d-flex align-items-center justify-content-center delete-user" 
                                style="width:32px;height:32px;border-radius:6px;border:1px solid #dc3545;" 
-                               title="Delete" data-id="${user.user_id}">
+                               title="Delete" data-user_id="${user.user_id}">
                                 <i class="fas fa-trash"></i>
                             </a>
                         </div>
@@ -772,7 +773,7 @@
             dataType: 'json',
             data: {
                 action: 'update_user',
-                ...data
+                ...data // includes user_id
             },
             success: function(response) {
                 if (response.success) {
@@ -819,7 +820,7 @@
             dataType: 'json',
             data: {
                 action: 'change_status',
-                id: userId,
+                user_id: userId, // <-- FIXED: was 'id'
                 status: status
             },
             success: function(response) {
