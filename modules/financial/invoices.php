@@ -532,10 +532,8 @@ $projects = DB::query("SELECT * FROM projects ");
                 // Fetch tasks for selected project within last 15 days
                 fetch(`ajax_helpers/getTasks.php?project_id=${projectId}&start_date=${formatDate(startDate)}&end_date=${formatDate(endDate)}`)
                     .then(response => {
-                        // First check if the response is JSON
-                        const contentType = response.headers.get('content-type');
-                        if (!contentType || !contentType.includes('application/json')) {
-                            throw new Error('Response is not JSON');
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
                         }
                         return response.json();
                     })
