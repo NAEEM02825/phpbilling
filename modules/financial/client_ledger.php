@@ -1,4 +1,4 @@
-    <!-- Ledger Page Header -->
+<!-- Ledger Page Header -->
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-4 pb-3 mb-4 border-bottom">
         <div>
             <h1 class="h2">General Ledger</h1>
@@ -149,17 +149,31 @@
                                     <td class="text-success">$3,700.00</td>
                                     <td><span class="badge bg-success">Active</span></td>
                                     <td>
-                                        <div class="dropdown">
-                                            <button class="btn btn-sm btn-light dropdown-toggle" type="button" id="actionsDropdown1" data-bs-toggle="dropdown">
-                                                <i class="fas fa-ellipsis-h"></i>
-                                            </button>
-                                            <ul class="dropdown-menu" aria-labelledby="actionsDropdown1">
-                                                <li><a class="dropdown-item" href="#"><i class="fas fa-eye me-2"></i> View</a></li>
-                                                <li><a class="dropdown-item" href="#"><i class="fas fa-edit me-2"></i> Edit</a></li>
-                                                <li><a class="dropdown-item" href="#"><i class="fas fa-file-invoice me-2"></i> Statement</a></li>
-                                                <li><hr class="dropdown-divider"></li>
-                                                <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-trash me-2"></i> Delete</a></li>
-                                            </ul>
+                                        <div class="d-flex gap-2">
+                                            <a href="#" 
+                                               class="btn btn-outline-secondary p-0 d-flex align-items-center justify-content-center action-view-account"
+                                               style="width:32px;height:32px;border-radius:6px;border:1px solid #dee2e6;"
+                                               title="View Account">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="#" 
+                                               class="btn btn-outline-primary p-0 d-flex align-items-center justify-content-center action-edit-account"
+                                               style="width:32px;height:32px;border-radius:6px;border:1px solid #3a4f8a;"
+                                               title="Edit Account">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a href="#" 
+                                               class="btn btn-outline-info p-0 d-flex align-items-center justify-content-center action-statement-account"
+                                               style="width:32px;height:32px;border-radius:6px;border:1px solid #17a2b8;"
+                                               title="View Statement">
+                                                <i class="fas fa-file-invoice"></i>
+                                            </a>
+                                            <a href="#" 
+                                               class="btn btn-outline-danger p-0 d-flex align-items-center justify-content-center action-delete-account"
+                                               style="width:32px;height:32px;border-radius:6px;border:1px solid #dc3545;"
+                                               title="Delete Account">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
                                         </div>
                                     </td>
                                 </tr>
@@ -175,17 +189,31 @@
                                     <td class="text-danger">-$4,600.00</td>
                                     <td><span class="badge bg-success">Active</span></td>
                                     <td>
-                                        <div class="dropdown">
-                                            <button class="btn btn-sm btn-light dropdown-toggle" type="button" id="actionsDropdown2" data-bs-toggle="dropdown">
-                                                <i class="fas fa-ellipsis-h"></i>
-                                            </button>
-                                            <ul class="dropdown-menu" aria-labelledby="actionsDropdown2">
-                                                <li><a class="dropdown-item" href="#"><i class="fas fa-eye me-2"></i> View</a></li>
-                                                <li><a class="dropdown-item" href="#"><i class="fas fa-edit me-2"></i> Edit</a></li>
-                                                <li><a class="dropdown-item" href="#"><i class="fas fa-file-invoice me-2"></i> Statement</a></li>
-                                                <li><hr class="dropdown-divider"></li>
-                                                <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-trash me-2"></i> Delete</a></li>
-                                            </ul>
+                                        <div class="d-flex gap-2">
+                                            <a href="#" 
+                                               class="btn btn-outline-secondary p-0 d-flex align-items-center justify-content-center action-view-account"
+                                               style="width:32px;height:32px;border-radius:6px;border:1px solid #dee2e6;"
+                                               title="View Account">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="#" 
+                                               class="btn btn-outline-primary p-0 d-flex align-items-center justify-content-center action-edit-account"
+                                               style="width:32px;height:32px;border-radius:6px;border:1px solid #3a4f8a;"
+                                               title="Edit Account">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a href="#" 
+                                               class="btn btn-outline-info p-0 d-flex align-items-center justify-content-center action-statement-account"
+                                               style="width:32px;height:32px;border-radius:6px;border:1px solid #17a2b8;"
+                                               title="View Statement">
+                                                <i class="fas fa-file-invoice"></i>
+                                            </a>
+                                            <a href="#" 
+                                               class="btn btn-outline-danger p-0 d-flex align-items-center justify-content-center action-delete-account"
+                                               style="width:32px;height:32px;border-radius:6px;border:1px solid #dc3545;"
+                                               title="Delete Account">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
                                         </div>
                                     </td>
                                 </tr>
@@ -201,17 +229,31 @@
                                     <td class="text-success">$25,400.00</td>
                                     <td><span class="badge bg-success">Active</span></td>
                                     <td>
-                                        <div class="dropdown">
-                                            <button class="btn btn-sm btn-light dropdown-toggle" type="button" id="actionsDropdown3" data-bs-toggle="dropdown">
-                                                <i class="fas fa-ellipsis-h"></i>
-                                            </button>
-                                            <ul class="dropdown-menu" aria-labelledby="actionsDropdown3">
-                                                <li><a class="dropdown-item" href="#"><i class="fas fa-eye me-2"></i> View</a></li>
-                                                <li><a class="dropdown-item" href="#"><i class="fas fa-edit me-2"></i> Edit</a></li>
-                                                <li><a class="dropdown-item" href="#"><i class="fas fa-file-invoice me-2"></i> Statement</a></li>
-                                                <li><hr class="dropdown-divider"></li>
-                                                <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-trash me-2"></i> Delete</a></li>
-                                            </ul>
+                                        <div class="d-flex gap-2">
+                                            <a href="#" 
+                                               class="btn btn-outline-secondary p-0 d-flex align-items-center justify-content-center action-view-account"
+                                               style="width:32px;height:32px;border-radius:6px;border:1px solid #dee2e6;"
+                                               title="View Account">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="#" 
+                                               class="btn btn-outline-primary p-0 d-flex align-items-center justify-content-center action-edit-account"
+                                               style="width:32px;height:32px;border-radius:6px;border:1px solid #3a4f8a;"
+                                               title="Edit Account">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a href="#" 
+                                               class="btn btn-outline-info p-0 d-flex align-items-center justify-content-center action-statement-account"
+                                               style="width:32px;height:32px;border-radius:6px;border:1px solid #17a2b8;"
+                                               title="View Statement">
+                                                <i class="fas fa-file-invoice"></i>
+                                            </a>
+                                            <a href="#" 
+                                               class="btn btn-outline-danger p-0 d-flex align-items-center justify-content-center action-delete-account"
+                                               style="width:32px;height:32px;border-radius:6px;border:1px solid #dc3545;"
+                                               title="Delete Account">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
                                         </div>
                                     </td>
                                 </tr>
@@ -227,17 +269,31 @@
                                     <td class="text-danger">-$8,200.00</td>
                                     <td><span class="badge bg-warning">Review</span></td>
                                     <td>
-                                        <div class="dropdown">
-                                            <button class="btn btn-sm btn-light dropdown-toggle" type="button" id="actionsDropdown4" data-bs-toggle="dropdown">
-                                                <i class="fas fa-ellipsis-h"></i>
-                                            </button>
-                                            <ul class="dropdown-menu" aria-labelledby="actionsDropdown4">
-                                                <li><a class="dropdown-item" href="#"><i class="fas fa-eye me-2"></i> View</a></li>
-                                                <li><a class="dropdown-item" href="#"><i class="fas fa-edit me-2"></i> Edit</a></li>
-                                                <li><a class="dropdown-item" href="#"><i class="fas fa-file-invoice me-2"></i> Statement</a></li>
-                                                <li><hr class="dropdown-divider"></li>
-                                                <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-trash me-2"></i> Delete</a></li>
-                                            </ul>
+                                        <div class="d-flex gap-2">
+                                            <a href="#" 
+                                               class="btn btn-outline-secondary p-0 d-flex align-items-center justify-content-center action-view-account"
+                                               style="width:32px;height:32px;border-radius:6px;border:1px solid #dee2e6;"
+                                               title="View Account">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="#" 
+                                               class="btn btn-outline-primary p-0 d-flex align-items-center justify-content-center action-edit-account"
+                                               style="width:32px;height:32px;border-radius:6px;border:1px solid #3a4f8a;"
+                                               title="Edit Account">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a href="#" 
+                                               class="btn btn-outline-info p-0 d-flex align-items-center justify-content-center action-statement-account"
+                                               style="width:32px;height:32px;border-radius:6px;border:1px solid #17a2b8;"
+                                               title="View Statement">
+                                                <i class="fas fa-file-invoice"></i>
+                                            </a>
+                                            <a href="#" 
+                                               class="btn btn-outline-danger p-0 d-flex align-items-center justify-content-center action-delete-account"
+                                               style="width:32px;height:32px;border-radius:6px;border:1px solid #dc3545;"
+                                               title="Delete Account">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
                                         </div>
                                     </td>
                                 </tr>

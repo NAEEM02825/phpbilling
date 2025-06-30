@@ -1,5 +1,4 @@
-
-    <!-- Payment Page Header -->
+<!-- Payment Page Header -->
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-4 pb-3 mb-4 border-bottom">
         <div>
             <h1 class="h2">Payment History</h1>
@@ -159,17 +158,50 @@
                                     <td><a href="#" class="text-primary">INV-2023-015</a></td>
                                     <td><span class="badge bg-success">Completed</span></td>
                                     <td>
-                                        <div class="dropdown">
-                                            <button class="btn btn-sm btn-light dropdown-toggle" type="button" id="actionsDropdown1" data-bs-toggle="dropdown">
-                                                <i class="fas fa-ellipsis-h"></i>
-                                            </button>
-                                            <ul class="dropdown-menu" aria-labelledby="actionsDropdown1">
-                                                <li><a class="dropdown-item" href="#"><i class="fas fa-eye me-2"></i> View</a></li>
-                                                <li><a class="dropdown-item" href="#"><i class="fas fa-receipt me-2"></i> Invoice</a></li>
-                                                <li><a class="dropdown-item" href="#"><i class="fas fa-print me-2"></i> Print</a></li>
-                                                <li><hr class="dropdown-divider"></li>
-                                                <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-trash me-2"></i> Delete</a></li>
-                                            </ul>
+                                        <div class="d-flex gap-2">
+                                            <a href="#" 
+                                               class="btn btn-outline-secondary p-0 d-flex align-items-center justify-content-center action-view-payment"
+                                               style="width:32px;height:32px;border-radius:6px;border:1px solid #dee2e6;"
+                                               title="View Payment">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="#" 
+                                               class="btn btn-outline-info p-0 d-flex align-items-center justify-content-center action-invoice-payment"
+                                               style="width:32px;height:32px;border-radius:6px;border:1px solid #17a2b8;"
+                                               title="View Invoice">
+                                                <i class="fas fa-receipt"></i>
+                                            </a>
+                                            <a href="#" 
+                                               class="btn btn-outline-primary p-0 d-flex align-items-center justify-content-center action-print-payment"
+                                               style="width:32px;height:32px;border-radius:6px;border:1px solid #3a4f8a;"
+                                               title="Print Payment">
+                                                <i class="fas fa-print"></i>
+                                            </a>
+                                            <!-- For Pending/Failed payments, you can conditionally show Mark Paid or Retry -->
+                                            <!-- Example for Mark Paid: -->
+                                            <!--
+                                            <a href="#" 
+                                               class="btn btn-outline-success p-0 d-flex align-items-center justify-content-center action-mark-paid-payment"
+                                               style="width:32px;height:32px;border-radius:6px;border:1px solid #198754;"
+                                               title="Mark as Paid">
+                                                <i class="fas fa-check"></i>
+                                            </a>
+                                            -->
+                                            <!-- Example for Retry: -->
+                                            <!--
+                                            <a href="#" 
+                                               class="btn btn-outline-warning p-0 d-flex align-items-center justify-content-center action-retry-payment"
+                                               style="width:32px;height:32px;border-radius:6px;border:1px solid #ffc107;"
+                                               title="Retry Payment">
+                                                <i class="fas fa-sync-alt"></i>
+                                            </a>
+                                            -->
+                                            <a href="#" 
+                                               class="btn btn-outline-danger p-0 d-flex align-items-center justify-content-center action-delete-payment"
+                                               style="width:32px;height:32px;border-radius:6px;border:1px solid #dc3545;"
+                                               title="Delete Payment">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
                                         </div>
                                     </td>
                                 </tr>
@@ -191,17 +223,50 @@
                                     <td><a href="#" class="text-primary">INV-2023-014</a></td>
                                     <td><span class="badge bg-success">Completed</span></td>
                                     <td>
-                                        <div class="dropdown">
-                                            <button class="btn btn-sm btn-light dropdown-toggle" type="button" id="actionsDropdown2" data-bs-toggle="dropdown">
-                                                <i class="fas fa-ellipsis-h"></i>
-                                            </button>
-                                            <ul class="dropdown-menu" aria-labelledby="actionsDropdown2">
-                                                <li><a class="dropdown-item" href="#"><i class="fas fa-eye me-2"></i> View</a></li>
-                                                <li><a class="dropdown-item" href="#"><i class="fas fa-receipt me-2"></i> Invoice</a></li>
-                                                <li><a class="dropdown-item" href="#"><i class="fas fa-print me-2"></i> Print</a></li>
-                                                <li><hr class="dropdown-divider"></li>
-                                                <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-trash me-2"></i> Delete</a></li>
-                                            </ul>
+                                        <div class="d-flex gap-2">
+                                            <a href="#" 
+                                               class="btn btn-outline-secondary p-0 d-flex align-items-center justify-content-center action-view-payment"
+                                               style="width:32px;height:32px;border-radius:6px;border:1px solid #dee2e6;"
+                                               title="View Payment">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="#" 
+                                               class="btn btn-outline-info p-0 d-flex align-items-center justify-content-center action-invoice-payment"
+                                               style="width:32px;height:32px;border-radius:6px;border:1px solid #17a2b8;"
+                                               title="View Invoice">
+                                                <i class="fas fa-receipt"></i>
+                                            </a>
+                                            <a href="#" 
+                                               class="btn btn-outline-primary p-0 d-flex align-items-center justify-content-center action-print-payment"
+                                               style="width:32px;height:32px;border-radius:6px;border:1px solid #3a4f8a;"
+                                               title="Print Payment">
+                                                <i class="fas fa-print"></i>
+                                            </a>
+                                            <!-- For Pending/Failed payments, you can conditionally show Mark Paid or Retry -->
+                                            <!-- Example for Mark Paid: -->
+                                            <!--
+                                            <a href="#" 
+                                               class="btn btn-outline-success p-0 d-flex align-items-center justify-content-center action-mark-paid-payment"
+                                               style="width:32px;height:32px;border-radius:6px;border:1px solid #198754;"
+                                               title="Mark as Paid">
+                                                <i class="fas fa-check"></i>
+                                            </a>
+                                            -->
+                                            <!-- Example for Retry: -->
+                                            <!--
+                                            <a href="#" 
+                                               class="btn btn-outline-warning p-0 d-flex align-items-center justify-content-center action-retry-payment"
+                                               style="width:32px;height:32px;border-radius:6px;border:1px solid #ffc107;"
+                                               title="Retry Payment">
+                                                <i class="fas fa-sync-alt"></i>
+                                            </a>
+                                            -->
+                                            <a href="#" 
+                                               class="btn btn-outline-danger p-0 d-flex align-items-center justify-content-center action-delete-payment"
+                                               style="width:32px;height:32px;border-radius:6px;border:1px solid #dc3545;"
+                                               title="Delete Payment">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
                                         </div>
                                     </td>
                                 </tr>
@@ -223,17 +288,50 @@
                                     <td><a href="#" class="text-primary">INV-2023-013</a></td>
                                     <td><span class="badge bg-warning">Pending</span></td>
                                     <td>
-                                        <div class="dropdown">
-                                            <button class="btn btn-sm btn-light dropdown-toggle" type="button" id="actionsDropdown3" data-bs-toggle="dropdown">
-                                                <i class="fas fa-ellipsis-h"></i>
-                                            </button>
-                                            <ul class="dropdown-menu" aria-labelledby="actionsDropdown3">
-                                                <li><a class="dropdown-item" href="#"><i class="fas fa-eye me-2"></i> View</a></li>
-                                                <li><a class="dropdown-item" href="#"><i class="fas fa-receipt me-2"></i> Invoice</a></li>
-                                                <li><a class="dropdown-item" href="#"><i class="fas fa-check me-2"></i> Mark Paid</a></li>
-                                                <li><hr class="dropdown-divider"></li>
-                                                <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-trash me-2"></i> Delete</a></li>
-                                            </ul>
+                                        <div class="d-flex gap-2">
+                                            <a href="#" 
+                                               class="btn btn-outline-secondary p-0 d-flex align-items-center justify-content-center action-view-payment"
+                                               style="width:32px;height:32px;border-radius:6px;border:1px solid #dee2e6;"
+                                               title="View Payment">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="#" 
+                                               class="btn btn-outline-info p-0 d-flex align-items-center justify-content-center action-invoice-payment"
+                                               style="width:32px;height:32px;border-radius:6px;border:1px solid #17a2b8;"
+                                               title="View Invoice">
+                                                <i class="fas fa-receipt"></i>
+                                            </a>
+                                            <a href="#" 
+                                               class="btn btn-outline-primary p-0 d-flex align-items-center justify-content-center action-print-payment"
+                                               style="width:32px;height:32px;border-radius:6px;border:1px solid #3a4f8a;"
+                                               title="Print Payment">
+                                                <i class="fas fa-print"></i>
+                                            </a>
+                                            <!-- For Pending/Failed payments, you can conditionally show Mark Paid or Retry -->
+                                            <!-- Example for Mark Paid: -->
+                                            <!--
+                                            <a href="#" 
+                                               class="btn btn-outline-success p-0 d-flex align-items-center justify-content-center action-mark-paid-payment"
+                                               style="width:32px;height:32px;border-radius:6px;border:1px solid #198754;"
+                                               title="Mark as Paid">
+                                                <i class="fas fa-check"></i>
+                                            </a>
+                                            -->
+                                            <!-- Example for Retry: -->
+                                            <!--
+                                            <a href="#" 
+                                               class="btn btn-outline-warning p-0 d-flex align-items-center justify-content-center action-retry-payment"
+                                               style="width:32px;height:32px;border-radius:6px;border:1px solid #ffc107;"
+                                               title="Retry Payment">
+                                                <i class="fas fa-sync-alt"></i>
+                                            </a>
+                                            -->
+                                            <a href="#" 
+                                               class="btn btn-outline-danger p-0 d-flex align-items-center justify-content-center action-delete-payment"
+                                               style="width:32px;height:32px;border-radius:6px;border:1px solid #dc3545;"
+                                               title="Delete Payment">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
                                         </div>
                                     </td>
                                 </tr>
@@ -255,17 +353,50 @@
                                     <td><a href="#" class="text-primary">INV-2023-012</a></td>
                                     <td><span class="badge bg-danger">Failed</span></td>
                                     <td>
-                                        <div class="dropdown">
-                                            <button class="btn btn-sm btn-light dropdown-toggle" type="button" id="actionsDropdown4" data-bs-toggle="dropdown">
-                                                <i class="fas fa-ellipsis-h"></i>
-                                            </button>
-                                            <ul class="dropdown-menu" aria-labelledby="actionsDropdown4">
-                                                <li><a class="dropdown-item" href="#"><i class="fas fa-eye me-2"></i> View</a></li>
-                                                <li><a class="dropdown-item" href="#"><i class="fas fa-receipt me-2"></i> Invoice</a></li>
-                                                <li><a class="dropdown-item" href="#"><i class="fas fa-sync-alt me-2"></i> Retry</a></li>
-                                                <li><hr class="dropdown-divider"></li>
-                                                <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-trash me-2"></i> Delete</a></li>
-                                            </ul>
+                                        <div class="d-flex gap-2">
+                                            <a href="#" 
+                                               class="btn btn-outline-secondary p-0 d-flex align-items-center justify-content-center action-view-payment"
+                                               style="width:32px;height:32px;border-radius:6px;border:1px solid #dee2e6;"
+                                               title="View Payment">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="#" 
+                                               class="btn btn-outline-info p-0 d-flex align-items-center justify-content-center action-invoice-payment"
+                                               style="width:32px;height:32px;border-radius:6px;border:1px solid #17a2b8;"
+                                               title="View Invoice">
+                                                <i class="fas fa-receipt"></i>
+                                            </a>
+                                            <a href="#" 
+                                               class="btn btn-outline-primary p-0 d-flex align-items-center justify-content-center action-print-payment"
+                                               style="width:32px;height:32px;border-radius:6px;border:1px solid #3a4f8a;"
+                                               title="Print Payment">
+                                                <i class="fas fa-print"></i>
+                                            </a>
+                                            <!-- For Pending/Failed payments, you can conditionally show Mark Paid or Retry -->
+                                            <!-- Example for Mark Paid: -->
+                                            <!--
+                                            <a href="#" 
+                                               class="btn btn-outline-success p-0 d-flex align-items-center justify-content-center action-mark-paid-payment"
+                                               style="width:32px;height:32px;border-radius:6px;border:1px solid #198754;"
+                                               title="Mark as Paid">
+                                                <i class="fas fa-check"></i>
+                                            </a>
+                                            -->
+                                            <!-- Example for Retry: -->
+                                            <!--
+                                            <a href="#" 
+                                               class="btn btn-outline-warning p-0 d-flex align-items-center justify-content-center action-retry-payment"
+                                               style="width:32px;height:32px;border-radius:6px;border:1px solid #ffc107;"
+                                               title="Retry Payment">
+                                                <i class="fas fa-sync-alt"></i>
+                                            </a>
+                                            -->
+                                            <a href="#" 
+                                               class="btn btn-outline-danger p-0 d-flex align-items-center justify-content-center action-delete-payment"
+                                               style="width:32px;height:32px;border-radius:6px;border:1px solid #dc3545;"
+                                               title="Delete Payment">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
                                         </div>
                                     </td>
                                 </tr>
