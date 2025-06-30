@@ -620,23 +620,26 @@
                     <td>${lastActive}</td>
                     <td><span class="badge ${statusClass}">${status}</span></td>
                     <td>
-                        <div class="dropdown">
-                            <button class="btn btn-sm btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-ellipsis-h"></i>
-                            </button>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item edit-user" href="#" data-id="${user.user_id}"><i class="fas fa-edit me-2"></i> Edit</a></li>
-                                <li><a class="dropdown-item" href="#"><i class="fas fa-key me-2"></i> Reset Password</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li>
-                                    <a class="dropdown-item ${status === 'Active' ? 'text-danger change-status' : 'text-success change-status'}" 
-                                       href="#" data-id="${user.user_id}" data-status="${status === 'Active' ? 'Inactive' : 'Active'}">
-                                        <i class="fas ${status === 'Active' ? 'fa-user-slash' : 'fa-user-check'} me-2"></i> 
-                                        ${status === 'Active' ? 'Deactivate' : 'Activate'}
-                                    </a>
-                                </li>
-                                <li><a class="dropdown-item text-danger delete-user" href="#" data-id="${user.user_id}"><i class="fas fa-trash me-2"></i> Delete</a></li>
-                            </ul>
+                        <div class="d-flex gap-2">
+                            <a href="#" 
+                               class="btn btn-outline-primary p-0 d-flex align-items-center justify-content-center edit-user" 
+                               style="width:32px;height:32px;border-radius:6px;border:1px solid #3a4f8a;" 
+                               title="Edit" data-id="${user.user_id}">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="#" 
+                               class="btn ${status === 'Active' ? 'btn-outline-danger' : 'btn-outline-success'} p-0 d-flex align-items-center justify-content-center change-status" 
+                               style="width:32px;height:32px;border-radius:6px;border:1px solid ${status === 'Active' ? '#dc3545' : '#198754'};" 
+                               title="${status === 'Active' ? 'Deactivate' : 'Activate'}" 
+                               data-id="${user.user_id}" data-status="${status === 'Active' ? 'Inactive' : 'Active'}">
+                                <i class="fas ${status === 'Active' ? 'fa-user-slash' : 'fa-user-check'}"></i>
+                            </a>
+                            <a href="#" 
+                               class="btn btn-outline-danger p-0 d-flex align-items-center justify-content-center delete-user" 
+                               style="width:32px;height:32px;border-radius:6px;border:1px solid #dc3545;" 
+                               title="Delete" data-id="${user.user_id}">
+                                <i class="fas fa-trash"></i>
+                            </a>
                         </div>
                     </td>
                 </tr>
