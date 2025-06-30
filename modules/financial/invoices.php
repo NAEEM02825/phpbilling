@@ -881,18 +881,37 @@ document.addEventListener('DOMContentLoaded', function() {
                     <td>$${invoice.total_amount.toFixed(2)}</td>
                     <td>${statusBadge}</td>
                     <td>
-                        <div class="dropdown">
-                            <button class="btn btn-sm btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-ellipsis-h"></i>
-                            </button>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item view-invoice" href="#" data-id="${invoice.id}"><i class="fas fa-eye me-2"></i> View</a></li>
-                                <li><a class="dropdown-item edit-invoice" href="#" data-id="${invoice.id}"><i class="fas fa-edit me-2"></i> Edit</a></li>
-                                <li><a class="dropdown-item download-invoice" href="#"><i class="fas fa-file-pdf me-2"></i> Download PDF</a></li>
-                                <li><a class="dropdown-item send-invoice" href="#" data-id="${invoice.id}"><i class="fas fa-envelope me-2"></i> Send to Client</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item text-danger delete-invoice" href="#" data-id="${invoice.id}"><i class="fas fa-trash me-2"></i> Delete</a></li>
-                            </ul>
+                        <div class="d-flex gap-2">
+                            <a href="#" 
+                               class="btn btn-outline-secondary p-0 d-flex align-items-center justify-content-center view-invoice"
+                               style="width:32px;height:32px;border-radius:6px;border:1px solid #dee2e6;"
+                               title="View" data-id="${invoice.id}">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a href="#" 
+                               class="btn btn-outline-primary p-0 d-flex align-items-center justify-content-center edit-invoice"
+                               style="width:32px;height:32px;border-radius:6px;border:1px solid #3a4f8a;"
+                               title="Edit" data-id="${invoice.id}">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="#" 
+                               class="btn btn-outline-info p-0 d-flex align-items-center justify-content-center download-invoice"
+                               style="width:32px;height:32px;border-radius:6px;border:1px solid #17a2b8;"
+                               title="Download PDF" data-id="${invoice.id}">
+                                <i class="fas fa-file-pdf"></i>
+                            </a>
+                            <a href="#" 
+                               class="btn btn-outline-success p-0 d-flex align-items-center justify-content-center send-invoice"
+                               style="width:32px;height:32px;border-radius:6px;border:1px solid #198754;"
+                               title="Send to Client" data-id="${invoice.id}">
+                                <i class="fas fa-envelope"></i>
+                            </a>
+                            <a href="#" 
+                               class="btn btn-outline-danger p-0 d-flex align-items-center justify-content-center delete-invoice"
+                               style="width:32px;height:32px;border-radius:6px;border:1px solid #dc3545;"
+                               title="Delete" data-id="${invoice.id}">
+                                <i class="fas fa-trash"></i>
+                            </a>
                         </div>
                     </td>
                 `;
