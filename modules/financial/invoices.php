@@ -29,7 +29,6 @@ $projects = DB::query("SELECT * FROM projects ");
         </div>
     </div>
 </div>
-
 <!-- Invoice Status Tabs -->
 <ul class="nav nav-tabs mb-4" id="invoiceTabs" role="tablist">
     <li class="nav-item" role="presentation">
@@ -351,6 +350,7 @@ $projects = DB::query("SELECT * FROM projects ");
     }
 </style>
 
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const invoiceManager = {
@@ -451,35 +451,31 @@ document.addEventListener('DOMContentLoaded', function() {
         },
         
         loadClients: function() {
-            // Simulate API call
-            setTimeout(() => {
-                // Normally this would come from your backend API
-                const clients = [
-                    { id: 1, name: 'Acme Corporation' },
-                    { id: 2, name: 'Globex Inc.' },
-                    { id: 3, name: 'Stark Industries' },
-                    { id: 4, name: 'Wayne Enterprises' },
-                    { id: 5, name: 'Oscorp Industries' }
-                ];
-                
-                // Populate filter dropdown
-                const clientFilter = document.getElementById('clientFilter');
-                clients.forEach(client => {
-                    const option = document.createElement('option');
-                    option.value = client.id;
-                    option.textContent = client.name;
-                    clientFilter.appendChild(option);
+            // Fetch clients from server
+            fetch('ajax_helpers/getClients.php')
+                .then(response => response.json())
+                .then(clients => {
+                    // Populate filter dropdown
+                    const clientFilter = document.getElementById('clientFilter');
+                    clients.forEach(client => {
+                        const option = document.createElement('option');
+                        option.value = client.id;
+                        option.textContent = client.name;
+                        clientFilter.appendChild(option);
+                    });
+                    
+                    // Populate new invoice modal dropdown
+                    const invoiceClient = document.getElementById('invoiceClient');
+                    clients.forEach(client => {
+                        const option = document.createElement('option');
+                        option.value = client.id;
+                        option.textContent = client.name;
+                        invoiceClient.appendChild(option);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading clients:', error);
                 });
-                
-                // Populate new invoice modal dropdown
-                const invoiceClient = document.getElementById('invoiceClient');
-                clients.forEach(client => {
-                    const option = document.createElement('option');
-                    option.value = client.id;
-                    option.textContent = client.name;
-                    invoiceClient.appendChild(option);
-                });
-            }, 500);
         },
         
         loadProjectsForClient: function(clientId) {
@@ -488,467 +484,88 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
             
-            // Simulate API call
-            setTimeout(() => {
-                // Normally this would come from your backend API
-                const projects = {
-                    1: [
-                        { id: 101, name: 'Website Redesign' },
-                        { id: 102, name: 'E-commerce Platform' }
-                    ],
-                    2: [
-                        { id: 201, name: 'Mobile App Development' }
-                    ],
-                    3: [
-                        { id: 301, name: 'AI Research Project' },
-                        { id: 302, name: 'Robotics Prototype' }
-                    ],
-                    4: [
-                        { id: 401, name: 'Security System Upgrade' }
-                    ],
-                    5: [
-                        { id: 501, name: 'Genetic Research' }
-                    ]
-                };
-                
-                const projectSelect = document.getElementById('invoiceProject');
-                projectSelect.innerHTML = '<option value="">Select Project</option>';
-                projectSelect.disabled = false;
-                
-                if (projects[clientId]) {
-                    projects[clientId].forEach(project => {
+            // Fetch projects for selected client
+            fetch(`api/getProjects.php?client_id=${clientId}`)
+                .then(response => response.json())
+                .then(projects => {
+                    const projectSelect = document.getElementById('invoiceProject');
+                    projectSelect.innerHTML = '<option value="">Select Project</option>';
+                    projectSelect.disabled = false;
+                    
+                    projects.forEach(project => {
                         const option = document.createElement('option');
                         option.value = project.id;
                         option.textContent = project.name;
                         projectSelect.appendChild(option);
                     });
-                }
-                
-                // Load tasks when project is selected
-                projectSelect.addEventListener('change', (e) => {
-                    if (e.target.value) {
-                        this.loadTasksForProject(clientId, e.target.value);
-                    } else {
-                        document.getElementById('tasksTableBody').innerHTML = '';
-                        document.getElementById('invoiceTotal').textContent = '0.00';
-                    }
+                    
+                    // Load tasks when project is selected
+                    projectSelect.addEventListener('change', (e) => {
+                        if (e.target.value) {
+                            this.loadTasksForProject(clientId, e.target.value);
+                        } else {
+                            document.getElementById('tasksTableBody').innerHTML = '';
+                            document.getElementById('invoiceTotal').textContent = '0.00';
+                        }
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading projects:', error);
                 });
-            }, 500);
         },
         
         loadTasksForProject: function(clientId, projectId) {
-            // Simulate API call
-            setTimeout(() => {
-                // Normally this would come from your backend API
-                const tasks = {
-                    // Projects for client 1
-                    101: [
-                        { id: 1001, name: 'Design Homepage', description: 'Create new homepage design', hours: 10, rate: 75 },
-                        { id: 1002, name: 'Design Product Pages', description: 'Create product page templates', hours: 15, rate: 75 }
-                    ],
-                    102: [
-                        { id: 1003, name: 'Shopping Cart', description: 'Develop shopping cart functionality', hours: 25, rate: 100 },
-                        { id: 1004, name: 'Payment Gateway', description: 'Integrate payment processing', hours: 20, rate: 100 }
-                    ],
-                    // Projects for client 2
-                    201: [
-                        { id: 2001, name: 'UI Development', description: 'Build user interface components', hours: 40, rate: 90 }
-                    ],
-                    // Projects for client 3
-                    301: [
-                        { id: 3001, name: 'Machine Learning Model', description: 'Develop predictive model', hours: 60, rate: 120 }
-                    ],
-                    302: [
-                        { id: 3002, name: 'Prototype Assembly', description: 'Build physical prototype', hours: 80, rate: 110 }
-                    ],
-                    // Projects for client 4
-                    401: [
-                        { id: 4001, name: 'System Audit', description: 'Security vulnerability assessment', hours: 30, rate: 150 }
-                    ],
-                    // Projects for client 5
-                    501: [
-                        { id: 5001, name: 'DNA Sequencing', description: 'Genetic marker analysis', hours: 50, rate: 200 }
-                    ]
-                };
-                
-                const tbody = document.getElementById('tasksTableBody');
-                tbody.innerHTML = '';
-                
-                if (tasks[projectId]) {
-                    tasks[projectId].forEach(task => {
-                        const row = document.createElement('tr');
-                        const amount = (task.hours * task.rate).toFixed(2);
-                        
-                        row.innerHTML = `
-                            <td><input type="checkbox" class="form-check-input task-checkbox" data-rate="${task.rate}" data-hours="${task.hours}"></td>
-                            <td>${task.name}</td>
-                            <td>${task.description}</td>
-                            <td>${task.hours}</td>
-                            <td>$${task.rate.toFixed(2)}</td>
-                            <td>$${amount}</td>
-                        `;
-                        
-                        tbody.appendChild(row);
-                    });
+            // Calculate date range (last 15 days)
+            const endDate = new Date();
+            const startDate = new Date();
+            startDate.setDate(endDate.getDate() - 15);
+            
+            // Format dates for API
+            const formatDate = (date) => date.toISOString().split('T')[0];
+            
+            // Fetch tasks for selected project within last 15 days
+            fetch(`api/getTasks.php?project_id=${projectId}&start_date=${formatDate(startDate)}&end_date=${formatDate(endDate)}`)
+                .then(response => response.json())
+                .then(tasks => {
+                    const tbody = document.getElementById('tasksTableBody');
+                    tbody.innerHTML = '';
                     
-                    // Add event listeners to task checkboxes
-                    document.querySelectorAll('.task-checkbox').forEach(checkbox => {
-                        checkbox.addEventListener('change', this.calculateInvoiceTotal.bind(this));
-                    });
-                }
-            }, 500);
-        },
-        
-        calculateInvoiceTotal: function() {
-            let total = 0;
-            
-            document.querySelectorAll('#tasksTableBody .task-checkbox:checked').forEach(checkbox => {
-                const hours = parseFloat(checkbox.getAttribute('data-hours'));
-                const rate = parseFloat(checkbox.getAttribute('data-rate'));
-                total += hours * rate;
-            });
-            
-            document.getElementById('invoiceTotal').textContent = total.toFixed(2);
-        },
-        
-        createNewInvoice: function() {
-            const form = document.getElementById('newInvoiceForm');
-            const clientId = form.querySelector('#invoiceClient').value;
-            const projectId = form.querySelector('#invoiceProject').value;
-            const issueDate = form.querySelector('#invoiceIssueDate').value;
-            const dueDate = form.querySelector('#invoiceDueDate').value;
-            const notes = form.querySelector('#invoiceNotes').value;
-            
-            // Get selected tasks
-            const selectedTasks = [];
-            document.querySelectorAll('#tasksTableBody .task-checkbox:checked').forEach(checkbox => {
-                const row = checkbox.closest('tr');
-                selectedTasks.push({
-                    name: row.cells[1].textContent,
-                    description: row.cells[2].textContent,
-                    hours: parseFloat(checkbox.getAttribute('data-hours')),
-                    rate: parseFloat(checkbox.getAttribute('data-rate'))
-                });
-            });
-            
-            if (selectedTasks.length === 0) {
-                alert('Please select at least one task to invoice');
-                return;
-            }
-            
-            // Calculate total amount
-            const totalAmount = selectedTasks.reduce((sum, task) => sum + (task.hours * task.rate), 0);
-            
-            // Simulate API call to create invoice
-            setTimeout(() => {
-                // Normally this would be a POST to your backend
-                console.log('Creating new invoice:', {
-                    clientId,
-                    projectId,
-                    issueDate,
-                    dueDate,
-                    notes,
-                    tasks: selectedTasks,
-                    totalAmount
-                });
-                
-                // Close modal and show success message
-                bootstrap.Modal.getInstance(document.getElementById('newInvoiceModal')).hide();
-                alert('Invoice created successfully!');
-                
-                // Refresh invoices list
-                this.loadInvoices();
-                
-                // Reset form
-                form.reset();
-                document.getElementById('tasksTableBody').innerHTML = '';
-                document.getElementById('invoiceTotal').textContent = '0.00';
-                document.getElementById('invoiceProject').disabled = true;
-            }, 1000);
-        },
-        
-        loadInvoices: function() {
-            // Show loading state
-            document.getElementById('invoicesTableBody').innerHTML = `
-                <tr>
-                    <td colspan="8" class="text-center py-4">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Loading...</span>
-                        </div>
-                        <p class="mt-2 mb-0">Loading invoices...</p>
-                    </td>
-                </tr>
-            `;
-            
-            // Simulate API call
-            setTimeout(() => {
-                // Normally this would come from your backend API
-                const allInvoices = [
-                    {
-                        id: 1,
-                        invoice_number: 'INV-2023-001',
-                        client_name: 'Acme Corporation',
-                        issue_date: '2023-06-15',
-                        due_date: '2023-07-15',
-                        total_amount: 2450.00,
-                        status: 'paid'
-                    },
-                    {
-                        id: 2,
-                        invoice_number: 'INV-2023-002',
-                        client_name: 'Globex Inc.',
-                        issue_date: '2023-06-18',
-                        due_date: '2023-07-18',
-                        total_amount: 3750.00,
-                        status: 'pending'
-                    },
-                    {
-                        id: 3,
-                        invoice_number: 'INV-2023-003',
-                        client_name: 'Stark Industries',
-                        issue_date: '2023-06-20',
-                        due_date: '2023-07-20',
-                        total_amount: 5200.00,
-                        status: 'pending'
-                    },
-                    {
-                        id: 4,
-                        invoice_number: 'INV-2023-004',
-                        client_name: 'Wayne Enterprises',
-                        issue_date: '2023-05-28',
-                        due_date: '2023-06-28',
-                        total_amount: 1850.00,
-                        status: 'overdue'
-                    },
-                    {
-                        id: 5,
-                        invoice_number: 'INV-2023-005',
-                        client_name: 'Oscorp Industries',
-                        issue_date: '2023-06-25',
-                        due_date: '2023-07-25',
-                        total_amount: 3150.00,
-                        status: 'draft'
-                    },
-                    {
-                        id: 6,
-                        invoice_number: 'INV-2023-006',
-                        client_name: 'Acme Corporation',
-                        issue_date: '2023-06-10',
-                        due_date: '2023-07-10',
-                        total_amount: 4200.00,
-                        status: 'paid'
-                    },
-                    {
-                        id: 7,
-                        invoice_number: 'INV-2023-007',
-                        client_name: 'Stark Industries',
-                        issue_date: '2023-06-05',
-                        due_date: '2023-07-05',
-                        total_amount: 6800.00,
-                        status: 'paid'
-                    },
-                    {
-                        id: 8,
-                        invoice_number: 'INV-2023-008',
-                        client_name: 'Globex Inc.',
-                        issue_date: '2023-06-22',
-                        due_date: '2023-07-22',
-                        total_amount: 2950.00,
-                        status: 'pending'
-                    },
-                    {
-                        id: 9,
-                        invoice_number: 'INV-2023-009',
-                        client_name: 'Wayne Enterprises',
-                        issue_date: '2023-06-15',
-                        due_date: '2023-07-15',
-                        total_amount: 5300.00,
-                        status: 'pending'
-                    },
-                    {
-                        id: 10,
-                        invoice_number: 'INV-2023-010',
-                        client_name: 'Oscorp Industries',
-                        issue_date: '2023-06-30',
-                        due_date: '2023-07-30',
-                        total_amount: 2100.00,
-                        status: 'draft'
+                    if (tasks.length > 0) {
+                        tasks.forEach(task => {
+                            const row = document.createElement('tr');
+                            const amount = (task.hours * task.rate).toFixed(2);
+                            
+                            row.innerHTML = `
+                                <td><input type="checkbox" class="form-check-input task-checkbox" data-rate="${task.rate}" data-hours="${task.hours}"></td>
+                                <td>${task.name}</td>
+                                <td>${task.description}</td>
+                                <td>${task.hours}</td>
+                                <td>$${task.rate.toFixed(2)}</td>
+                                <td>$${amount}</td>
+                            `;
+                            
+                            tbody.appendChild(row);
+                        });
+                        
+                        // Add event listeners to task checkboxes
+                        document.querySelectorAll('.task-checkbox').forEach(checkbox => {
+                            checkbox.addEventListener('change', this.calculateInvoiceTotal.bind(this));
+                        });
+                    } else {
+                        tbody.innerHTML = `
+                            <tr>
+                                <td colspan="6" class="text-center py-4 text-muted">
+                                    No tasks found for this project in the last 15 days
+                                </td>
+                            </tr>
+                        `;
                     }
-                ];
-                
-                // Apply filters
-                let filteredInvoices = [...allInvoices];
-                
-                if (this.filters.client_id) {
-                    filteredInvoices = filteredInvoices.filter(invoice => 
-                        invoice.client_name === document.querySelector(`#clientFilter option[value="${this.filters.client_id}"]`).textContent
-                    );
-                }
-                
-                if (this.filters.date_from) {
-                    filteredInvoices = filteredInvoices.filter(invoice => 
-                        new Date(invoice.issue_date) >= new Date(this.filters.date_from)
-                    );
-                }
-                
-                if (this.filters.date_to) {
-                    filteredInvoices = filteredInvoices.filter(invoice => 
-                        new Date(invoice.issue_date) <= new Date(this.filters.date_to)
-                    );
-                }
-                
-                if (this.filters.amount_from) {
-                    filteredInvoices = filteredInvoices.filter(invoice => 
-                        invoice.total_amount >= parseFloat(this.filters.amount_from)
-                    );
-                }
-                
-                if (this.filters.amount_to) {
-                    filteredInvoices = filteredInvoices.filter(invoice => 
-                        invoice.total_amount <= parseFloat(this.filters.amount_to)
-                    );
-                }
-                
-                if (this.filters.status) {
-                    filteredInvoices = filteredInvoices.filter(invoice => 
-                        invoice.status === this.filters.status
-                    );
-                }
-                
-                this.totalInvoices = filteredInvoices.length;
-                
-                // Paginate results
-                const startIndex = (this.currentPage - 1) * this.itemsPerPage;
-                const endIndex = startIndex + this.itemsPerPage;
-                const paginatedInvoices = filteredInvoices.slice(startIndex, endIndex);
-                
-                // Render invoices
-                this.renderInvoices(paginatedInvoices);
-                
-                // Update pagination controls
-                this.updatePagination();
-            }, 800);
+                })
+                .catch(error => {
+                    console.error('Error loading tasks:', error);
+                });
         },
-        
-        renderInvoices: function(invoices) {
-            const tbody = document.getElementById('invoicesTableBody');
-            
-            if (invoices.length === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="8" class="text-center py-4">
-                            <i class="fas fa-inbox fa-2x mb-3 text-muted"></i>
-                            <p class="mb-0">No invoices found matching your criteria</p>
-                        </td>
-                    </tr>
-                `;
-                return;
-            }
-            
-            tbody.innerHTML = '';
-            
-            invoices.forEach(invoice => {
-                const row = document.createElement('tr');
-                
-                // Status badge
-                let statusBadge;
-                switch(invoice.status) {
-                    case 'paid':
-                        statusBadge = '<span class="badge bg-success">Paid</span>';
-                        break;
-                    case 'pending':
-                        statusBadge = '<span class="badge bg-primary">Pending</span>';
-                        break;
-                    case 'overdue':
-                        statusBadge = '<span class="badge bg-danger">Overdue</span>';
-                        break;
-                    default:
-                        statusBadge = '<span class="badge bg-secondary">Draft</span>';
-                }
-                
-                row.innerHTML = `
-                    <td>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" data-id="${invoice.id}">
-                        </div>
-                    </td>
-                    <td>
-                        <a href="#" class="text-primary fw-bold view-invoice" data-id="${invoice.id}">${invoice.invoice_number}</a>
-                    </td>
-                    <td>${invoice.client_name}</td>
-                    <td>${new Date(invoice.issue_date).toLocaleDateString()}</td>
-                    <td>${new Date(invoice.due_date).toLocaleDateString()}</td>
-                    <td>$${invoice.total_amount.toFixed(2)}</td>
-                    <td>${statusBadge}</td>
-                    <td>
-                        <div class="d-flex gap-2">
-                            <a href="#" 
-                               class="btn btn-outline-secondary p-0 d-flex align-items-center justify-content-center view-invoice"
-                               style="width:32px;height:32px;border-radius:6px;border:1px solid #dee2e6;"
-                               title="View" data-id="${invoice.id}">
-                                <i class="fas fa-eye"></i>
-                            </a>
-                            <a href="#" 
-                               class="btn btn-outline-primary p-0 d-flex align-items-center justify-content-center edit-invoice"
-                               style="width:32px;height:32px;border-radius:6px;border:1px solid #3a4f8a;"
-                               title="Edit" data-id="${invoice.id}">
-                                <i class="fas fa-edit"></i>
-                            </a>
-                            <a href="#" 
-                               class="btn btn-outline-info p-0 d-flex align-items-center justify-content-center download-invoice"
-                               style="width:32px;height:32px;border-radius:6px;border:1px solid #17a2b8;"
-                               title="Download PDF" data-id="${invoice.id}">
-                                <i class="fas fa-file-pdf"></i>
-                            </a>
-                            <a href="#" 
-                               class="btn btn-outline-success p-0 d-flex align-items-center justify-content-center send-invoice"
-                               style="width:32px;height:32px;border-radius:6px;border:1px solid #198754;"
-                               title="Send to Client" data-id="${invoice.id}">
-                                <i class="fas fa-envelope"></i>
-                            </a>
-                            <a href="#" 
-                               class="btn btn-outline-danger p-0 d-flex align-items-center justify-content-center delete-invoice"
-                               style="width:32px;height:32px;border-radius:6px;border:1px solid #dc3545;"
-                               title="Delete" data-id="${invoice.id}">
-                                <i class="fas fa-trash"></i>
-                            </a>
-                        </div>
-                    </td>
-                `;
-                
-                tbody.appendChild(row);
-            });
-            
-            // Add event listeners to action buttons
-            document.querySelectorAll('.view-invoice').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    this.viewInvoice(e.target.closest('[data-id]').getAttribute('data-id'));
-                });
-            });
-            
-            document.querySelectorAll('.edit-invoice').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    this.editInvoice(e.target.closest('[data-id]').getAttribute('data-id'));
-                });
-            });
-            
-            document.querySelectorAll('.send-invoice').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    this.sendInvoice(e.target.closest('[data-id]').getAttribute('data-id'));
-                });
-            });
-            
-            document.querySelectorAll('.delete-invoice').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    this.deleteInvoice(e.target.closest('[data-id]').getAttribute('data-id'));
-                });
-            });
-        },
-        
+
         updatePagination: function() {
             const totalPages = Math.ceil(this.totalInvoices / this.itemsPerPage);
             const pagination = document.getElementById('paginationControls');
