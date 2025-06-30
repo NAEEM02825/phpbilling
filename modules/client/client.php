@@ -372,7 +372,7 @@
             clients.forEach(client => {
                 const initials = getInitials(client.first_name + ' ' + client.last_name);
                 const createdDate = new Date(client.created_at).toLocaleDateString();
-                
+
                 const row = `
                 <tr>
                     <td>
@@ -396,16 +396,21 @@
                     <td>${client.address || '-'}</td>
                     <td>${createdDate}</td>
                     <td>
-                        <div class="dropdown">
-                            <button class="btn btn-sm btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-ellipsis-h"></i>
-                            </button>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="#"><i class="fas fa-eye me-2"></i> View</a></li>
-                                <li><a class="dropdown-item" href="#"><i class="fas fa-edit me-2"></i> Edit</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item text-danger delete-client" href="#" data-id="${client.id}"><i class="fas fa-trash me-2"></i> Delete</a></li>
-                            </ul>
+                        <div class="d-flex gap-2">
+                            <a href="#" 
+                               class="btn btn-outline-primary p-0 d-flex align-items-center justify-content-center edit-client" 
+                               data-id="${client.id}" 
+                               style="width:32px;height:32px;border-radius:6px;border:1px solid #3a4f8a;" 
+                               title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="#" 
+                               class="btn btn-outline-danger p-0 d-flex align-items-center justify-content-center delete-client" 
+                               data-id="${client.id}" 
+                               style="width:32px;height:32px;border-radius:6px;border:1px solid #dc3545;" 
+                               title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </a>
                         </div>
                     </td>
                 </tr>
