@@ -631,7 +631,7 @@
                                class="btn ${status === 'Active' ? 'btn-outline-danger' : 'btn-outline-success'} p-0 d-flex align-items-center justify-content-center change-status" 
                                style="width:32px;height:32px;border-radius:6px;border:1px solid ${status === 'Active' ? '#dc3545' : '#198754'};" 
                                title="${status === 'Active' ? 'Deactivate' : 'Activate'}" 
-                               data-id="${user.user_id}" data-status="${status === 'Active' ? 'Inactive' : 'Active'}">
+                               data-user_id="${user.user_id}" data-status="${status === 'Active' ? 'Inactive' : 'Active'}">
                                 <i class="fas ${status === 'Active' ? 'fa-user-slash' : 'fa-user-check'}"></i>
                             </a>
                             <a href="#" 
@@ -819,7 +819,7 @@
             dataType: 'json',
             data: {
                 action: 'change_status',
-                id: userId,
+                user_id: userId, // <-- FIXED: was 'id'
                 status: status
             },
             success: function(response) {
