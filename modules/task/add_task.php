@@ -8,9 +8,7 @@
         <button type="button" class="btn btn-outline-secondary me-2">
             <i class="fas fa-times me-1"></i> Cancel
         </button>
-        <button type="button" class="btn btn-primary" id="saveTask">
-            <i class="fas fa-save me-1"></i> Save Task
-        </button>
+        <!-- Remove the Save Task button from the header toolbar -->
     </div>
 </div>
 
@@ -219,9 +217,9 @@
             }
         });
 
-        // --- Save Task AJAX ---
-        document.getElementById('saveTask').addEventListener('click', async function() {
-            const form = document.getElementById('taskForm');
+        const form = document.getElementById('taskForm');
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
             if (!form.taskTitle.value.trim()) {
                 alert('Task Title is required');
                 return;
