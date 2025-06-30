@@ -596,7 +596,187 @@ $projects = DB::query("SELECT * FROM projects ");
             `;
                     });
             },
+            createNewInvoice: function() {
+                const form = document.getElementById('newInvoiceForm');
+                const selectedTasks = Array.from(document.querySelectorAll('.task-checkbox:checked'))
+                    .map(checkbox => checkbox.getAttribute('data-task_id'));
 
+                if (selectedTasks.length === 0) {
+                    alert('Please select at least one task to include in the invoice');
+                    return;
+                }
+
+                const formData = {
+                    action: 'create_invoice',
+                    client_id: form.querySelector('#invoiceClient').value,
+                    project_id: form.querySelector('#invoiceProject').value,
+                    issue_date: form.querySelector('#invoiceIssueDate').value,
+                    due_date: form.querySelector('#invoiceDueDate').value,
+                    total_amount: parseFloat(document.getElementById('invoiceTotal').textContent),
+                    notes: form.querySelector('#invoiceNotes').value,
+                    task_ids: JSON.stringify(selectedTasks)
+                };
+
+                // Show loading state
+                const submitBtn = form.querySelector('button[type="submit"]');
+                const originalBtnText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating...';
+                submitBtn.disabled = true;
+
+                // Send data to server
+                fetch('ajax_helpers/create_New_Invoice.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: new URLSearchParams(formData)
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Close modal and refresh invoices
+                            bootstrap.Modal.getInstance(document.getElementById('newInvoiceModal')).hide();
+                            this.loadInvoices();
+
+                            // Show success message
+                            alert('Invoice created successfully!');
+                        } else {
+                            throw new Error(data.error || 'Failed to create invoice');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Error creating invoice: ' + error.message);
+                    })
+                    .finally(() => {
+                        submitBtn.innerHTML = originalBtnText;
+                        submitBtn.disabled = false;
+                    });
+            },
+
+            loadInvoices: function() {
+                // Show loading state
+                const tbody = document.getElementById('invoicesTableBody');
+                tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4">Loading invoices...</td></tr>';
+
+                // Prepare filters
+                const params = new URLSearchParams({
+                    page: this.currentPage,
+                    per_page: this.itemsPerPage,
+                    status: this.currentTab === 'all' ? '' : this.currentTab,
+                    ...this.filters
+                });
+
+                // Fetch invoices from server
+                fetch(`ajax_helpers/getInvoices.php?${params.toString()}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (!data.success) {
+                            throw new Error(data.error || 'Failed to load invoices');
+                        }
+
+                        this.totalInvoices = data.total;
+                        this.renderInvoices(data.invoices);
+                        this.updatePagination();
+                    })
+                    .catch(error => {
+                        console.error('Error loading invoices:', error);
+                        tbody.innerHTML = `
+                <tr>
+                    <td colspan="8" class="text-center py-4 text-danger">
+                        Error loading invoices: ${error.message}
+                    </td>
+                </tr>
+            `;
+                    });
+            },
+
+            renderInvoices: function(invoices) {
+                const tbody = document.getElementById('invoicesTableBody');
+                tbody.innerHTML = '';
+
+                if (invoices.length === 0) {
+                    tbody.innerHTML = `
+            <tr>
+                <td colspan="8" class="text-center py-4 text-muted">
+                    No invoices found
+                </td>
+            </tr>
+        `;
+                    return;
+                }
+
+                invoices.forEach(invoice => {
+                    const row = document.createElement('tr');
+
+                    // Format dates
+                    const issueDate = new Date(invoice.issue_date).toLocaleDateString();
+                    const dueDate = new Date(invoice.due_date).toLocaleDateString();
+
+                    // Status badge
+                    let statusBadge;
+                    switch (invoice.status) {
+                        case 'paid':
+                            statusBadge = '<span class="badge bg-success">Paid</span>';
+                            break;
+                        case 'pending':
+                            statusBadge = '<span class="badge bg-primary">Pending</span>';
+                            break;
+                        case 'overdue':
+                            statusBadge = '<span class="badge bg-danger">Overdue</span>';
+                            break;
+                        default:
+                            statusBadge = '<span class="badge bg-secondary">Draft</span>';
+                    }
+
+                    row.innerHTML = `
+            <td>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="${invoice.id}">
+                </div>
+            </td>
+            <td>${invoice.invoice_number}</td>
+            <td>${invoice.client_name}</td>
+            <td>${issueDate}</td>
+            <td>${dueDate}</td>
+            <td>$${parseFloat(invoice.total_amount).toFixed(2)}</td>
+            <td>${statusBadge}</td>
+            <td>
+                <div class="dropdown">
+                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" 
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                        Actions
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a class="dropdown-item" href="#" onclick="invoiceManager.viewInvoice(${invoice.id})">
+                                <i class="fas fa-eye me-1"></i> View
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="#" onclick="invoiceManager.editInvoice(${invoice.id})">
+                                <i class="fas fa-edit me-1"></i> Edit
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="#" onclick="invoiceManager.sendInvoice(${invoice.id})">
+                                <i class="fas fa-paper-plane me-1"></i> Send
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <a class="dropdown-item text-danger" href="#" onclick="invoiceManager.deleteInvoice(${invoice.id})">
+                                <i class="fas fa-trash me-1"></i> Delete
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </td>
+        `;
+
+                    tbody.appendChild(row);
+                });
+            },
             updatePagination: function() {
                 const totalPages = Math.ceil(this.totalInvoices / this.itemsPerPage);
                 const pagination = document.getElementById('paginationControls');
