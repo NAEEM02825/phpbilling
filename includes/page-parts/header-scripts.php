@@ -1,4 +1,4 @@
-  <!-- loader-->
+<!-- loader-->
   <link href="assets/css/pace.min.css" rel="stylesheet">
   <script src="assets/js/pace.min.js"></script>
   <!--bootstrap js-->
@@ -61,5 +61,8 @@
 
 
   <link href="sass/responsive.css" rel="stylesheet">
+
+<!-- Font Awesome 5 CDN -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
 

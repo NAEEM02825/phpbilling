@@ -1,3 +1,7 @@
+<?php
+$projects = DB::query("SELECT * FROM projects ");
+
+?>
 <!-- Invoices Page Header -->
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-4 pb-3 mb-4 border-bottom">
     <div>

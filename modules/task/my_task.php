@@ -507,16 +507,19 @@
                         ${project.completed_tasks == project.task_count ? 'Completed' : 'In Progress'}
                     </span></td>
                     <td>
-                        <div class="dropdown">
-                            <button class="btn btn-sm btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-ellipsis-h"></i>
-                            </button>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="#"><i class="fas fa-eye me-2"></i> View</a></li>
-                                <li><a class="dropdown-item" href="#"><i class="fas fa-edit me-2"></i> Edit</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-trash me-2"></i> Delete</a></li>
-                            </ul>
+                        <div class="d-flex gap-2">
+                            <a href="#" 
+                               class="btn btn-outline-secondary p-0 d-flex align-items-center justify-content-center action-view-project" 
+                               style="width:32px;height:32px;border-radius:6px;border:1px solid #dee2e6;" 
+                               title="View Project" onclick="viewProject(${project.id})">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a href="#" 
+                               class="btn btn-outline-danger p-0 d-flex align-items-center justify-content-center action-delete-project" 
+                               style="width:32px;height:32px;border-radius:6px;border:1px solid #dc3545;" 
+                               title="Delete Project" onclick="deleteProject(${project.id})">
+                                <i class="fas fa-trash"></i>
+                            </a>
                         </div>
                     </td>
                 `;
@@ -577,15 +580,25 @@
                         ${task.clickup_link ? `<a href="${task.clickup_link}" target="_blank" class="text-info">View</a>` : 'No link'}
                     </td>
                     <td>
-                        <div class="dropdown">
-                            <button class="btn btn-sm btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-ellipsis-h"></i>
-                            </button>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="#" onclick="editTask(${task.id})"><i class="fas fa-edit me-2"></i> Edit</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item text-danger" href="#" onclick="deleteTask(${task.id})"><i class="fas fa-trash me-2"></i> Delete</a></li>
-                            </ul>
+                        <div class="d-flex gap-2">
+                            <a href="#" 
+                               class="btn btn-outline-secondary p-0 d-flex align-items-center justify-content-center action-view" 
+                               style="width:32px;height:32px;border-radius:6px;border:1px solid #dee2e6;" 
+                               title="View" onclick="viewTask(${task.id})">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a href="#" 
+                               class="btn btn-outline-primary p-0 d-flex align-items-center justify-content-center action-edit" 
+                               style="width:32px;height:32px;border-radius:6px;border:1px solid #3a4f8a;" 
+                               title="Edit" onclick="editTask(${task.id})">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="#" 
+                               class="btn btn-outline-danger p-0 d-flex align-items-center justify-content-center action-delete" 
+                               style="width:32px;height:32px;border-radius:6px;border:1px solid #dc3545;" 
+                               title="Delete" onclick="deleteTask(${task.id})">
+                                <i class="fas fa-trash"></i>
+                            </a>
                         </div>
                     </td>
                 `;
@@ -872,5 +885,18 @@
 
     function showError(message) {
         showAlert(message, 'danger');
+    }
+
+    function viewProject(id) {
+        // Implement view project modal or redirect
+    }
+    
+    function deleteProject(id) {
+        if (confirm('Are you sure you want to delete this project?')) {
+            // Implement AJAX delete logic
+        }
+    }
+    function viewTask(id) {
+        // Implement view task modal or redirect
     }
 </script>
