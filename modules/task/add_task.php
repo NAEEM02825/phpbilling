@@ -67,6 +67,18 @@
                         <input type="date" class="form-control" id="dueDate" name="task_date">
                     </div>
 
+                    <!-- Hours Field -->
+                    <div class="mb-4 w-100">
+                        <label for="taskHours" class="form-label">Hours</label>
+                        <input type="number" class="form-control" id="taskHours" name="hours" min="0" step="0.1" placeholder="Enter estimated hours">
+                    </div>
+
+                    <!-- ClickUp Link Field -->
+                    <div class="mb-4 w-100">
+                        <label for="clickupLink" class="form-label">ClickUp Link</label>
+                        <input type="url" class="form-control" id="clickupLink" name="clickup_link" placeholder="Paste ClickUp task link">
+                    </div>
+
                     <!-- Submit Button -->
                     <div class="d-flex justify-content-end">
                         <button type="submit" class="btn btn-primary" id="saveTask">
