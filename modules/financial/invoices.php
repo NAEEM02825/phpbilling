@@ -463,7 +463,7 @@ $projects = DB::query("SELECT * FROM projects ");
                         clients.forEach(client => {
                             const option = document.createElement('option');
                             option.value = client.id;
-                            option.textContent = client.name;
+                            option.textContent = client.fiest_name;
                             clientFilter.appendChild(option);
                         });
 
@@ -472,7 +472,7 @@ $projects = DB::query("SELECT * FROM projects ");
                         clients.forEach(client => {
                             const option = document.createElement('option');
                             option.value = client.id;
-                            option.textContent = client.name;
+                            option.textContent = client.first_name;
                             invoiceClient.appendChild(option);
                         });
                     })
