@@ -71,6 +71,17 @@
     <div class="tab-pane fade" id="tasks" role="tabpanel">
         <div class="card shadow-sm">
             <div class="card-body p-0">
+                <!-- Filter/Search by Project -->
+                <div class="p-3 pb-0">
+                    <div class="row">
+                        <div class="col-md-6 col-lg-4">
+                            <label for="filterProject" class="form-label mb-1">Filter by Project</label>
+                            <select class="form-select" id="filterProject">
+                                <option value="">All Projects</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
                 <div class="table-responsive">
                     <table class="table table-hover align-middle mb-0" id="tasksTable">
                         <thead class="table-light">
@@ -457,6 +468,33 @@
                 }
             });
         });
+
+        // Populate filterProject dropdown
+        fetch('ajax_helpers/task_handler.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: 'action=get_projects'
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success && Array.isArray(data.data)) {
+                const filterSelect = document.getElementById('filterProject');
+                data.data.forEach(project => {
+                    const opt = document.createElement('option');
+                    opt.value = project.id;
+                    opt.textContent = project.name;
+                    filterSelect.appendChild(opt);
+                });
+            }
+        });
+
+        // Add filter event
+        const filterProject = document.getElementById('filterProject');
+        if (filterProject) {
+            filterProject.addEventListener('change', function () {
+                loadTasks();
+            });
+        }
     });
 
     // Load Projects Data
@@ -533,12 +571,18 @@
     // Load All Tasks Data
     async function loadTasks() {
         try {
+            const filterProject = document.getElementById('filterProject');
+            const projectId = filterProject ? filterProject.value : '';
+            let body = 'action=get_tasks';
+            if (projectId) {
+                body += `&project_id=${encodeURIComponent(projectId)}`;
+            }
             const response = await fetch('ajax_helpers/task_handler.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
                 },
-                body: 'action=get_tasks'
+                body: body
             });
             const data = await response.json();
 

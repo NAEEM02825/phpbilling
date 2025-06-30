@@ -26,6 +26,7 @@ try {
 
         case 'get_tasks':
             $assigneeId = $_POST['assignee_id'] ?? null;
+            $projectId = $_POST['project_id'] ?? null; // <-- Add this line
             $query = "
                 SELECT t.*, p.name as project_name, u.name as assignee_name, 
                        CONCAT(LEFT(u.name, 1), LEFT(u.last_name, 1)) as assignee_initials
@@ -34,9 +35,20 @@ try {
                 LEFT JOIN users u ON u.user_id = t.assignee_id
             ";
 
+            $where = [];
+            $params = [];
+
             if ($assigneeId) {
-                $query .= " WHERE t.assignee_id = %i";
-                $tasks = DB::query($query, $assigneeId);
+                $where[] = "t.assignee_id = %i";
+                $params[] = $assigneeId;
+            }
+            if ($projectId) {
+                $where[] = "t.project_id = %i";
+                $params[] = $projectId;
+            }
+            if ($where) {
+                $query .= " WHERE " . implode(" AND ", $where);
+                $tasks = DB::query($query, ...$params);
             } else {
                 $tasks = DB::query($query);
             }
