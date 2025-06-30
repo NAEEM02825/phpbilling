@@ -196,9 +196,12 @@ $projects = DB::query("SELECT * FROM projects ");
                                     <th width="40"><input type="checkbox" id="selectAllTasks"></th>
                                     <th>Task</th>
                                     <th>Description</th>
-                                    <th>Hours/Qty</th>
-                                    <th>Rate</th>
-                                    <th>Amount</th>
+                                    <th>Project</th>
+                                    <th>Date</th>
+                                    <th>Hours</th>
+                                    <th>Assignee</th>
+                                    <th>Status</th>
+                                    <th>ClickUp Link</th>
                                 </tr>
                             </thead>
                             <tbody id="tasksTableBody">
@@ -548,17 +551,22 @@ $projects = DB::query("SELECT * FROM projects ");
                         if (tasks && tasks.length > 0) {
                             tasks.forEach(task => {
                                 const row = document.createElement('tr');
-                                const amount = (task.hours * task.rate).toFixed(2);
-
                                 row.innerHTML = `
-                        <td><input type="checkbox" class="form-check-input task-checkbox" 
-                            data-rate="${task.rate}" data-hours="${task.hours}"></td>
-                        <td>${task.name || 'No name'}</td>
-                        <td>${task.description || 'No description'}</td>
-                        <td>${task.hours || 0}</td>
-                        <td>$${(task.rate || 0).toFixed(2)}</td>
-                        <td>$${amount}</td>
-                    `;
+                                    <td>
+                                        <input type="checkbox" class="form-check-input task-checkbox" 
+                                            data-task_id="${task.id}" data-hours="${task.hours}">
+                                    </td>
+                                    <td>${task.title || ''}</td>
+                                    <td>${task.details || ''}</td>
+                                    <td>${task.project_name || ''}</td>
+                                    <td>${task.task_date || ''}</td>
+                                    <td>${task.hours || ''}</td>
+                                    <td>${task.assignee_name || ''}</td>
+                                    <td>${task.status || ''}</td>
+                                    <td>
+                                        ${task.clickup_link ? `<a href="${task.clickup_link}" target="_blank">View</a>` : ''}
+                                    </td>
+                                `;
 
                                 tbody.appendChild(row);
                             });
@@ -819,7 +827,17 @@ $projects = DB::query("SELECT * FROM projects ");
                         this.loadInvoices();
                     }, 500);
                 }
-            }
+            },
+
+            calculateInvoiceTotal: function() {
+                let total = 0;
+                document.querySelectorAll('.task-checkbox:checked').forEach(checkbox => {
+                    const hours = parseFloat(checkbox.getAttribute('data-hours')) || 0;
+                    // You can add rate calculation here if needed
+                    total += hours;
+                });
+                document.getElementById('invoiceTotal').textContent = total.toFixed(2);
+            },
         };
 
         invoiceManager.init();
