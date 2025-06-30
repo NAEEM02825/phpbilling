@@ -637,7 +637,7 @@
                             <a href="#" 
                                class="btn btn-outline-danger p-0 d-flex align-items-center justify-content-center delete-user" 
                                style="width:32px;height:32px;border-radius:6px;border:1px solid #dc3545;" 
-                               title="Delete" data-id="${user.user_id}">
+                               title="Delete" data-user_id="${user.user_id}">
                                 <i class="fas fa-trash"></i>
                             </a>
                         </div>
