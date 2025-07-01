@@ -3,7 +3,6 @@ require('../functions.php');
 header('Content-Type: application/json');
 
 try {
-    // Get parameters
     $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
     $perPage = isset($_GET['per_page']) ? max(1, intval($_GET['per_page'])) : 10;
     $offset = ($page - 1) * $perPage;
@@ -42,15 +41,13 @@ try {
 
     // Get paginated invoice data using DB::select with LEFT JOIN
     $invoices = DB::query(
-        "SELECT i.*, c.name AS client_name
+        "SELECT i.*, CONCAT(c.first_name, ' ', c.last_name) AS client_name
          FROM invoices i
          LEFT JOIN clients c ON i.client_id = c.id
          %l
          ORDER BY i.issue_date DESC
-         LIMIT %d OFFSET %d",
-        $where,
-        $perPage, 
-        $offset
+         LIMIT $perPage OFFSET $offset",
+        $where
     );
 
     echo json_encode([

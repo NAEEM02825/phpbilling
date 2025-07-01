@@ -730,49 +730,38 @@ $projects = DB::query("SELECT * FROM projects ");
                     }
 
                     row.innerHTML = `
-            <td>
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" value="${invoice.id}">
-                </div>
-            </td>
-            <td>${invoice.invoice_number}</td>
-            <td>${invoice.client_name}</td>
-            <td>${issueDate}</td>
-            <td>${dueDate}</td>
-            <td>$${parseFloat(invoice.total_amount).toFixed(2)}</td>
-            <td>${statusBadge}</td>
-            <td>
-                <div class="dropdown">
-                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" 
-                            data-bs-toggle="dropdown" aria-expanded="false">
-                        Actions
-                    </button>
-                    <ul class="dropdown-menu">
-                        <li>
-                            <a class="dropdown-item" href="#" onclick="invoiceManager.viewInvoice(${invoice.id})">
-                                <i class="fas fa-eye me-1"></i> View
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="#" onclick="invoiceManager.editInvoice(${invoice.id})">
-                                <i class="fas fa-edit me-1"></i> Edit
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="#" onclick="invoiceManager.sendInvoice(${invoice.id})">
-                                <i class="fas fa-paper-plane me-1"></i> Send
-                            </a>
-                        </li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li>
-                            <a class="dropdown-item text-danger" href="#" onclick="invoiceManager.deleteInvoice(${invoice.id})">
-                                <i class="fas fa-trash me-1"></i> Delete
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </td>
-        `;
+        <td>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="${invoice.id}">
+            </div>
+        </td>
+        <td>${invoice.invoice_number}</td>
+        <td>${invoice.client_name}</td>
+        <td>${issueDate}</td>
+        <td>${dueDate}</td>
+        <td>$${parseFloat(invoice.total_amount).toFixed(2)}</td>
+        <td>${statusBadge}</td>
+        <td>
+            <div class="d-flex gap-2">
+                <a href="#" class="btn btn-outline-primary btn-sm d-flex align-items-center justify-content-center" title="View"
+                   onclick="invoiceManager.viewInvoice(${invoice.id}); return false;" style="width:32px;height:32px;border-radius:6px;">
+                    <i class="fas fa-eye"></i>
+                </a>
+                <a href="#" class="btn btn-outline-success btn-sm d-flex align-items-center justify-content-center" title="Edit"
+                   onclick="invoiceManager.editInvoice(${invoice.id}); return false;" style="width:32px;height:32px;border-radius:6px;">
+                    <i class="fas fa-edit"></i>
+                </a>
+                <a href="#" class="btn btn-outline-info btn-sm d-flex align-items-center justify-content-center" title="Send"
+                   onclick="invoiceManager.sendInvoice(${invoice.id}); return false;" style="width:32px;height:32px;border-radius:6px;">
+                    <i class="fas fa-paper-plane"></i>
+                </a>
+                <a href="#" class="btn btn-outline-danger btn-sm d-flex align-items-center justify-content-center" title="Delete"
+                   onclick="invoiceManager.deleteInvoice(${invoice.id}); return false;" style="width:32px;height:32px;border-radius:6px;">
+                    <i class="fas fa-trash"></i>
+                </a>
+            </div>
+        </td>
+    `;
 
                     tbody.appendChild(row);
                 });
@@ -832,6 +821,7 @@ $projects = DB::query("SELECT * FROM projects ");
                     lastLi.innerHTML = `<a class="page-link" href="#">${totalPages}</a>`;
                     pagination.appendChild(lastLi);
                 }
+                
 
                 // Next button
                 const nextLi = document.createElement('li');
