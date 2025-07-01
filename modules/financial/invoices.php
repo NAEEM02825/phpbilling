@@ -16,9 +16,6 @@ $projects = DB::query("SELECT * FROM projects ");
             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newInvoiceModal">
                 <i class="fas fa-plus me-1"></i> New Invoice
             </button>
-            <button type="button" class="btn btn-outline-secondary">
-                <i class="fas fa-filter me-1"></i> Filter
-            </button>
         </div>
         <div class="dropdown">
             <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="exportDropdown" data-bs-toggle="dropdown">
