@@ -61,18 +61,6 @@
             <i class="fas fa-list me-1"></i> All Projects
         </button>
     </li>
-    <li class="nav-item" role="presentation">
-        <button class="nav-link" id="sf-projects-tab" data-bs-toggle="tab" data-bs-target="#sf-projects" type="button"
-            role="tab">
-            SF Projects
-        </button>
-    </li>
-    <li class="nav-item" role="presentation">
-        <button class="nav-link" id="other-projects-tab" data-bs-toggle="tab" data-bs-target="#other-projects"
-            type="button" role="tab">
-            Other Projects
-        </button>
-    </li>
 </ul>
 
 <!-- Project Content -->
@@ -375,9 +363,15 @@
             e.preventDefault();
 
             const formData = $(this).serialize();
+            const editId = $(this).data('edit-id');
+            let url = 'ajax_helpers/ajax_add_projects.php?action=create';
+
+            if (editId) {
+                url = 'ajax_helpers/ajax_add_projects.php?action=update&project_id=' + editId;
+            }
 
             $.ajax({
-                url: 'ajax_helpers/ajax_add_projects.php?action=create',
+                url: url,
                 type: 'POST',
                 data: formData,
                 dataType: 'json',
@@ -385,10 +379,12 @@
                     if (response.success) {
                         $('#newProjectModal').modal('hide');
                         $('#projectForm')[0].reset();
+                        $('#projectForm').removeData('edit-id');
+                        $('#newProjectModalLabel').text('Create New Project');
                         loadProjects('all');
                         loadProjects('SF');
                         loadProjects('Other');
-                        alert('Project created successfully!');
+                        alert(editId ? 'Project updated successfully!' : 'Project created successfully!');
                     }
                 },
                 error: function (xhr) {
@@ -431,6 +427,11 @@
             $('#taskModalLabel').text('Tasks for ' + projectName);
             $('#taskProjectId').val(projectId);
             loadTasks(projectId);
+        });
+
+        $('#newProjectModal').on('hidden.bs.modal', function () {
+            $('#projectForm button[type="submit"]').text('Create Project');
+            $('#newProjectModalLabel').text('Create New Project');
         });
     });
 
@@ -701,6 +702,44 @@
         }
     }
 
+    $(document).on('click', '.action-edit-project', function (e) {
+        e.preventDefault();
+        const projectId = $(this).data('id');
+
+        // Fetch project data from the server
+        $.ajax({
+            url: 'ajax_helpers/ajax_add_projects.php?action=get&project_id=' + projectId,
+            type: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                if (response.success && response.data) {
+                    const project = response.data;
+
+                    // Fill modal fields
+                    $('#newProjectModalLabel').text('Edit Project');
+                    $('#projectForm button[type="submit"]').text('Update Project'); // <-- Add this line
+                    $('#projectName').val(project.name);
+                    $('#fromCompany').val(project.from_company);
+                    $('#toClient').val(project.to_client);
+                    $('input[name="type"][value="' + project.type + '"]').prop('checked', true).trigger('change');
+                    $('#recurringRate').val(project.type === 'Recurring' ? project.rate : '');
+                    $('#hourlyRate').val(project.type === 'Hourly' ? project.rate : '');
+                    $('#paymentCycle').val(project.payment_cycle);
+
+                    // Store project ID for update
+                    $('#projectForm').data('edit-id', project.id);
+
+                    // Show modal
+                    $('#newProjectModal').modal('show');
+                } else {
+                    alert('Could not load project data.');
+                }
+            },
+            error: function () {
+                alert('Error loading project data.');
+            }
+        });
+    });
     function loadTasks(projectId) {
         $.ajax({
             url: 'ajax_helpers/ajax_add_tasks.php?action=list&project_id=' + projectId,
