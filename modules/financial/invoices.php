@@ -299,8 +299,39 @@ $projects = DB::query("SELECT * FROM projects ");
                 });
 
                 // Print invoice button
-                document.getElementById('printInvoiceBtn').addEventListener('click', () => {
-                    window.print();
+                document.getElementById('printInvoiceBtn').addEventListener('click', function() {
+                    const modalContent = document.getElementById('invoiceDetailsContent').innerHTML;
+                    const printWindow = window.open('', '', 'width=900,height=700');
+                    printWindow.document.write(`
+                        <html>
+                        <head>
+                            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css">
+                            <style>
+                                body { background: #fff !important; }
+                                .invoice-preview { margin: 40px auto; max-width: 800px; }
+                                @media print {
+                                    body { background: #fff !important; }
+                                    .invoice-preview { box-shadow: none !important; }
+                                    /* Hide print headers/footers if possible (works in some browsers) */
+                                    @page { margin: 0; }
+                                    /* Remove default margins */
+                                    html, body { margin: 0 !important; padding: 0 !important; }
+                                }
+                            </style>
+                        </head>
+                        <body>
+                            <div class="invoice-preview">
+                                ${modalContent}
+                            </div>
+                        </body>
+                        </html>
+                    `);
+                    printWindow.document.close();
+                    printWindow.focus();
+                    printWindow.onload = function() {
+                        printWindow.print();
+                        printWindow.close();
+                    };
                 });
             },
 
