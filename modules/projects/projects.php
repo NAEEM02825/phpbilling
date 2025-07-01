@@ -47,7 +47,8 @@
             <div class="card-body">
                 <h6 class="card-title text-muted">Last Week</h6>
                 <h3 class="mb-0">
-                    <?php echo date('M d', strtotime('-7 days')) . ' - ' . date('M d', strtotime('-1 day')); ?></h3>
+                    <?php echo date('M d', strtotime('-7 days')) . ' - ' . date('M d', strtotime('-1 day')); ?>
+                </h3>
             </div>
         </div>
     </div>
@@ -59,18 +60,6 @@
         <button class="nav-link active" id="all-projects-tab" data-bs-toggle="tab" data-bs-target="#all-projects"
             type="button" role="tab">
             <i class="fas fa-list me-1"></i> All Projects
-        </button>
-    </li>
-    <li class="nav-item" role="presentation">
-        <button class="nav-link" id="sf-projects-tab" data-bs-toggle="tab" data-bs-target="#sf-projects" type="button"
-            role="tab">
-            SF Projects
-        </button>
-    </li>
-    <li class="nav-item" role="presentation">
-        <button class="nav-link" id="other-projects-tab" data-bs-toggle="tab" data-bs-target="#other-projects"
-            type="button" role="tab">
-            Other Projects
         </button>
     </li>
 </ul>
@@ -249,12 +238,12 @@
                     <table class="table table-hover" id="tasksTable">
                         <thead>
                             <tr>
+                                <th>Title</th>
                                 <th>Date</th>
                                 <th>Task Details</th>
                                 <th>Hours</th>
                                 <th>Status</th>
                                 <th>ClickUp Link</th>
-                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -364,20 +353,32 @@
             if ($(this).val() === 'Recurring') {
                 $('#recurringRateField').show();
                 $('#hourlyRateField').hide();
+                $('#recurringRate').attr('name', 'rate').prop('disabled', false);
+                $('#hourlyRate').removeAttr('name').prop('disabled', true);
             } else {
                 $('#recurringRateField').hide();
                 $('#hourlyRateField').show();
+                $('#hourlyRate').attr('name', 'rate').prop('disabled', false);
+                $('#recurringRate').removeAttr('name').prop('disabled', true);
             }
         });
+        // Trigger change on page load to set correct state
+        $('input[name="type"]:checked').trigger('change');
 
         // Handle project form submission
         $('#projectForm').submit(function (e) {
             e.preventDefault();
 
             const formData = $(this).serialize();
+            const editId = $(this).data('edit-id');
+            let url = 'ajax_helpers/ajax_add_projects.php?action=create';
+
+            if (editId) {
+                url = 'ajax_helpers/ajax_add_projects.php?action=update&project_id=' + editId;
+            }
 
             $.ajax({
-                url: 'ajax_helpers/ajax_add_projects.php?action=create',
+                url: url,
                 type: 'POST',
                 data: formData,
                 dataType: 'json',
@@ -385,10 +386,12 @@
                     if (response.success) {
                         $('#newProjectModal').modal('hide');
                         $('#projectForm')[0].reset();
+                        $('#projectForm').removeData('edit-id');
+                        $('#newProjectModalLabel').text('Create New Project');
                         loadProjects('all');
                         loadProjects('SF');
                         loadProjects('Other');
-                        alert('Project created successfully!');
+                        alert(editId ? 'Project updated successfully!' : 'Project created successfully!');
                     }
                 },
                 error: function (xhr) {
@@ -431,6 +434,11 @@
             $('#taskModalLabel').text('Tasks for ' + projectName);
             $('#taskProjectId').val(projectId);
             loadTasks(projectId);
+        });
+
+        $('#newProjectModal').on('hidden.bs.modal', function () {
+            $('#projectForm button[type="submit"]').text('Create Project');
+            $('#newProjectModalLabel').text('Create New Project');
         });
     });
 
@@ -477,19 +485,25 @@
                             </td>
                            <td>
     <div class="d-flex gap-2">
-        <a href="#" 
+        <a href="#"
            class="btn btn-outline-secondary p-0 d-flex align-items-center justify-content-center action-view-project"
            style="width:32px;height:32px;border-radius:6px;border:1px solid #dee2e6;"
            title="View Project" data-id="${project.id}">
             <i class="fas fa-eye"></i>
         </a>
-        <a href="#" 
+        <a href="#"
            class="btn btn-outline-primary p-0 d-flex align-items-center justify-content-center action-edit-project"
            style="width:32px;height:32px;border-radius:6px;border:1px solid #3a4f8a;"
            title="Edit Project" data-id="${project.id}">
             <i class="fas fa-edit"></i>
         </a>
-        <a href="#" 
+        <a href="#"
+           class="btn btn-outline-danger p-0 d-flex align-items-center justify-content-center action-delete-project"
+           style="width:32px;height:32px;border-radius:6px;border:1px solid #dc3545;"
+           title="Delete Project" data-id="${project.id}">
+            <i class="fas fa-trash"></i>
+        </a>
+        <a href="#"
            class="btn btn-outline-info p-0 d-flex align-items-center justify-content-center view-tasks"
            style="width:32px;height:32px;border-radius:6px;border:1px solid #17a2b8;"
            title="View Tasks"
@@ -701,6 +715,66 @@
         }
     }
 
+    $(document).on('click', '.action-edit-project', function (e) {
+        e.preventDefault();
+        const projectId = $(this).data('id');
+
+        // Fetch project data from the server
+        $.ajax({
+            url: 'ajax_helpers/ajax_add_projects.php?action=get&project_id=' + projectId,
+            type: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                if (response.success && response.data) {
+                    const project = response.data;
+
+                    // Fill modal fields
+                    $('#newProjectModalLabel').text('Edit Project');
+                    $('#projectForm button[type="submit"]').text('Update Project'); // <-- Add this line
+                    $('#projectName').val(project.name);
+                    $('#fromCompany').val(project.from_company);
+                    $('#toClient').val(project.to_client);
+                    $('input[name="type"][value="' + project.type + '"]').prop('checked', true).trigger('change');
+                    $('#recurringRate').val(project.type === 'Recurring' ? project.rate : '');
+                    $('#hourlyRate').val(project.type === 'Hourly' ? project.rate : '');
+                    $('#paymentCycle').val(project.payment_cycle);
+
+                    // Store project ID for update
+                    $('#projectForm').data('edit-id', project.id);
+
+                    // Show modal
+                    $('#newProjectModal').modal('show');
+                } else {
+                    alert('Could not load project data.');
+                }
+            },
+            error: function () {
+                alert('Error loading project data.');
+            }
+        });
+    });
+    $(document).on('click', '.action-delete-project', function (e) {
+        e.preventDefault();
+        const projectId = $(this).data('id');
+        if (!confirm('Are you sure you want to delete this project? This action cannot be undone.')) return;
+
+        $.ajax({
+            url: 'ajax_helpers/ajax_add_projects.php?action=delete&project_id=' + projectId,
+            type: 'POST',
+            dataType: 'json',
+            success: function (response) {
+                if (response.success) {
+                    loadProjects('all');
+                    alert('Project deleted successfully!');
+                } else {
+                    alert(response.error || 'Failed to delete project.');
+                }
+            },
+            error: function (xhr) {
+                alert('Error: ' + (xhr.responseJSON?.error || 'Failed to delete project.'));
+            }
+        });
+    });
     function loadTasks(projectId) {
         $.ajax({
             url: 'ajax_helpers/ajax_add_tasks.php?action=list&project_id=' + projectId,
@@ -722,19 +796,12 @@
 
                         const row = `
                         <tr>
+                            <td>${task.title || ''}</td>
                             <td>${task.task_date}</td>
                             <td>${task.details}</td>
                             <td>${task.hours}</td>
                             <td>${statusBadge}</td>
                             <td>${clickupLink}</td>
-                            <td>
-                                <a href="#" 
-                                    class="btn btn-outline-primary p-0 d-flex align-items-center justify-content-center action-edit-task"
-                                    style="width:32px;height:32px;border-radius:6px;border:1px solid #3a4f8a;"
-                                    title="Edit Task" data-id="${task.id}">
-                                        <i class="fas fa-edit"></i>
-                                </a>
-                            </td>
                         </tr>
                     `;
 
