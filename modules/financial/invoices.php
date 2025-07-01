@@ -3,9 +3,6 @@ $projects = DB::query("SELECT * FROM projects ");
 
 ?>
 <!-- Invoices Page Header -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-4 pb-3 mb-4 border-bottom">
     <div>
         <h1 class="h2">Invoice Management</h1>
@@ -15,6 +12,9 @@ $projects = DB::query("SELECT * FROM projects ");
         <div class="btn-group me-2">
             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newInvoiceModal">
                 <i class="fas fa-plus me-1"></i> New Invoice
+            </button>
+            <button type="button" class="btn btn-outline-secondary">
+                <i class="fas fa-filter me-1"></i> Filter
             </button>
         </div>
         <div class="dropdown">
@@ -221,19 +221,19 @@ $projects = DB::query("SELECT * FROM projects ");
 </div>
 
 <!-- View Invoice Modal -->
-<!-- Update your viewInvoiceModal content -->
-<div class="modal-body" id="invoiceDetailsContent">
-    <div id="invoice-pdf-content">
-        <div class="invoice-preview">
-            <!-- Your existing invoice content structure -->
-            <div id="invoice-header">
-                <!-- Header content -->
+<div class="modal fade" id="viewInvoiceModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Invoice Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div id="invoice-body">
-                <!-- Items table -->
+            <div class="modal-body" id="invoiceDetailsContent">
+                <!-- Will be populated dynamically -->
             </div>
-            <div id="invoice-footer">
-                <!-- Totals and notes -->
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="printInvoiceBtn">Print</button>
             </div>
         </div>
     </div>
@@ -350,44 +350,6 @@ $projects = DB::query("SELECT * FROM projects ");
         padding: 0.5rem 1rem;
         border-radius: 4px;
         font-weight: bold;
-    }
-
-    /* Add to your existing styles */
-    .invoice-preview {
-        width: 100%;
-        max-width: 800px;
-        margin: 0 auto;
-        background: white;
-        padding: 20px;
-        box-sizing: border-box;
-    }
-
-    #invoice-header {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 20px;
-    }
-
-    #invoice-body table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-
-    #invoice-body th,
-    #invoice-body td {
-        padding: 8px;
-        border: 1px solid #ddd;
-        text-align: left;
-    }
-
-    #invoice-footer {
-        margin-top: 20px;
-        text-align: right;
-    }
-
-    /* Ensure fonts are embedded in PDF */
-    body {
-        font-family: Arial, sans-serif;
     }
 </style>
 
@@ -768,37 +730,49 @@ $projects = DB::query("SELECT * FROM projects ");
                     }
 
                     row.innerHTML = `
-        <td>
-            <div class="form-check">
-                <input class="form-check-input" type="checkbox" value="${invoice.id}">
-            </div>
-        </td>
-        <td>${invoice.invoice_number}</td>
-        <td>${invoice.client_name}</td>
-        <td>${issueDate}</td>
-        <td>${dueDate}</td>
-        <td>$${parseFloat(invoice.total_amount).toFixed(2)}</td>
-        <td>${statusBadge}</td>
-        <td>
-            <div class="d-flex gap-2">
-               <button type="button" class="btn btn-primary" id="downloadPdfBtn">
-    <i class="fas fa-file-pdf me-1"></i> Download PDF
-</button>
-                <a href="#" class="btn btn-outline-success btn-sm d-flex align-items-center justify-content-center" title="Edit"
-                   onclick="invoiceManager.editInvoice(${invoice.id}); return false;" style="width:32px;height:32px;border-radius:6px;">
-                    <i class="fas fa-edit"></i>
-                </a>
-                <a href="#" class="btn btn-outline-info btn-sm d-flex align-items-center justify-content-center" title="Send"
-                   onclick="invoiceManager.sendInvoice(${invoice.id}); return false;" style="width:32px;height:32px;border-radius:6px;">
-                    <i class="fas fa-paper-plane"></i>
-                </a>
-                <a href="#" class="btn btn-outline-danger btn-sm d-flex align-items-center justify-content-center" title="Delete"
-                   onclick="invoiceManager.deleteInvoice(${invoice.id}); return false;" style="width:32px;height:32px;border-radius:6px;">
-                    <i class="fas fa-trash"></i>
-                </a>
-            </div>
-        </td>
-    `;
+            <td>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="${invoice.id}">
+                </div>
+            </td>
+            <td>${invoice.invoice_number}</td>
+            <td>${invoice.client_name}</td>
+            <td>${issueDate}</td>
+            <td>${dueDate}</td>
+            <td>$${parseFloat(invoice.total_amount).toFixed(2)}</td>
+            <td>${statusBadge}</td>
+            <td>
+                <div class="dropdown">
+                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" 
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                        Actions
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a class="dropdown-item" href="#" onclick="invoiceManager.viewInvoice(${invoice.id})">
+                                <i class="fas fa-eye me-1"></i> View
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="#" onclick="invoiceManager.editInvoice(${invoice.id})">
+                                <i class="fas fa-edit me-1"></i> Edit
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="#" onclick="invoiceManager.sendInvoice(${invoice.id})">
+                                <i class="fas fa-paper-plane me-1"></i> Send
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <a class="dropdown-item text-danger" href="#" onclick="invoiceManager.deleteInvoice(${invoice.id})">
+                                <i class="fas fa-trash me-1"></i> Delete
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </td>
+        `;
 
                     tbody.appendChild(row);
                 });
@@ -859,7 +833,6 @@ $projects = DB::query("SELECT * FROM projects ");
                     pagination.appendChild(lastLi);
                 }
 
-
                 // Next button
                 const nextLi = document.createElement('li');
                 nextLi.className = `page-item ${this.currentPage === totalPages ? 'disabled' : ''}`;
@@ -910,72 +883,7 @@ $projects = DB::query("SELECT * FROM projects ");
                     this.showInvoiceModal(invoiceDetails);
                 }, 500);
             },
-            downloadPDF: function(invoiceId) {
-                // Show loading state
-                const pdfBtn = document.getElementById('printInvoiceBtn');
-                const originalText = pdfBtn.innerHTML;
-                pdfBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Preparing PDF...';
-                pdfBtn.disabled = true;
 
-                // First fetch the complete invoice data
-                fetch(`ajax_helpers/getInvoiceDetails.php?id=${invoiceId}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (!data.success) {
-                            throw new Error(data.error || 'Failed to load invoice details');
-                        }
-
-                        // Populate the modal with the data (similar to showInvoiceModal)
-                        this.showInvoiceModal(data.invoice);
-
-                        // Wait for the modal to render
-                        setTimeout(() => {
-                            this.generatePDF(invoiceId);
-                            pdfBtn.innerHTML = originalText;
-                            pdfBtn.disabled = false;
-                        }, 500);
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('Error generating PDF: ' + error.message);
-                        pdfBtn.innerHTML = originalText;
-                        pdfBtn.disabled = false;
-                    });
-            },
-
-            generatePDF: function(invoiceId) {
-                const {
-                    jsPDF
-                } = window.jspdf;
-                const element = document.getElementById('invoice-pdf-content');
-
-                // Options for html2canvas
-                const options = {
-                    scale: 2,
-                    useCORS: true,
-                    allowTaint: true,
-                    logging: true
-                };
-
-                // Generate PDF
-                html2canvas(element, options).then(canvas => {
-                    const imgData = canvas.toDataURL('image/png');
-                    const pdf = new jsPDF({
-                        orientation: 'portrait',
-                        unit: 'mm'
-                    });
-
-                    const imgProps = pdf.getImageProperties(imgData);
-                    const pdfWidth = pdf.internal.pageSize.getWidth();
-                    const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-
-                    // Add image to PDF
-                    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-
-                    // Save the PDF
-                    pdf.save(`invoice_${invoiceId}.pdf`);
-                });
-            },
             showInvoiceModal: function(invoice) {
                 const modalContent = document.getElementById('invoiceDetailsContent');
 
