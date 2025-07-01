@@ -1,8 +1,12 @@
+
 <?php
 $projects = DB::query("SELECT * FROM projects ");
 
 ?>
 <!-- Invoices Page Header -->
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-4 pb-3 mb-4 border-bottom">
     <div>
         <h1 class="h2">Invoice Management</h1>
