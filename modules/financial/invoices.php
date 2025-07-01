@@ -313,27 +313,32 @@ $projects = DB::query("SELECT * FROM projects ");
                 };
             },
 
-            loadClients: function() {
-                fetch('ajax_helpers/getClients.php')
-                    .then(response => response.json())
-                    .then(clients => {
-                        const clientFilter = document.getElementById('clientFilter');
-                        const invoiceClient = document.getElementById('invoiceClient');
+          loadClients: function() {
+    fetch('ajax_helpers/getClients.php')
+        .then(response => response.json())
+        .then(clients => {
+            const clientFilter = document.getElementById('clientFilter');
+            const invoiceClient = document.getElementById('invoiceClient');
 
-                        clients.forEach(client => {
-                            const option1 = document.createElement('option');
-                            option1.value = client.id;
-                            option1.textContent = client.first_name;
-                            clientFilter.appendChild(option1);
+            clients.forEach(client => {
+                // Combine first_name and last_name
+                const fullName = `${client.first_name} ${client.last_name}`;
+                
+                // For clientFilter
+                const option1 = document.createElement('option');
+                option1.value = client.id;
+                option1.textContent = fullName;
+                clientFilter.appendChild(option1);
 
-                            const option2 = document.createElement('option');
-                            option2.value = client.id;
-                            option2.textContent = client.first_name;
-                            invoiceClient.appendChild(option2);
-                        });
-                    })
-                    .catch(error => console.error('Error loading clients:', error));
-            },
+                // For invoiceClient
+                const option2 = document.createElement('option');
+                option2.value = client.id;
+                option2.textContent = fullName;
+                invoiceClient.appendChild(option2);
+            });
+        })
+        .catch(error => console.error('Error loading clients:', error));
+},
 
             loadProjectsForClient: function(clientId) {
                 if (!clientId) {
