@@ -47,7 +47,8 @@
             <div class="card-body">
                 <h6 class="card-title text-muted">Last Week</h6>
                 <h3 class="mb-0">
-                    <?php echo date('M d', strtotime('-7 days')) . ' - ' . date('M d', strtotime('-1 day')); ?></h3>
+                    <?php echo date('M d', strtotime('-7 days')) . ' - ' . date('M d', strtotime('-1 day')); ?>
+                </h3>
             </div>
         </div>
     </div>
@@ -237,12 +238,12 @@
                     <table class="table table-hover" id="tasksTable">
                         <thead>
                             <tr>
+                                <th>Title</th>
                                 <th>Date</th>
                                 <th>Task Details</th>
                                 <th>Hours</th>
                                 <th>Status</th>
                                 <th>ClickUp Link</th>
-                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -761,19 +762,12 @@
 
                         const row = `
                         <tr>
+                            <td>${task.title || ''}</td>
                             <td>${task.task_date}</td>
                             <td>${task.details}</td>
                             <td>${task.hours}</td>
                             <td>${statusBadge}</td>
                             <td>${clickupLink}</td>
-                            <td>
-                                <a href="#" 
-                                    class="btn btn-outline-primary p-0 d-flex align-items-center justify-content-center action-edit-task"
-                                    style="width:32px;height:32px;border-radius:6px;border:1px solid #3a4f8a;"
-                                    title="Edit Task" data-id="${task.id}">
-                                        <i class="fas fa-edit"></i>
-                                </a>
-                            </td>
                         </tr>
                     `;
 
