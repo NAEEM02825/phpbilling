@@ -353,11 +353,17 @@
             if ($(this).val() === 'Recurring') {
                 $('#recurringRateField').show();
                 $('#hourlyRateField').hide();
+                $('#recurringRate').attr('name', 'rate').prop('disabled', false);
+                $('#hourlyRate').removeAttr('name').prop('disabled', true);
             } else {
                 $('#recurringRateField').hide();
                 $('#hourlyRateField').show();
+                $('#hourlyRate').attr('name', 'rate').prop('disabled', false);
+                $('#recurringRate').removeAttr('name').prop('disabled', true);
             }
         });
+        // Trigger change on page load to set correct state
+        $('input[name="type"]:checked').trigger('change');
 
         // Handle project form submission
         $('#projectForm').submit(function (e) {
