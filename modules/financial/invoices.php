@@ -627,46 +627,51 @@ $projects = DB::query("SELECT * FROM projects ");
 },
 
 showInvoiceModal: function(invoice) {
-    console.log('Showing invoice:', invoice);
     try {
-        // Validate required invoice properties
-        if (!invoice || !invoice.invoice_number || !invoice.items) {
-            throw new Error('Invalid invoice data structure');
+        // Validate required fields
+        if (!invoice || !invoice.invoice_number) {
+            throw new Error('Invalid invoice data received');
         }
 
         const modalContent = document.getElementById('invoiceDetailsContent');
-        const issueDate = new Date(invoice.issue_date).toLocaleDateString();
-        const dueDate = new Date(invoice.due_date).toLocaleDateString();
+        
+        // Format dates with fallbacks
+        const issueDate = invoice.issue_date 
+            ? new Date(invoice.issue_date).toLocaleDateString() 
+            : 'Not specified';
+            
+        const dueDate = invoice.due_date 
+            ? new Date(invoice.due_date).toLocaleDateString() 
+            : 'Not specified';
 
-        let statusBadge;
-        switch (invoice.status) {
-            case 'paid':
-                statusBadge = '<span class="badge bg-success">Paid</span>';
-                break;
-            case 'pending':
-                statusBadge = '<span class="badge bg-primary">Pending</span>';
-                break;
-            case 'overdue':
-                statusBadge = '<span class="badge bg-danger">Overdue</span>';
-                break;
-            default:
-                statusBadge = '<span class="badge bg-secondary">Draft</span>';
-        }
+        // Status badge with fallback
+        const status = invoice.status || 'draft';
+        const statusBadges = {
+            paid: 'bg-success',
+            pending: 'bg-primary',
+            overdue: 'bg-danger',
+            draft: 'bg-secondary'
+        };
+        const statusBadge = `<span class="badge ${statusBadges[status]}">${status}</span>`;
 
+        // Build items table
         let itemsHtml = '';
-        invoice.items.forEach(item => {
-            itemsHtml += `<tr>
-                <td>${item.task_title || item.description || 'No description'}</td>
-                <td class="text-end">${item.quantity || 1}</td>
-                <td class="text-end">$${parseFloat(item.unit_price || 0).toFixed(2)}</td>
-                <td class="text-end">$${parseFloat(item.amount || 0).toFixed(2)}</td>
-            </tr>`;
+        (invoice.items || []).forEach(item => {
+            itemsHtml += `
+                <tr>
+                    <td>${item.task_title || 'No title'}</td>
+                    <td class="text-end">${item.quantity || 1}</td>
+                    <td class="text-end">$${(item.unit_price || 0).toFixed(2)}</td>
+                    <td class="text-end">$${(item.amount || 0).toFixed(2)}</td>
+                </tr>`;
         });
 
-        const subtotal = invoice.total_amount || invoice.items.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
-        const tax = 0; // You can add tax calculation if needed
-        const total = subtotal + tax;
+        // Calculate totals
+        const subtotal = invoice.total_amount || 
+            (invoice.items || []).reduce((sum, item) => sum + (parseFloat(item.amount) || 0, 0));
+        const total = parseFloat(subtotal).toFixed(2);
 
+        // Build the modal content
         modalContent.innerHTML = `
             <div class="invoice-preview">
                 <div class="invoice-header d-flex justify-content-between mb-4">
@@ -677,7 +682,7 @@ showInvoiceModal: function(invoice) {
                         <p class="mb-1"><strong>Due Date:</strong> ${dueDate}</p>
                     </div>
                     <div class="text-end">
-                        <h4>${invoice.client_name}</h4>
+                        <h4>${invoice.client_name || 'No client'}</h4>
                         ${invoice.client_info ? `
                         <p class="mb-1">${invoice.client_info.address || ''}</p>
                         <p class="mb-1">Phone: ${invoice.client_info.phone || ''}</p>
@@ -704,19 +709,9 @@ showInvoiceModal: function(invoice) {
                     <div class="row justify-content-end">
                         <div class="col-md-4">
                             <table class="table">
-                                <tr>
-                                    <td><strong>Subtotal:</strong></td>
-                                    <td class="text-end">$${subtotal.toFixed(2)}</td>
-                                </tr>
-                                ${tax > 0 ? `
-                                <tr>
-                                    <td><strong>Tax:</strong></td>
-                                    <td class="text-end">$${tax.toFixed(2)}</td>
-                                </tr>
-                                ` : ''}
                                 <tr class="table-active">
                                     <td><strong>Total:</strong></td>
-                                    <td class="text-end">$${total.toFixed(2)}</td>
+                                    <td class="text-end">$${total}</td>
                                 </tr>
                             </table>
                         </div>
@@ -732,22 +727,22 @@ showInvoiceModal: function(invoice) {
             </div>
         `;
 
-        const modal = bootstrap.Modal.getInstance(document.getElementById('viewInvoiceModal')) ||
-            new bootstrap.Modal(document.getElementById('viewInvoiceModal'));
-        modal.show();
-    } catch (error) {
-        console.error('Error showing invoice modal:', error);
-        const modalContent = document.getElementById('invoiceDetailsContent');
-        modalContent.innerHTML = `
-            <div class="alert alert-danger">
-                <h5>Error displaying invoice</h5>
-                <p>${error.message}</p>
-                <pre>${JSON.stringify(invoice, null, 2)}</pre>
-            </div>
-        `;
-        
+        // Show the modal
         const modal = new bootstrap.Modal(document.getElementById('viewInvoiceModal'));
         modal.show();
+
+    } catch (error) {
+        console.error('Error displaying invoice:', error);
+        document.getElementById('invoiceDetailsContent').innerHTML = `
+            <div class="alert alert-danger">
+                <h4>Error Displaying Invoice</h4>
+                <p>${error.message}</p>
+                <button class="btn btn-sm btn-secondary" onclick="window.location.reload()">
+                    Reload Page
+                </button>
+            </div>
+        `;
+        new bootstrap.Modal(document.getElementById('viewInvoiceModal')).show();
     }
 },
 

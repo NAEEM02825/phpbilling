@@ -11,8 +11,11 @@ try {
 
     // Get invoice header data
     $invoice = DB::queryFirstRow("
-        SELECT i.*, c.name AS client_name, c.email AS client_email, 
-               c.address AS client_address, c.phone AS client_phone
+        SELECT i.*, 
+               CONCAT(c.first_name, ' ', c.last_name) AS client_name, 
+               c.email AS client_email, 
+               c.address AS client_address, 
+               c.phone AS client_phone
         FROM invoices i
         LEFT JOIN clients c ON i.client_id = c.id
         WHERE i.id = %d
@@ -22,10 +25,10 @@ try {
         throw new Exception("Invoice not found");
     }
 
-    // Get invoice items
+    // Get invoice items (fixed query)
     $items = DB::query("
-        SELECT it.*, t.title AS task_title, t.description AS task_description
-        FROM invoice_tasks it
+        SELECT it.*, t.title AS task_title
+        FROM invoice_items it
         LEFT JOIN tasks t ON it.task_id = t.id
         WHERE it.invoice_id = %d
     ", $invoiceId);
@@ -46,7 +49,17 @@ try {
             'status' => $invoice['status'],
             'total_amount' => $invoice['total_amount'],
             'notes' => $invoice['notes'],
-            'items' => $items
+            'items' => array_map(function($item) {
+                return [
+                    'id' => $item['id'],
+                    'task_id' => $item['task_id'],
+                    'task_title' => $item['task_title'],
+                    'description' => $item['description'] ?? $item['task_title'],
+                    'quantity' => $item['quantity'],
+                    'unit_price' => $item['unit_price'],
+                    'amount' => $item['amount']
+                ];
+            }, $items)
         ]
     ]);
 } catch (Exception $e) {
