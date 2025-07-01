@@ -174,8 +174,18 @@
                         </div>
 
                         <div class="col-md-6">
-                            <label for="toClient" class="form-label">To Client</label>
-                            <input type="text" class="form-control" id="toClient" name="to_client" required>
+                            <label for="clientSelect" class="form-label"> To Client</label>
+                            <select class="form-select" id="clientSelect" name="client_id">
+                                <option value="">Select a client...</option>
+                                <!-- Client options will be populated here -->
+                                <?php foreach ($clients as $client): ?>
+                                    <option value="<?php echo $client['id']; ?>">
+                                        <?php echo htmlspecialchars($client['name']); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                            <!-- Keep the original to_client field as hidden for backward compatibility -->
+                            <input type="hidden" id="toClient" name="to_client">
                         </div>
 
                         <div class="col-md-6">
@@ -332,12 +342,38 @@
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    $(document).ready(function () {
+    document.addEventListener('DOMContentLoaded', function() {
+        const select = document.getElementById('clientSelect');
+        select.disabled = true; // Disable while loading
+
+        fetch('ajax_helpers/getClients.php')
+            .then(response => {
+                if (!response.ok) throw new Error('Network response was not ok');
+                return response.json();
+            })
+            .then(clients => {
+                // Clear loading message
+                select.innerHTML = '<option value="">Select a client...</option>';
+
+                clients.forEach(client => {
+                    const fullName = `${client.first_name} ${client.last_name}`;
+                    const option = new Option(fullName, client.id);
+                    select.add(option);
+                });
+                select.disabled = false;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                // Show error message to user
+                select.innerHTML = '<option value="">Failed to load clients</option>';
+            });
+    });
+    $(document).ready(function() {
         // Load projects when page loads
         loadProjects('all');
 
         // Load projects when tab changes
-        $('button[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
+        $('button[data-bs-toggle="tab"]').on('shown.bs.tab', function(e) {
             const target = $(e.target).attr('data-bs-target');
             if (target === '#all-projects') {
                 loadProjects('all');
@@ -349,7 +385,7 @@
         });
 
         // Toggle between recurring and hourly rate fields
-        $('input[name="type"]').change(function () {
+        $('input[name="type"]').change(function() {
             if ($(this).val() === 'Recurring') {
                 $('#recurringRateField').show();
                 $('#hourlyRateField').hide();
@@ -366,7 +402,7 @@
         $('input[name="type"]:checked').trigger('change');
 
         // Handle project form submission
-        $('#projectForm').submit(function (e) {
+        $('#projectForm').submit(function(e) {
             e.preventDefault();
 
             const formData = $(this).serialize();
@@ -382,7 +418,7 @@
                 type: 'POST',
                 data: formData,
                 dataType: 'json',
-                success: function (response) {
+                success: function(response) {
                     if (response.success) {
                         $('#newProjectModal').modal('hide');
                         $('#projectForm')[0].reset();
@@ -394,14 +430,14 @@
                         alert(editId ? 'Project updated successfully!' : 'Project created successfully!');
                     }
                 },
-                error: function (xhr) {
+                error: function(xhr) {
                     alert('Error: ' + xhr.responseJSON.error);
                 }
             });
         });
 
         // Handle task form submission
-        $('#taskForm').submit(function (e) {
+        $('#taskForm').submit(function(e) {
             e.preventDefault();
 
             const formData = $(this).serialize();
@@ -411,7 +447,7 @@
                 type: 'POST',
                 data: formData,
                 dataType: 'json',
-                success: function (response) {
+                success: function(response) {
                     if (response.success) {
                         $('#newTaskModal').modal('hide');
                         $('#taskForm')[0].reset();
@@ -419,14 +455,14 @@
                         alert('Task added successfully!');
                     }
                 },
-                error: function (xhr) {
+                error: function(xhr) {
                     alert('Error: ' + xhr.responseJSON.error);
                 }
             });
         });
 
         // When task modal opens, load tasks for the project
-        $('#taskModal').on('show.bs.modal', function (e) {
+        $('#taskModal').on('show.bs.modal', function(e) {
             const button = $(e.relatedTarget);
             const projectId = button.data('project-id');
             const projectName = button.data('project-name');
@@ -436,7 +472,7 @@
             loadTasks(projectId);
         });
 
-        $('#newProjectModal').on('hidden.bs.modal', function () {
+        $('#newProjectModal').on('hidden.bs.modal', function() {
             $('#projectForm button[type="submit"]').text('Create Project');
             $('#newProjectModalLabel').text('Create New Project');
         });
@@ -451,12 +487,12 @@
             url: 'ajax_helpers/ajax_add_projects.php?action=list&category=' + category,
             type: 'GET',
             dataType: 'json',
-            success: function (response) {
+            success: function(response) {
                 if (response.success) {
                     const tbody = $('#' + tableId + ' tbody');
                     tbody.empty();
 
-                    response.data.forEach(function (project) {
+                    response.data.forEach(function(project) {
                         const typeBadge = project.type === 'Recurring' ?
                             '<span class="badge bg-info">Recurring</span>' :
                             '<span class="badge bg-warning">Hourly</span>';
@@ -520,7 +556,7 @@
                     });
                 }
             },
-            error: function (xhr) {
+            error: function(xhr) {
                 alert('Error loading projects: ' + xhr.responseJSON.error);
             }
         });
@@ -715,7 +751,7 @@
         }
     }
 
-    $(document).on('click', '.action-edit-project', function (e) {
+    $(document).on('click', '.action-edit-project', function(e) {
         e.preventDefault();
         const projectId = $(this).data('id');
 
@@ -724,7 +760,7 @@
             url: 'ajax_helpers/ajax_add_projects.php?action=get&project_id=' + projectId,
             type: 'GET',
             dataType: 'json',
-            success: function (response) {
+            success: function(response) {
                 if (response.success && response.data) {
                     const project = response.data;
 
@@ -748,12 +784,12 @@
                     alert('Could not load project data.');
                 }
             },
-            error: function () {
+            error: function() {
                 alert('Error loading project data.');
             }
         });
     });
-    $(document).on('click', '.action-delete-project', function (e) {
+    $(document).on('click', '.action-delete-project', function(e) {
         e.preventDefault();
         const projectId = $(this).data('id');
         if (!confirm('Are you sure you want to delete this project? This action cannot be undone.')) return;
@@ -762,7 +798,7 @@
             url: 'ajax_helpers/ajax_add_projects.php?action=delete&project_id=' + projectId,
             type: 'POST',
             dataType: 'json',
-            success: function (response) {
+            success: function(response) {
                 if (response.success) {
                     loadProjects('all');
                     alert('Project deleted successfully!');
@@ -770,22 +806,23 @@
                     alert(response.error || 'Failed to delete project.');
                 }
             },
-            error: function (xhr) {
+            error: function(xhr) {
                 alert('Error: ' + (xhr.responseJSON?.error || 'Failed to delete project.'));
             }
         });
     });
+
     function loadTasks(projectId) {
         $.ajax({
             url: 'ajax_helpers/ajax_add_tasks.php?action=list&project_id=' + projectId,
             type: 'GET',
             dataType: 'json',
-            success: function (response) {
+            success: function(response) {
                 if (response.success) {
                     const tbody = $('#tasksTable tbody');
                     tbody.empty();
 
-                    response.data.forEach(function (task) {
+                    response.data.forEach(function(task) {
                         const statusBadge = task.status === 'Completed' ?
                             '<span class="badge bg-success">Completed</span>' :
                             '<span class="badge bg-warning">WIP</span>';
@@ -809,7 +846,7 @@
                     });
                 }
             },
-            error: function (xhr) {
+            error: function(xhr) {
                 alert('Error loading tasks: ' + xhr.responseJSON.error);
             }
         });
