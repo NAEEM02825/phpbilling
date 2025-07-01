@@ -4,54 +4,66 @@ header('Content-Type: application/json');
 
 try {
     // Get parameters
-    $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
-    $perPage = isset($_GET['per_page']) ? max(1, intval($_GET['per_page'])) : 10;
-    $offset = ($page - 1) * $perPage;
+
     $status = isset($_GET['status']) ? $_GET['status'] : '';
     $clientId = isset($_GET['client_id']) ? intval($_GET['client_id']) : 0;
 
     // Build WHERE clause
     $where = [];
+    $whereArgs = [];
 
     if (!empty($status)) {
-        $where["status"] = $status;
+        $where[] = "i.status = %s";
+        $whereArgs[] = $status;
     }
 
     if ($clientId > 0) {
-        $where["client_id"] = $clientId;
+        $where[] = "i.client_id = %d";
+        $whereArgs[] = $clientId;
     }
 
     if (!empty($_GET['date_from'])) {
-        $where["issue_date >= %s"] = $_GET['date_from'];
+        $where[] = "i.issue_date >= %s";
+        $whereArgs[] = $_GET['date_from'];
     }
 
     if (!empty($_GET['date_to'])) {
-        $where["issue_date <= %s"] = $_GET['date_to'];
+        $where[] = "i.issue_date <= %s";
+        $whereArgs[] = $_GET['date_to'];
     }
 
     if (!empty($_GET['amount_from'])) {
-        $where["total_amount >= %f"] = floatval($_GET['amount_from']);
+        $where[] = "i.total_amount >= %f";
+        $whereArgs[] = floatval($_GET['amount_from']);
     }
 
     if (!empty($_GET['amount_to'])) {
-        $where["total_amount <= %f"] = floatval($_GET['amount_to']);
+        $where[] = "i.total_amount <= %f";
+        $whereArgs[] = floatval($_GET['amount_to']);
     }
 
-    // Get total count using MeekroDB's count function
-    $total = DB::queryFirstField("SELECT COUNT(*) FROM invoices %l", $where);
+    // Build the WHERE clause string
+    $whereClause = '';
+    if (!empty($where)) {
+        $whereClause = 'WHERE ' . implode(' AND ', $where);
+    }
 
-    // Get paginated invoice data using DB::select with LEFT JOIN
-    $invoices = DB::query(
-        "SELECT i.*, c.name AS client_name
-         FROM invoices i
-         LEFT JOIN clients c ON i.client_id = c.id
-         %l
-         ORDER BY i.issue_date DESC
-         LIMIT %d OFFSET %d",
-        $where,
-        $perPage, 
-        $offset
-    );
+    // Get total count
+    $totalQuery = "SELECT COUNT(*) FROM invoices i $whereClause";
+    $total = DB::queryFirstField($totalQuery, ...$whereArgs);
+
+    // Get paginated data
+    $query = "SELECT i.*, c.name AS client_name
+              FROM invoices i
+              LEFT JOIN clients c ON i.client_id = c.id
+              $whereClause
+              ORDER BY i.issue_date DESC
+              LIMIT %d OFFSET %d";
+              
+    // Combine all arguments
+    $args = array_merge($whereArgs, [$perPage, $offset]);
+    
+    $invoices = DB::query($query, ...$args);
 
     echo json_encode([
         'success' => true,
