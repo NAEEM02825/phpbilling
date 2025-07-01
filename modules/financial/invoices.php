@@ -253,13 +253,14 @@ $projects = DB::query("SELECT * FROM projects ");
             },
 
             bindEvents: function() {
-                // In your bindEvents method:
+                // View invoice button click
                 document.addEventListener('click', (e) => {
                     if (e.target.closest('.view-invoice-btn')) {
                         const invoiceId = e.target.closest('.view-invoice-btn').getAttribute('data-invoice-id');
                         this.viewInvoice(invoiceId);
                     }
                 });
+
                 // Tab switching
                 document.querySelectorAll('#invoiceTabs button[data-bs-toggle="tab"]').forEach(tab => {
                     tab.addEventListener('click', (e) => {
@@ -381,8 +382,6 @@ $projects = DB::query("SELECT * FROM projects ");
 
                 const url = `ajax_helpers/getTasks.php?project_id=${projectId}&start_date=${startDate.toISOString().split('T')[0]}&end_date=${endDate.toISOString().split('T')[0]}`;
 
-                console.log('Fetching tasks from:', url); // Debug log
-
                 fetch(url)
                     .then(response => {
                         if (!response.ok) {
@@ -391,25 +390,24 @@ $projects = DB::query("SELECT * FROM projects ");
                         return response.json();
                     })
                     .then(data => {
-                        console.log('Tasks API response:', data); // Debug log
                         tbody.innerHTML = '';
 
                         if (data && data.length > 0) {
                             data.forEach(task => {
                                 const row = document.createElement('tr');
                                 row.innerHTML = `
-                        <td>
-                            <input type="checkbox" class="form-check-input task-checkbox" 
-                                data-task_id="${task.id}" data-hours="${task.hours || 0}">
-                        </td>
-                        <td>${task.title || ''}</td>
-                        <td>${task.details || ''}</td>
-                        <td>${task.project_name || ''}</td>
-                        <td>${task.task_date || ''}</td>
-                        <td>${task.hours || '0'}</td>
-                        <td>${task.assignee_name || ''}</td>
-                        <td>${task.status || ''}</td>
-                    `;
+                                    <td>
+                                        <input type="checkbox" class="form-check-input task-checkbox" 
+                                            data-task_id="${task.id}" data-hours="${task.hours || 0}">
+                                    </td>
+                                    <td>${task.title || ''}</td>
+                                    <td>${task.details || ''}</td>
+                                    <td>${task.project_name || ''}</td>
+                                    <td>${task.task_date || ''}</td>
+                                    <td>${task.hours || '0'}</td>
+                                    <td>${task.assignee_name || ''}</td>
+                                    <td>${task.status || ''}</td>
+                                `;
                                 tbody.appendChild(row);
                             });
 
@@ -425,6 +423,7 @@ $projects = DB::query("SELECT * FROM projects ");
                         tbody.innerHTML = `<tr><td colspan="8" class="text-center py-4 text-danger">Error loading tasks: ${error.message}</td></tr>`;
                     });
             },
+
             loadInvoices: function() {
                 const tbody = document.getElementById('invoicesTableBody');
                 tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4">Loading invoices...</td></tr>';
@@ -485,21 +484,20 @@ $projects = DB::query("SELECT * FROM projects ");
                         <td>${dueDate}</td>
                         <td>$${parseFloat(invoice.total_amount).toFixed(2)}</td>
                         <td>${statusBadge}</td>
-                       <td>
-   <button class="btn btn-sm btn-outline-primary me-1 view-invoice-btn" title="View" data-invoice-id="${invoice.id}">
-    <i class="fas fa-eye"></i>
-</button>
-    <button class="btn btn-sm btn-outline-success me-1" title="Edit" onclick="invoiceManager.editInvoice(${invoice.id})">
-        <i class="fas fa-edit me-1"></i>
-    </button>
-    <button class="btn btn-sm btn-outline-info me-1" title="send" onclick="invoiceManager.sendInvoice(${invoice.id})">
-        <i class="fas fa-paper-plane me-1"></i> 
-    </button>
-    <button class="btn btn-sm btn-outline-danger" title="Delete" onclick="invoiceManager.deleteInvoice(${invoice.id})">
-        <i class="fas fa-trash me-1"></i> 
-    </button>
-</td>
-
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary me-1 view-invoice-btn" title="View" data-invoice-id="${invoice.id}">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-success me-1" title="Edit" onclick="invoiceManager.editInvoice(${invoice.id})">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-info me-1" title="Send" onclick="invoiceManager.sendInvoice(${invoice.id})">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" title="Delete" onclick="invoiceManager.deleteInvoice(${invoice.id})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
                     `;
                     tbody.appendChild(row);
                 });
@@ -514,6 +512,13 @@ $projects = DB::query("SELECT * FROM projects ");
                 const prevLi = document.createElement('li');
                 prevLi.className = `page-item ${this.currentPage === 1 ? 'disabled' : ''}`;
                 prevLi.innerHTML = `<a class="page-link" href="#">Previous</a>`;
+                prevLi.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (this.currentPage > 1) {
+                        this.currentPage--;
+                        this.loadInvoices();
+                    }
+                });
                 pagination.appendChild(prevLi);
 
                 // Page numbers
@@ -529,6 +534,11 @@ $projects = DB::query("SELECT * FROM projects ");
                     const li = document.createElement('li');
                     li.className = `page-item ${i === this.currentPage ? 'active' : ''}`;
                     li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+                    li.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        this.currentPage = i;
+                        this.loadInvoices();
+                    });
                     pagination.appendChild(li);
                 }
 
@@ -536,6 +546,13 @@ $projects = DB::query("SELECT * FROM projects ");
                 const nextLi = document.createElement('li');
                 nextLi.className = `page-item ${this.currentPage === totalPages ? 'disabled' : ''}`;
                 nextLi.innerHTML = `<a class="page-link" href="#">Next</a>`;
+                nextLi.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (this.currentPage < totalPages) {
+                        this.currentPage++;
+                        this.loadInvoices();
+                    }
+                });
                 pagination.appendChild(nextLi);
 
                 // Update showing text
@@ -604,154 +621,168 @@ $projects = DB::query("SELECT * FROM projects ");
                     });
             },
 
-         viewInvoice: function(invoiceId) {
-    console.log('Attempting to view invoice:', invoiceId);
-    fetch(`ajax_helpers/getInvoiceDetails.php?id=${invoiceId}`)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (!data.success) {
-                throw new Error(data.error || 'Failed to load invoice');
-            }
-            console.log('Invoice data received:', data);
-            this.showInvoiceModal(data.invoice); // Pass data.invoice instead of data
-        })
-        .catch(error => {
-            console.error('Error loading invoice:', error);
-            alert('Error loading invoice details: ' + error.message);
-        });
-},
+            viewInvoice: function(invoiceId) {
+                fetch(`ajax_helpers/getInvoiceDetails.php?id=${invoiceId}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (!data.success) {
+                            throw new Error(data.error || 'Failed to load invoice');
+                        }
+                        this.showInvoiceModal(data.invoice);
+                    })
+                    .catch(error => {
+                        console.error('Error loading invoice:', error);
+                        alert('Error loading invoice details: ' + error.message);
+                    });
+            },
 
-showInvoiceModal: function(invoice) {
-    try {
-        // Validate required fields
-        if (!invoice || !invoice.invoice_number) {
-            throw new Error('Invalid invoice data received');
-        }
+            showInvoiceModal: function(invoice) {
+                try {
+                    // Validate required fields
+                    if (!invoice || !invoice.invoice_number) {
+                        throw new Error('Invalid invoice data received');
+                    }
 
-        const modalContent = document.getElementById('invoiceDetailsContent');
-        
-        // Format dates with fallbacks
-        const issueDate = invoice.issue_date 
-            ? new Date(invoice.issue_date).toLocaleDateString() 
-            : 'Not specified';
-            
-        const dueDate = invoice.due_date 
-            ? new Date(invoice.due_date).toLocaleDateString() 
-            : 'Not specified';
+                    const modalContent = document.getElementById('invoiceDetailsContent');
+                    
+                    // Format dates with fallbacks
+                    const issueDate = invoice.issue_date 
+                        ? new Date(invoice.issue_date).toLocaleDateString() 
+                        : 'Not specified';
+                        
+                    const dueDate = invoice.due_date 
+                        ? new Date(invoice.due_date).toLocaleDateString() 
+                        : 'Not specified';
 
-        // Status badge with fallback
-        const status = invoice.status || 'draft';
-        const statusBadges = {
-            paid: 'bg-success',
-            pending: 'bg-primary',
-            overdue: 'bg-danger',
-            draft: 'bg-secondary'
-        };
-        const statusBadge = `<span class="badge ${statusBadges[status]}">${status}</span>`;
+                    // Status badge with fallback
+                    const status = invoice.status || 'draft';
+                    const statusBadges = {
+                        paid: 'bg-success',
+                        pending: 'bg-primary',
+                        overdue: 'bg-danger',
+                        draft: 'bg-secondary'
+                    };
+                    const statusBadge = `<span class="badge ${statusBadges[status]}">${status}</span>`;
 
-        // Build items table
-        let itemsHtml = '';
-        (invoice.items || []).forEach(item => {
-            itemsHtml += `
-                <tr>
-                    <td>${item.task_title || 'No title'}</td>
-                    <td class="text-end">${item.quantity || 1}</td>
-                    <td class="text-end">$${(item.unit_price || 0).toFixed(2)}</td>
-                    <td class="text-end">$${(item.amount || 0).toFixed(2)}</td>
-                </tr>`;
-        });
-
-        // Calculate totals
-        const subtotal = invoice.total_amount || 
-            (invoice.items || []).reduce((sum, item) => sum + (parseFloat(item.amount) || 0, 0));
-        const total = parseFloat(subtotal).toFixed(2);
-
-        // Build the modal content
-        modalContent.innerHTML = `
-            <div class="invoice-preview">
-                <div class="invoice-header d-flex justify-content-between mb-4">
-                    <div>
-                        <h4>Invoice ${invoice.invoice_number}</h4>
-                        <p class="mb-1"><strong>Status:</strong> ${statusBadge}</p>
-                        <p class="mb-1"><strong>Issue Date:</strong> ${issueDate}</p>
-                        <p class="mb-1"><strong>Due Date:</strong> ${dueDate}</p>
-                    </div>
-                    <div class="text-end">
-                        <h4>${invoice.client_name || 'No client'}</h4>
-                        ${invoice.client_info ? `
-                        <p class="mb-1">${invoice.client_info.address || ''}</p>
-                        <p class="mb-1">Phone: ${invoice.client_info.phone || ''}</p>
-                        <p class="mb-1">Email: ${invoice.client_info.email || ''}</p>
-                        ` : ''}
-                    </div>
-                </div>
-                
-                <div class="invoice-items mb-4">
-                    <table class="table table-bordered">
-                        <thead class="table-light">
+                    // Build items table
+                    let itemsHtml = '';
+                    (invoice.items || []).forEach(item => {
+                        // Convert string prices to numbers
+                        const unitPrice = parseFloat(item.unit_price) || 0;
+                        const amount = parseFloat(item.amount) || 0;
+                        
+                        itemsHtml += `
                             <tr>
-                                <th>Description</th>
-                                <th class="text-end">Qty</th>
-                                <th class="text-end">Unit Price</th>
-                                <th class="text-end">Amount</th>
-                            </tr>
-                        </thead>
-                        <tbody>${itemsHtml}</tbody>
-                    </table>
-                </div>
-                
-                <div class="invoice-totals">
-                    <div class="row justify-content-end">
-                        <div class="col-md-4">
-                            <table class="table">
-                                <tr class="table-active">
-                                    <td><strong>Total:</strong></td>
-                                    <td class="text-end">$${total}</td>
-                                </tr>
-                            </table>
+                                <td>${item.task_title || 'No title'}</td>
+                                <td class="text-end">${item.quantity || 1}</td>
+                                <td class="text-end">$${unitPrice.toFixed(2)}</td>
+                                <td class="text-end">$${amount.toFixed(2)}</td>
+                            </tr>`;
+                    });
+
+                    // Calculate totals
+                    const subtotal = parseFloat(invoice.total_amount) || 
+                        (invoice.items || []).reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
+                    const total = subtotal.toFixed(2);
+
+                    // Build the modal content
+                    modalContent.innerHTML = `
+                        <div class="invoice-preview">
+                            <div class="invoice-header d-flex justify-content-between mb-4">
+                                <div>
+                                    <h4>Invoice ${invoice.invoice_number}</h4>
+                                    <p class="mb-1"><strong>Status:</strong> ${statusBadge}</p>
+                                    <p class="mb-1"><strong>Issue Date:</strong> ${issueDate}</p>
+                                    <p class="mb-1"><strong>Due Date:</strong> ${dueDate}</p>
+                                </div>
+                                <div class="text-end">
+                                    <h4>${invoice.client_name || 'No client'}</h4>
+                                    ${invoice.client_info ? `
+                                    <p class="mb-1">${invoice.client_info.address || ''}</p>
+                                    <p class="mb-1">Phone: ${invoice.client_info.phone || ''}</p>
+                                    <p class="mb-1">Email: ${invoice.client_info.email || ''}</p>
+                                    ` : ''}
+                                </div>
+                            </div>
+                            
+                            <div class="invoice-items mb-4">
+                                <table class="table table-bordered">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Description</th>
+                                            <th class="text-end">Qty</th>
+                                            <th class="text-end">Unit Price</th>
+                                            <th class="text-end">Amount</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>${itemsHtml}</tbody>
+                                </table>
+                            </div>
+                            
+                            <div class="invoice-totals">
+                                <div class="row justify-content-end">
+                                    <div class="col-md-4">
+                                        <table class="table">
+                                            <tr class="table-active">
+                                                <td><strong>Total:</strong></td>
+                                                <td class="text-end">$${total}</td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            ${invoice.notes ? `
+                            <div class="mt-4 p-3 bg-light rounded">
+                                <h5>Notes</h5>
+                                <p class="mb-0">${invoice.notes}</p>
+                            </div>
+                            ` : ''}
                         </div>
-                    </div>
-                </div>
-                
-                ${invoice.notes ? `
-                <div class="mt-4 p-3 bg-light rounded">
-                    <h5>Notes</h5>
-                    <p class="mb-0">${invoice.notes}</p>
-                </div>
-                ` : ''}
-            </div>
-        `;
+                    `;
 
-        // Show the modal
-        const modal = new bootstrap.Modal(document.getElementById('viewInvoiceModal'));
-        modal.show();
+                    // Show the modal
+                    const modal = new bootstrap.Modal(document.getElementById('viewInvoiceModal'));
+                    modal.show();
 
-    } catch (error) {
-        console.error('Error displaying invoice:', error);
-        document.getElementById('invoiceDetailsContent').innerHTML = `
-            <div class="alert alert-danger">
-                <h4>Error Displaying Invoice</h4>
-                <p>${error.message}</p>
-                <button class="btn btn-sm btn-secondary" onclick="window.location.reload()">
-                    Reload Page
-                </button>
-            </div>
-        `;
-        new bootstrap.Modal(document.getElementById('viewInvoiceModal')).show();
-    }
-},
+                } catch (error) {
+                    console.error('Error displaying invoice:', error);
+                    document.getElementById('invoiceDetailsContent').innerHTML = `
+                        <div class="alert alert-danger">
+                            <h4>Error Displaying Invoice</h4>
+                            <p>${error.message}</p>
+                            <button class="btn btn-sm btn-secondary" onclick="window.location.reload()">
+                                Reload Page
+                            </button>
+                        </div>
+                    `;
+                    new bootstrap.Modal(document.getElementById('viewInvoiceModal')).show();
+                }
+            },
 
             editInvoice: function(invoiceId) {
                 alert(`Edit invoice ${invoiceId} - This would open an edit form`);
             },
 
             sendInvoice: function(invoiceId) {
-                alert(`Send invoice ${invoiceId} to client`);
+                if (confirm(`Are you sure you want to send invoice #${invoiceId} to the client?`)) {
+                    fetch(`ajax_helpers/sendInvoice.php?id=${invoiceId}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                alert('Invoice sent successfully');
+                                this.loadInvoices();
+                            } else {
+                                throw new Error(data.error || 'Failed to send invoice');
+                            }
+                        })
+                        .catch(error => alert('Error sending invoice: ' + error.message));
+                }
             },
 
             deleteInvoice: function(invoiceId) {
@@ -772,7 +803,6 @@ showInvoiceModal: function(invoice) {
         };
 
         invoiceManager.init();
+        window.invoiceManager = invoiceManager;
     });
-    // Make invoiceManager globally available
-    window.invoiceManager = invoiceManager;
 </script>
