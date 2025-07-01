@@ -41,9 +41,12 @@ try {
 
     // Get paginated invoice data using DB::select with LEFT JOIN
     $invoices = DB::query(
-        "SELECT i.*, CONCAT(c.first_name, ' ', c.last_name) AS client_name
+        "SELECT i.*, 
+                CONCAT(c.first_name, ' ', c.last_name) AS client_name,
+                p.name AS project_name
          FROM invoices i
          LEFT JOIN clients c ON i.client_id = c.id
+         LEFT JOIN projects p ON i.project_id = p.id
          %l
          ORDER BY i.issue_date DESC
          LIMIT $perPage OFFSET $offset",
