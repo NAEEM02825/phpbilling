@@ -84,6 +84,18 @@ try {
             echo json_encode(['success' => true, 'message' => 'Project updated successfully']);
             break;
 
+        case 'delete':
+            $projectId = intval($_GET['project_id'] ?? 0);
+            if (!$projectId) {
+                echo json_encode(['success' => false, 'error' => 'Project ID required']);
+                exit;
+            }
+            // Optionally: delete related tasks first if you want to enforce referential integrity
+            DB::query("DELETE FROM tasks WHERE project_id = %i", $projectId);
+            DB::query("DELETE FROM projects WHERE id = %i", $projectId);
+            echo json_encode(['success' => true, 'message' => 'Project deleted successfully']);
+            break;
+
         default:
             http_response_code(400);
             echo json_encode(['error' => 'Invalid action']);

@@ -479,19 +479,25 @@
                             </td>
                            <td>
     <div class="d-flex gap-2">
-        <a href="#" 
+        <a href="#"
            class="btn btn-outline-secondary p-0 d-flex align-items-center justify-content-center action-view-project"
            style="width:32px;height:32px;border-radius:6px;border:1px solid #dee2e6;"
            title="View Project" data-id="${project.id}">
             <i class="fas fa-eye"></i>
         </a>
-        <a href="#" 
+        <a href="#"
            class="btn btn-outline-primary p-0 d-flex align-items-center justify-content-center action-edit-project"
            style="width:32px;height:32px;border-radius:6px;border:1px solid #3a4f8a;"
            title="Edit Project" data-id="${project.id}">
             <i class="fas fa-edit"></i>
         </a>
-        <a href="#" 
+        <a href="#"
+           class="btn btn-outline-danger p-0 d-flex align-items-center justify-content-center action-delete-project"
+           style="width:32px;height:32px;border-radius:6px;border:1px solid #dc3545;"
+           title="Delete Project" data-id="${project.id}">
+            <i class="fas fa-trash"></i>
+        </a>
+        <a href="#"
            class="btn btn-outline-info p-0 d-flex align-items-center justify-content-center view-tasks"
            style="width:32px;height:32px;border-radius:6px;border:1px solid #17a2b8;"
            title="View Tasks"
@@ -738,6 +744,28 @@
             },
             error: function () {
                 alert('Error loading project data.');
+            }
+        });
+    });
+    $(document).on('click', '.action-delete-project', function (e) {
+        e.preventDefault();
+        const projectId = $(this).data('id');
+        if (!confirm('Are you sure you want to delete this project? This action cannot be undone.')) return;
+
+        $.ajax({
+            url: 'ajax_helpers/ajax_add_projects.php?action=delete&project_id=' + projectId,
+            type: 'POST',
+            dataType: 'json',
+            success: function (response) {
+                if (response.success) {
+                    loadProjects('all');
+                    alert('Project deleted successfully!');
+                } else {
+                    alert(response.error || 'Failed to delete project.');
+                }
+            },
+            error: function (xhr) {
+                alert('Error: ' + (xhr.responseJSON?.error || 'Failed to delete project.'));
             }
         });
     });
