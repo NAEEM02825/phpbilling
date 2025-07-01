@@ -665,8 +665,15 @@ $projects = DB::query("SELECT * FROM projects ");
                     <td>${item.task_title || 'No title'}</td>
                     <td>${item.project_name || 'N/A'}</td>
                     <td>${item.description || ''}</td>
-                </tr>`;
+                </tr>
+                ${(!item.rate || item.rate == 0) ? 
+                    `<tr><td colspan="3" class="text-warning small">No rate set for project "${item.project_name}" (defaults to $0)</td></tr>` : ''}
+            `;
         });
+
+        // Calculate and format total project rate
+        const totalProjectRate = invoice.total_project_rate || 0;
+        const formattedTotal = totalProjectRate.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
 
         // Build the modal content
         modalContent.innerHTML = `
@@ -700,6 +707,12 @@ $projects = DB::query("SELECT * FROM projects ");
                         </thead>
                         <tbody>${itemsHtml}</tbody>
                     </table>
+                    <div class="d-flex justify-content-end align-items-center mt-2">
+                        <div class="bg-light p-3 rounded" style="min-width:220px;">
+                            <span class="fw-bold me-2">Total Project Rate:</span>
+                            <span class="fs-5 fw-bold text-success">${formattedTotal}</span>
+                        </div>
+                    </div>
                 </div>
                 
                 ${invoice.notes ? `
