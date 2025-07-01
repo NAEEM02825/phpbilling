@@ -335,6 +335,46 @@
             loadClients();
         });
 
+        // Open edit modal and fill data
+        $(document).on('click', '.edit-client', function (e) {
+            e.preventDefault();
+            const clientId = $(this).data('id');
+            $.ajax({
+                url: 'ajax_helpers/client_handle.php',
+                type: 'GET',
+                data: { action: 'get_client', id: clientId },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success && response.data) {
+                        const c = response.data;
+                        $('#addClientModalLabel').text('Edit Client');
+                        $('#clientFirstName').val(c.first_name);
+                        $('#clientLastName').val(c.last_name);
+                        $('#clientEmail').val(c.email);
+                        $('#clientPhone').val(c.phone);
+                        $('#clientCompany').val(c.company);
+                        $('#clientAddress').val(c.address);
+                        $('#addClientForm').data('edit-id', c.id);
+                        $('#addClientModal').modal('show');
+                        $('#saveClientBtn').text('Update Client');
+                    } else {
+                        showAlert('danger', response.message || 'Could not load client.');
+                    }
+                },
+                error: function() {
+                    showAlert('danger', 'Failed to load client.');
+                }
+            });
+        });
+
+        // Reset modal on close
+        $('#addClientModal').on('hidden.bs.modal', function () {
+            $('#addClientForm')[0].reset();
+            $('#addClientForm').removeData('edit-id');
+            $('#addClientModalLabel').text('Add New Client');
+            $('#saveClientBtn').text('Save Client');
+        });
+
         // Function to load clients
         function loadClients() {
             $.ajax({
@@ -485,8 +525,9 @@
 
         // Function to add a new client
         function addClient() {
+            const editId = $('#addClientForm').data('edit-id');
             const formData = {
-                action: 'add_client',
+                action: editId ? 'update_client' : 'add_client',
                 first_name: $('#clientFirstName').val().trim(),
                 last_name: $('#clientLastName').val().trim(),
                 email: $('#clientEmail').val().trim(),
@@ -494,6 +535,7 @@
                 company: $('#clientCompany').val().trim(),
                 address: $('#clientAddress').val().trim()
             };
+            if (editId) formData.id = editId;
 
             // Basic validation
             if (!formData.first_name || !formData.last_name) {
@@ -526,7 +568,7 @@
                     }
                 },
                 error: function() {
-                    showAlert('danger', 'Failed to add client. Please try again.');
+                    showAlert('danger', 'Failed to save client. Please try again.');
                 }
             });
         }

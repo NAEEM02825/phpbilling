@@ -91,6 +91,65 @@ try {
             ]);
             break;
             
+        case 'get_client':
+            $id = $_GET['id'] ?? 0;
+            if (empty($id) || !is_numeric($id)) {
+                throw new Exception('Invalid client ID');
+            }
+            $client = DB::queryFirstRow("SELECT * FROM clients WHERE id=%i", $id);
+            if (!$client) {
+                throw new Exception('Client not found');
+            }
+            echo json_encode([
+                'success' => true,
+                'data' => $client
+            ]);
+            break;
+
+        case 'update_client':
+            $id = $_POST['id'] ?? 0;
+            $firstName = $_POST['first_name'] ?? '';
+            $lastName = $_POST['last_name'] ?? '';
+            $email = $_POST['email'] ?? '';
+            $phone = $_POST['phone'] ?? '';
+            $company = $_POST['company'] ?? '';
+            $address = $_POST['address'] ?? '';
+
+            if (empty($id) || !is_numeric($id)) {
+                throw new Exception('Invalid client ID');
+            }
+            if (empty($firstName)) {
+                throw new Exception('First name is required');
+            }
+            if (empty($lastName)) {
+                throw new Exception('Last name is required');
+            }
+            if (empty($email)) {
+                throw new Exception('Email is required');
+            }
+            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                throw new Exception('Invalid email format');
+            }
+            // Check for duplicate email (exclude current client)
+            $existing = DB::queryFirstRow("SELECT id FROM clients WHERE email=%s AND id!=%i", $email, $id);
+            if ($existing) {
+                throw new Exception('A client with this email already exists');
+            }
+            DB::update('clients', [
+                'first_name' => $firstName,
+                'last_name' => $lastName,
+                'email' => $email,
+                'phone' => $phone,
+                'company' => $company,
+                'address' => $address
+            ], 'id=%i', $id);
+
+            echo json_encode([
+                'success' => true,
+                'message' => 'Client updated successfully'
+            ]);
+            break;
+            
         default:
             throw new Exception('Invalid action');
     }
