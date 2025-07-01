@@ -664,7 +664,7 @@ $projects = DB::query("SELECT * FROM projects ");
                 <tr>
                     <td>${item.task_title || 'No title'}</td>
                     <td>${item.project_name || 'N/A'}</td>
-                    <td>${item.details || ''}</td>
+                    <td>${item.description || ''}</td>
                 </tr>`;
         });
 

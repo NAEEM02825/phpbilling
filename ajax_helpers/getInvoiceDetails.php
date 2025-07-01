@@ -33,6 +33,7 @@ try {
     $items = DB::query("
         SELECT it.*, 
                t.title AS task_title,
+               t.details AS task_details,
                p.name AS project_name,
                p.id AS project_id
         FROM invoice_items it
@@ -67,7 +68,7 @@ try {
                     'task_title' => $item['task_title'],
                     'project_id' => $item['project_id'],
                     'project_name' => $item['project_name'],
-                    'description' => $item['description'] ?? $item['task_title'],
+                    'description' => $item['task_details'] ?? $item['task_title'], // use details as description
                     'quantity' => $item['quantity'],
                     'unit_price' => $item['unit_price'],
                     'amount' => $item['amount']
