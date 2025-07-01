@@ -9,22 +9,22 @@ $endDate = $_GET['end_date'] ?? '';
 try {
     // Build query and parameters
     $query = "
-        SELECT t.*, 
-               p.name as project_name, 
-               u.name as assignee_name,
-               t.details as description,
-               t.hours
+        SELECT 
+            t.id,
+            t.title,
+            t.details as description,
+            p.name as project_name,
+            t.task_date,
+            t.hours,
+            u.name as assignee_name,
+            t.status
         FROM tasks t
         LEFT JOIN projects p ON p.id = t.project_id
         LEFT JOIN users u ON u.user_id = t.assignee_id
-        WHERE 1=1
+        WHERE t.project_id = %i
     ";
-    $params = [];
+    $params = [$projectId];
 
-    if ($projectId) {
-        $query .= " AND t.project_id = %i";
-        $params[] = $projectId;
-    }
     if ($startDate && $endDate) {
         $query .= " AND t.task_date BETWEEN %s AND %s";
         $params[] = $startDate;
@@ -35,11 +35,10 @@ try {
 
     $tasks = DB::query($query, ...$params);
 
-    echo json_encode([
-        'success' => true,
-        'data' => $tasks
-    ]);
+    // Return the data directly (without success wrapper) to match JS expectations
+    echo json_encode($tasks);
+    
 } catch (MeekroDBException $e) {
     http_response_code(500);
-    echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+    echo json_encode(['error' => $e->getMessage()]);
 }
