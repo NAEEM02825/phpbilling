@@ -34,8 +34,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             $totalAmount += $quantity * $unitPrice;
         }
 
-        // Insert invoice and verify it was created
-        $invoiceId = DB::insert('invoices', [
+        // Insert invoice and get the correct invoice ID
+        DB::insert('invoices', [
             'client_id' => $_POST['client_id'],
             'project_id' => $_POST['project_id'],
             'invoice_number' => generateInvoiceNumber(),
@@ -46,12 +46,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             'notes' => $_POST['notes'] ?? '',
             'created_at' => DB::sqleval('NOW()')
         ]);
+        $invoiceId = DB::insertId(); // <-- Use insertId() to get the correct invoice ID
         
         if (!$invoiceId) {
             throw new Exception("Failed to create invoice record");
         }
 
-        // Second pass to insert invoice items
+        // Second pass to insert invoice items with the correct invoice_id
         foreach ($taskIds as $taskId) {
             $task = DB::queryFirstRow("SELECT * FROM tasks WHERE id = %i", $taskId);
             
@@ -61,13 +62,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             $amount = $quantity * $unitPrice;
             
             $itemId = DB::insert('invoice_items', [
-                'invoice_id' => $invoiceId,
+                'invoice_id' => $invoiceId, // <-- Use the correct invoice ID here
                 'task_id' => $taskId,
                 'description' => $task['title'],
                 'quantity' => $quantity,
                 'unit_price' => $unitPrice,
                 'amount' => $amount
-                // Removed rate_type to fix the error
             ]);
             
             if (!$itemId) {
