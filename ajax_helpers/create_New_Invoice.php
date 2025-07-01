@@ -10,6 +10,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             throw new Exception("Missing required fields");
         }
 
+        // Get project details to check if it has a rate
+        $project = DB::queryFirstRow("SELECT * FROM projects WHERE id = %i", $_POST['project_id']);
+        if (!$project) {
+            throw new Exception("Project not found");
+        }
+
+        // Calculate total amount from tasks
+        $taskIds = json_decode($_POST['task_ids'], true);
+        $totalAmount = 0;
+        
+        // First pass to calculate total amount
+        foreach ($taskIds as $taskId) {
+            $task = DB::queryFirstRow("SELECT * FROM tasks WHERE id = %i", $taskId);
+            
+            if (!$task) {
+                throw new Exception("Task with ID $taskId not found");
+            }
+            
+            // Use project rate if available, otherwise fall back to task rate
+            $unitPrice = $project['hourly_rate'] ?? $task['hourly_rate'] ?? $task['fixed_price'] ?? 0;
+            $quantity = $task['hours'] ?? 1;
+            $totalAmount += $quantity * $unitPrice;
+        }
+
         // Insert invoice and verify it was created
         $invoiceId = DB::insert('invoices', [
             'client_id' => $_POST['client_id'],
@@ -18,8 +42,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             'issue_date' => $_POST['issue_date'],
             'due_date' => $_POST['due_date'],
             'status' => 'pending',
-            'total_amount' => $_POST['total_amount'],
-            'notes' => $_POST['notes'],
+            'total_amount' => $totalAmount,
+            'notes' => $_POST['notes'] ?? '',
             'created_at' => DB::sqleval('NOW()')
         ]);
         
@@ -27,16 +51,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             throw new Exception("Failed to create invoice record");
         }
 
-        // Insert invoice items
-        $taskIds = json_decode($_POST['task_ids'], true);
+        // Second pass to insert invoice items
         foreach ($taskIds as $taskId) {
             $task = DB::queryFirstRow("SELECT * FROM tasks WHERE id = %i", $taskId);
             
-            if (!$task) {
-                throw new Exception("Task with ID $taskId not found");
-            }
-            
-            $unitPrice = $task['hourly_rate'] ?? $task['fixed_price'] ?? 0;
+            // Use project rate if available, otherwise fall back to task rate
+            $unitPrice = $project['hourly_rate'] ?? $task['hourly_rate'] ?? $task['fixed_price'] ?? 0;
             $quantity = $task['hours'] ?? 1;
             $amount = $quantity * $unitPrice;
             
@@ -47,6 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 'quantity' => $quantity,
                 'unit_price' => $unitPrice,
                 'amount' => $amount
+                // Removed rate_type to fix the error
             ]);
             
             if (!$itemId) {

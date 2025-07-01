@@ -9,15 +9,19 @@ try {
         throw new Exception("Invalid invoice ID");
     }
 
-    // Get invoice header data
+    // Get invoice header data with project information
     $invoice = DB::queryFirstRow("
         SELECT i.*, 
                CONCAT(c.first_name, ' ', c.last_name) AS client_name, 
                c.email AS client_email, 
                c.address AS client_address, 
-               c.phone AS client_phone
+               c.phone AS client_phone,
+               p.name AS project_name,
+               p.id AS project_id,
+               p.rate AS project_rate
         FROM invoices i
         LEFT JOIN clients c ON i.client_id = c.id
+        LEFT JOIN projects p ON i.project_id = p.id
         WHERE i.id = %d
     ", $invoiceId);
 
@@ -25,11 +29,15 @@ try {
         throw new Exception("Invoice not found");
     }
 
-    // Get invoice items (fixed query)
+    // Get invoice items with project information
     $items = DB::query("
-        SELECT it.*, t.title AS task_title
+        SELECT it.*, 
+               t.title AS task_title,
+               p.name AS project_name,
+               p.id AS project_id
         FROM invoice_items it
         LEFT JOIN tasks t ON it.task_id = t.id
+        LEFT JOIN projects p ON t.project_id = p.id
         WHERE it.invoice_id = %d
     ", $invoiceId);
 
@@ -44,6 +52,9 @@ try {
                 'address' => $invoice['client_address'],
                 'phone' => $invoice['client_phone']
             ],
+            'project_id' => $invoice['project_id'],
+            'project_name' => $invoice['project_name'],
+            'project_rate' => $invoice['project_rate'],
             'issue_date' => $invoice['issue_date'],
             'due_date' => $invoice['due_date'],
             'status' => $invoice['status'],
@@ -54,6 +65,8 @@ try {
                     'id' => $item['id'],
                     'task_id' => $item['task_id'],
                     'task_title' => $item['task_title'],
+                    'project_id' => $item['project_id'],
+                    'project_name' => $item['project_name'],
                     'description' => $item['description'] ?? $item['task_title'],
                     'quantity' => $item['quantity'],
                     'unit_price' => $item['unit_price'],
