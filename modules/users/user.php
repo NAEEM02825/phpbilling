@@ -197,8 +197,6 @@
     </div>
 </div>
 
-
-
 <!-- Edit user  -->
 <div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -248,6 +246,27 @@
             </div>
         </div>
     </div>
+</div>
+
+<!-- Assign Projects Modal -->
+<div class="modal fade" id="assignProjectsModal" tabindex="-1" aria-labelledby="assignProjectsModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="assignProjectsModalLabel">Assign Projects</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="assignProjectsForm">
+          <input type="hidden" id="assignUserId" name="user_id">
+          <div id="projectsCheckboxList"></div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" id="saveProjectAssignments">Save</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <style>
@@ -641,6 +660,9 @@
                                title="Delete" data-user_id="${user.user_id}">
                                 <i class="fas fa-trash"></i>
                             </a>
+                            <button class="btn btn-sm btn-outline-info assign-projects-btn" data-user-id="${user.user_id}" title="Assign Projects">
+                                <i class="fas fa-project-diagram"></i>
+                            </button>
                         </div>
                     </td>
                 </tr>
@@ -876,5 +898,44 @@
         $('#roleFilter').val('');
         $('#statusFilter').val('');
         loadUsers(); // Reload users with default filters
+    });
+
+    // Assign Projects functionality
+    $(document).on('click', '.assign-projects-btn', function() {
+        const userId = $(this).data('user-id');
+        $('#assignUserId').val(userId);
+        // Load all projects
+        $.get('ajax_helpers/task_handler.php', {action: 'get_projects'}, function(data) {
+            let html = '';
+            data.data.forEach(p => {
+                html += `<div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="${p.id}" id="projectCheck${p.id}" name="project_ids[]">
+                    <label class="form-check-label" for="projectCheck${p.id}">${p.name}</label>
+                </div>`;
+            });
+            $('#projectsCheckboxList').html(html);
+            // Load user's assigned projects
+            $.get('ajax_helpers/user_project_assign.php', {action: 'get_user_projects', user_id: userId}, function(res) {
+                if (res.success) {
+                    res.projects.forEach(p => {
+                        $(`#projectCheck${p.id}`).prop('checked', true);
+                    });
+                }
+                $('#assignProjectsModal').modal('show');
+            });
+        });
+    });
+
+    $('#saveProjectAssignments').on('click', function() {
+        const userId = $('#assignUserId').val();
+        const projectIds = $('#assignProjectsForm input[name="project_ids[]"]:checked').map(function(){return this.value;}).get();
+        $.post('ajax_helpers/user_project_assign.php', {action: 'assign_projects_to_user', user_id: userId, project_ids: projectIds}, function(res) {
+            if (res.success) {
+                $('#assignProjectsModal').modal('hide');
+                alert('Projects assigned!');
+            } else {
+                alert(res.error || 'Failed to assign projects');
+            }
+        }, 'json');
     });
 </Script>

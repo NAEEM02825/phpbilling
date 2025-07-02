@@ -4,7 +4,7 @@ require('../functions.php');
 header('Content-Type: application/json');
 
 try {
-    $action = $_POST['action'] ?? '';
+    $action = $_POST['action'] ?? $_GET['action'] ?? '';
     $response = ['success' => false];
 
     switch ($action) {

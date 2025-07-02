@@ -340,6 +340,27 @@
     </div>
 </div>
 
+<!-- Assign Users Modal -->
+<div class="modal fade" id="assignUsersModal" tabindex="-1" aria-labelledby="assignUsersModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="assignUsersModalLabel">Assign Users</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="assignUsersForm">
+          <input type="hidden" id="assignProjectId" name="project_id">
+          <div id="usersCheckboxList"></div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" id="saveUserAssignments">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -547,6 +568,9 @@
            data-project-id="${project.id}" data-project-name="${project.name}">
             <i class="fas fa-tasks"></i>
         </a>
+        <button class="btn btn-sm btn-outline-info assign-users-btn" data-project-id="${project.id}" title="Assign Users">
+            <i class="fas fa-users"></i>
+        </button>
     </div>
 </td>
                         </tr>
@@ -851,6 +875,45 @@
             }
         });
     }
+
+    // Assign Users to Project
+    $(document).on('click', '.assign-users-btn', function() {
+        const projectId = $(this).data('project-id');
+        $('#assignProjectId').val(projectId);
+        // Load all users
+        $.get('ajax_helpers/ajax_get_user.php', {action: 'get_users'}, function(data) {
+            let html = '';
+            data.data.forEach(u => {
+                html += `<div class="form-check">
+                <input class="form-check-input" type="checkbox" value="${u.user_id}" id="userCheck${u.user_id}" name="user_ids[]">
+                <label class="form-check-label" for="userCheck${u.user_id}">${u.first_name} ${u.last_name}</label>
+            </div>`;
+            });
+            $('#usersCheckboxList').html(html);
+            // Load project's assigned users
+            $.get('ajax_helpers/user_project_assign.php', {action: 'get_project_users', project_id: projectId}, function(res) {
+                if (res.success) {
+                    res.users.forEach(u => {
+                        $(`#userCheck${u.id}`).prop('checked', true);
+                    });
+                }
+                $('#assignUsersModal').modal('show');
+            });
+        });
+    });
+
+    $('#saveUserAssignments').on('click', function() {
+        const projectId = $('#assignProjectId').val();
+        const userIds = $('#assignUsersForm input[name="user_ids[]"]:checked').map(function(){return this.value;}).get();
+        $.post('ajax_helpers/user_project_assign.php', {action: 'assign_users_to_project', project_id: projectId, user_ids: userIds}, function(res) {
+            if (res.success) {
+                $('#assignUsersModal').modal('hide');
+                alert('Users assigned!');
+            } else {
+                alert(res.error || 'Failed to assign users');
+            }
+        }, 'json');
+    });
 </script>
 
 <!-- Keep your existing styles -->

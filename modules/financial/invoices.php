@@ -409,7 +409,7 @@ $projects = DB::query("SELECT * FROM projects ");
                                             data-task_id="${task.id}">
                                     </td>
                                     <td>${task.title || ''}</td>
-                                    <td>${task.details || ''}</td>
+                                    <td>${task.description || ''}</td>
                                     <td>${task.project_name || ''}</td>
                                     <td>${task.task_date || ''}</td>
                                     <td>${task.assignee_name || ''}</td>
