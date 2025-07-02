@@ -13,9 +13,6 @@
             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addClientModal">
                 <i class="fas fa-plus me-1"></i> New Client
             </button>
-            <button type="button" class="btn btn-outline-secondary">
-                <i class="fas fa-filter me-1"></i> Filter
-            </button>
         </div>
         <div class="dropdown">
             <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="exportDropdown" data-bs-toggle="dropdown">
