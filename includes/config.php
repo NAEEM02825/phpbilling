@@ -26,12 +26,12 @@ define('DB_PREFIX', '');
 // Constants for user roles by ID
 define('ROLE_ID_ADMIN', 1);
 define('ROLE_ID_MANAGER', 2);
-define('ROLE_ID_Agent', 3); 
+define('ROLE_ID_USER', 3); 
 
 
 $admin_role = 1;
 $manager_role = 2;
-$agent_role = 3;
+$user_role = 3;
 
  
 	?>
