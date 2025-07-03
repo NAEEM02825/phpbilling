@@ -7,18 +7,9 @@
 
 if ($_SESSION['role_id'] == ROLE_ID_ADMIN) {
     include_once('includes/page-parts/admins/admins_sidebar.php');
-}  else if ($_SESSION['role_id'] == ROLE_ID_VISUALIZER_WRITER) {
-    include_once('includes/page-parts/writer/writer_sidebar.php');
-} else if ($_SESSION['role_id'] == ROLE_ID_DESIGNER) {
-    include_once('includes/page-parts/designers/designers_sidebar.php');
-} else if ($_SESSION['role_id'] == ROLE_ID_SOCIAL_MEDIA_MANAGER) {
-    include_once('includes/page-parts/smm_manager/smm_manager_sidebar.php');
-} else if ($_SESSION['role_id'] == ROLE_ID_ACCOUNTANT) {
-    include_once('includes/page-parts/accounts/accounts_sidebar.php');
-} else if ($_SESSION['role_id'] == ROLE_ID_CLIENT) {
-    include_once('includes/page-parts/clients/clients_sidebar.php');
-
-} else { // Default sidebar for all other roles
+}  else if ($_SESSION['role_id'] == ROLE_ID_USER) {
+    include_once('includes/page-parts/user/user_sidebar.php');
+}   else { // Default sidebar for all other roles
     
   ?>
 <!--start sidebar-->

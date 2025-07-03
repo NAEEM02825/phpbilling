@@ -4,6 +4,10 @@ switch ($_SESSION['role_id']) {
         include_once('includes/page-parts/admins/admins_dashboard.php');
         $content_included = true;
         break;
+	case ROLE_ID_USER:
+        include_once('includes/page-parts/user/user_dashboard.php');
+        $content_included = true;
+        break;
     default:
         $content_included = false;
         break;
