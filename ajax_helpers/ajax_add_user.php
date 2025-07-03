@@ -29,7 +29,7 @@ try {
                 'last_name' => $_POST['last_name'],
                 'email' => $_POST['email'],
                 'name' => $_POST['name'],
-                'password' => password_hash($_POST['password'], PASSWORD_DEFAULT),
+                'password' => $_POST['password'],
                 'role_id' => $_POST['role_id'],
                 'status' => $_POST['status'] ?? 'active',
                 'avatar' => $_POST['avatar'] ?? null,
@@ -58,7 +58,7 @@ try {
             ];
 
             if (!empty($_POST['password'])) {
-                $data['password'] = password_hash($_POST['password'], PASSWORD_DEFAULT);
+                $data['password'] = $_POST['password']; 
             }
 
             DB::update('users', $data, 'user_id=%i', $_POST['user_id']);
