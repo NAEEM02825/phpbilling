@@ -1,237 +1,274 @@
+<?php
+$userId = $_SESSION['user_id'] ?? 0;
+if (!$userId) {
+    die('User not logged in.');
+}
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Tasks</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
     <style>
+        body { background: #f7f9fb; }
         .task-card {
             border: 1px solid #e0e0e0;
             border-radius: 8px;
-            padding: 16px;
-            margin-bottom: 16px;
+            padding: 18px 20px;
+            margin-bottom: 18px;
             background: white;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            max-width: 600px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            transition: box-shadow .2s;
         }
-
-        .task-card h3 {
-            margin-top: 0;
-            color: #333;
-        }
-
-        .task-meta {
-            display: flex;
-            gap: 12px;
-            margin: 12px 0;
-            font-size: 14px;
-            flex-wrap: wrap;
-        }
-
-        .priority {
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-weight: 500;
-        }
-
-        .priority.high {
-            background-color: #ffebee;
-            color: #c62828;
-        }
-
-        .priority.medium {
-            background-color: #fff8e1;
-            color: #f57f17;
-        }
-
-        .priority.low {
-            background-color: #e8f5e9;
-            color: #2e7d32;
-        }
-
-        .task-actions {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
-        .task-actions button,
-        .task-actions a {
-            padding: 6px 12px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-        }
-
-        .btn-view {
-            background: #e3f2fd;
-            color: #1565c0;
-        }
-
-        .btn-start {
-            background: #fff3e0;
-            color: #ef6c00;
-        }
-
-        .btn-complete {
-            background: #e8f5e9;
-            color: #2e7d32;
-        }
-
-        .btn-external {
-            background: #f3e5f5;
-            color: #7b1fa2;
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        #tasks-container {
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 20px;
-        }
+        .task-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.10);}
+        .task-title { font-size: 1.2rem; font-weight: 600; color: #3a4f8a; }
+        .task-meta { font-size: 0.95rem; color: #6c757d; margin-bottom: 8px;}
+        .badge-status { font-size: 0.85em; }
+        .task-actions button { margin-right: 8px; }
+        .no-tasks { text-align: center; color: #888; margin-top: 40px;}
+        .modal-title { color: #3a4f8a; }
+        .form-label { font-weight: 500; }
+        .alert-fixed { position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 250px;}
     </style>
-
-    <div id="tasks-container">
-        <div class="loading">Loading tasks...</div>
+</head>
+<body>
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">My Tasks</h2>
+        <button class="btn btn-primary" id="btnNewTask"><i class="fas fa-plus me-1"></i> New Task</button>
     </div>
+    <div id="tasks-container">
+        <div class="text-center py-5"><div class="spinner-border text-primary"></div></div>
+    </div>
+</div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            loadTasks();
-        });
+<!-- Task Modal -->
+<div class="modal fade" id="taskModal" tabindex="-1" aria-labelledby="taskModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <form class="modal-content" id="taskForm">
+      <div class="modal-header">
+        <h5 class="modal-title" id="taskModalLabel">Create Task</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" name="task_id" id="taskId">
+        <div class="mb-3">
+          <label for="taskTitle" class="form-label">Title</label>
+          <input type="text" class="form-control" name="title" id="taskTitle" required maxlength="100">
+        </div>
+        <div class="mb-3">
+          <label for="taskProject" class="form-label">Project</label>
+          <select class="form-select" name="project_id" id="taskProject" required>
+            <option value="">Loading...</option>
+          </select>
+        </div>
+        <div class="mb-3">
+          <label for="taskDate" class="form-label">Due Date</label>
+          <input type="date" class="form-control" name="task_date" id="taskDate" required>
+        </div>
+        <div class="mb-3">
+          <label for="taskHours" class="form-label">Hours Taken</label>
+          <input type="number" class="form-control" name="hours" id="taskHours" min="0.5" step="0.5" required>
+        </div>
+        <div class="mb-3">
+          <label for="taskStatus" class="form-label">Status</label>
+          <select class="form-select" name="status" id="taskStatus" required>
+            <option value="Pending">Pending</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Completed">Completed</option>
+          </select>
+        </div>
+        <div class="mb-3">
+          <label for="taskDetails" class="form-label">Details</label>
+          <textarea class="form-control" name="details" id="taskDetails" rows="3" maxlength="500"></textarea>
+        </div>
+        <div class="mb-3">
+          <label for="clickupLink" class="form-label">ClickUp Link</label>
+          <input type="url" class="form-control" name="clickup_link" id="clickupLink" placeholder="https://app.clickup.com/t/xxxxxx">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="submit" class="btn btn-primary" id="saveTaskBtn">Save Task</button>
+      </div>
+    </form>
+  </div>
+</div>
 
-        async function fetchTasksByAssignee(assigneeId) {
-    try {
-        const response = await fetch(`ajax_helpers/user_tasks.php?assignee_id=${assigneeId}`);
-        if (!response.ok) throw new Error('Failed to fetch tasks');
-        const data = await response.json();
-        
-        // Handle both the success flag and tasks array
-        if (data.success === false) {
-            throw new Error('API request failed');
-        }
-        return data.tasks || []; // Return empty array if tasks is undefined
-    } catch (error) {
-        console.error('Error fetching tasks:', error);
-        return []; // Return empty array on error
-    }
-}
+<!-- Alert -->
+<div id="alertBox" class="alert alert-success alert-fixed d-none"></div>
 
-   function renderTasks(tasks) {
-    const tasksContainer = document.getElementById('tasks-container');
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+const userId = <?= (int)$userId ?>;
+let editingTaskId = null;
 
-    if (!tasksContainer) {
-        console.error('tasks-container element not found');
-        return;
-    }
-
-   // Clear the container first
-    tasksContainer.innerHTML = '';
-
-    // Check if tasks is an array and if it's empty
-    if (!Array.isArray(tasks)) {
-        tasksContainer.innerHTML = '<p class="error">Invalid tasks data received</p>';
-        return;
-    }
-    if (tasks.length === 0) {
-        tasksContainer.innerHTML = `
-            <div class="no-tasks">
-                <p>You currently have no tasks assigned.</p>
-                <p>Enjoy your free time!</p>
-            </div>
-        `;
-        return;
-    }
-    tasks.forEach(task => {
-        const taskCard = document.createElement('div');
-        taskCard.className = 'task-card';
-
-        const taskDate = new Date(task.task_date);
-        const formattedDate = taskDate.toLocaleDateString('en-US', {
-            month: 'short',
-            day: 'numeric'
-        });
-
-        const statusClass = getPriorityClass(task.status);
-
-        taskCard.innerHTML = `
-            <h3>${escapeHtml(task.title)}</h3>
-            <p>${escapeHtml(task.details?.substring(0, 50) || '')}${task.details?.length > 50 ? '...' : ''}</p>
-            <div class="task-meta">
-                <span class="due-date">Due: ${formattedDate}</span>
-                <span class="priority ${statusClass}">
-                    ${formatStatus(task.status)}
-                </span>
-                ${task.hours ? `<span class="hours">Est: ${task.hours}h</span>` : ''}
-            </div>
-            <div class="task-actions">
-                <button class="btn-view" data-task-id="${task.id}">View Details</button>
-                ${task.status !== 'completed' ? `
-                    <button class="btn-start" data-task-id="${task.id}">Start Task</button>
-                    <button class="btn-complete" data-task-id="${task.id}">Mark Complete</button>
-                ` : ''}
-                ${task.clickup_link ? `
-                    <a href="${escapeHtml(task.clickup_link)}" target="_blank" class="btn-external">View in ClickUp</a>
-                ` : ''}
-            </div>
-        `;
-
-        tasksContainer.appendChild(taskCard);
+// Load all tasks for this user
+async function loadTasks() {
+    const container = document.getElementById('tasks-container');
+    container.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary"></div></div>';
+    const res = await fetch('ajax_helpers/user_task_crud.php', {
+        method: 'POST',
+        body: new URLSearchParams({action: 'get_my_tasks', user_id: userId})
     });
-
-    addTaskCardEventListeners();
+    const data = await res.json();
+    if (!data.success) {
+        container.innerHTML = '<div class="alert alert-danger">Failed to load tasks.</div>';
+        return;
+    }
+    if (!data.tasks.length) {
+        container.innerHTML = `<div class="no-tasks"><i class="fas fa-check-circle fa-2x mb-2"></i><br>No tasks assigned yet.</div>`;
+        return;
+    }
+    container.innerHTML = '';
+    data.tasks.forEach(task => {
+        const card = document.createElement('div');
+        card.className = 'task-card';
+        card.innerHTML = `
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="task-title">${escapeHtml(task.title)}</span>
+                <span class="badge badge-status ${getStatusClass(task.status)}">${escapeHtml(task.status)}</span>
+            </div>
+            <div class="task-meta mb-2">
+                <i class="fas fa-project-diagram me-1"></i> ${escapeHtml(task.project_name || 'No project')}
+                &nbsp;|&nbsp; <i class="fas fa-calendar-alt me-1"></i> ${escapeHtml(task.task_date)}
+                &nbsp;|&nbsp; <i class="fas fa-clock me-1"></i> ${task.hours || '0'}h
+            </div>
+            <div class="mb-2">${escapeHtml(task.details || '')}</div>
+            <div>
+                ${task.clickup_link ? `<a href="${escapeHtml(task.clickup_link)}" target="_blank" class="btn btn-sm btn-outline-info me-2"><i class="fab fa-clickup"></i> ClickUp</a>` : ''}
+                <button class="btn btn-sm btn-outline-primary me-2" onclick="editTask(${task.id})"><i class="fas fa-edit"></i> Edit</button>
+                <button class="btn btn-sm btn-outline-danger" onclick="deleteTask(${task.id})"><i class="fas fa-trash"></i> Delete</button>
+            </div>
+        `;
+        container.appendChild(card);
+    });
 }
 
-        function getPriorityClass(status) {
-            status = status.toLowerCase();
-            if (status.includes('urgent') || status.includes('high')) return 'high';
-            if (status.includes('progress') || status.includes('medium')) return 'medium';
-            return 'low';
-        }
+// Load project options for select
+async function loadProjectOptions() {
+    const select = document.getElementById('taskProject');
+    select.innerHTML = '<option value="">Loading...</option>';
+    const res = await fetch('ajax_helpers/user_task_crud.php', {
+        method: 'POST',
+        body: new URLSearchParams({action: 'get_projects'})
+    });
+    const data = await res.json();
+    select.innerHTML = '<option value="">Select project</option>';
+    if (data.success && Array.isArray(data.projects)) {
+        data.projects.forEach(p => {
+            const opt = document.createElement('option');
+            opt.value = p.id;
+            opt.textContent = p.name;
+            select.appendChild(opt);
+        });
+    }
+}
 
-        function formatStatus(status) {
-            return status.split('_').map(word =>
-                word.charAt(0).toUpperCase() + word.slice(1)
-            ).join(' ');
-        }
+// Show alert
+function showAlert(msg, type='success') {
+    const box = document.getElementById('alertBox');
+    box.className = `alert alert-${type} alert-fixed`;
+    box.textContent = msg;
+    box.classList.remove('d-none');
+    setTimeout(() => box.classList.add('d-none'), 3000);
+}
 
-        function escapeHtml(unsafe) {
-            if (!unsafe) return '';
-            return unsafe
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/"/g, "&quot;")
-                .replace(/'/g, "&#039;");
-        }
+// Escape HTML
+function escapeHtml(str) {
+    return (str || '').replace(/[&<>"']/g, function(m) {
+        return ({
+            '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
+        })[m];
+    });
+}
 
-        function addTaskCardEventListeners() {
-            document.querySelectorAll('.btn-view').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const taskId = e.target.getAttribute('data-task-id');
-                    alert(`Viewing task ID: ${taskId}`);
-                });
-            });
+// Status badge class
+function getStatusClass(status) {
+    status = (status || '').toLowerCase();
+    if (status === 'completed') return 'bg-success';
+    if (status === 'in progress') return 'bg-primary';
+    return 'bg-warning';
+}
 
-            document.querySelectorAll('.btn-start').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const taskId = e.target.getAttribute('data-task-id');
-                    alert(`Starting task ID: ${taskId}`);
-                });
-            });
+// Open modal for new task
+document.getElementById('btnNewTask').onclick = () => {
+    editingTaskId = null;
+    document.getElementById('taskModalLabel').textContent = 'Create Task';
+    document.getElementById('taskForm').reset();
+    document.getElementById('taskId').value = '';
+    loadProjectOptions();
+    const modal = new bootstrap.Modal(document.getElementById('taskModal'));
+    modal.show();
+};
 
-            document.querySelectorAll('.btn-complete').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const taskId = e.target.getAttribute('data-task-id');
-                    alert(`Completing task ID: ${taskId}`);
-                });
-            });
-        }
+// Handle form submit (create/update)
+document.getElementById('taskForm').onsubmit = async function(e) {
+    e.preventDefault();
+    const form = e.target;
+    const formData = new FormData(form);
+    formData.append('user_id', userId);
+    formData.append('assignee_id', userId); // Always assign to self
+    formData.append('action', editingTaskId ? 'update_task' : 'create_task');
+    if (editingTaskId) formData.append('task_id', editingTaskId);
 
-        async function loadTasks() {
-            const assigneeId = <?php echo $_SESSION['user_id'] ?? 0; ?>;// Replace with actual user ID from your system
-            const tasks = await fetchTasksByAssignee(assigneeId);
-            renderTasks(tasks);
-        }
-    </script>
+    const res = await fetch('ajax_helpers/user_task_crud.php', { method: 'POST', body: formData });
+    const data = await res.json();
+    if (data.success) {
+        showAlert(editingTaskId ? 'Task updated!' : 'Task created!');
+        bootstrap.Modal.getInstance(document.getElementById('taskModal')).hide();
+        loadTasks();
+    } else {
+        showAlert(data.error || 'Failed to save task', 'danger');
+    }
+};
+
+// Edit task
+window.editTask = async function(taskId) {
+    editingTaskId = taskId;
+    document.getElementById('taskModalLabel').textContent = 'Edit Task';
+    loadProjectOptions();
+    const res = await fetch('ajax_helpers/user_task_crud.php', {
+        method: 'POST',
+        body: new URLSearchParams({action: 'get_task', task_id: taskId})
+    });
+    const data = await res.json();
+    if (data.success && data.task) {
+        document.getElementById('taskId').value = data.task.id;
+        document.getElementById('taskTitle').value = data.task.title;
+        document.getElementById('taskProject').value = data.task.project_id;
+        document.getElementById('taskDate').value = data.task.task_date;
+        document.getElementById('taskHours').value = data.task.hours;
+        document.getElementById('taskStatus').value = data.task.status;
+        document.getElementById('taskDetails').value = data.task.details || '';
+        document.getElementById('clickupLink').value = data.task.clickup_link || '';
+        const modal = new bootstrap.Modal(document.getElementById('taskModal'));
+        modal.show();
+    } else {
+        showAlert('Failed to load task', 'danger');
+    }
+};
+
+// Delete task
+window.deleteTask = async function(taskId) {
+    if (!confirm('Are you sure you want to delete this task?')) return;
+    const res = await fetch('ajax_helpers/user_task_crud.php', {
+        method: 'POST',
+        body: new URLSearchParams({action: 'delete_task', task_id: taskId, user_id: userId})
+    });
+    const data = await res.json();
+    if (data.success) {
+        showAlert('Task deleted!');
+        loadTasks();
+    } else {
+        showAlert(data.error || 'Failed to delete task', 'danger');
+    }
+};
+
+// Initial load
+loadTasks();
+</script>
+</body>
+</html>
