@@ -659,17 +659,16 @@ $projects = DB::query("SELECT * FROM projects ");
         };
         const statusBadge = `<span class="badge ${statusBadges[status]}">${status}</span>`;
 
-        // Build items table with project name
+        // Build items table: Date, Task, Hours
         let itemsHtml = '';
         (invoice.items || []).forEach(item => {
+            const dateStr = item.date ? new Date(item.date).toLocaleDateString() : '';
             itemsHtml += `
                 <tr>
+                    <td>${dateStr}</td>
                     <td>${item.task_title || 'No title'}</td>
-                    <td>${item.project_name || 'N/A'}</td>
-                    <td>${item.description || ''}</td>
+                    <td>${item.hours || ''}</td>
                 </tr>
-                ${(!item.rate || item.rate == 0) ? 
-                    `<tr><td colspan="3" class="text-warning small">No rate set for project "${item.project_name}" (defaults to $0)</td></tr>` : ''}
             `;
         });
 
@@ -702,9 +701,9 @@ $projects = DB::query("SELECT * FROM projects ");
                     <table class="table table-bordered">
                         <thead class="table-light">
                             <tr>
+                                <th>Date</th>
                                 <th>Task</th>
-                                <th>Project</th>
-                                <th>Description</th>
+                                <th>Hours</th>
                             </tr>
                         </thead>
                         <tbody>${itemsHtml}</tbody>

@@ -7,31 +7,26 @@ $startDate = $_GET['start_date'] ?? '';
 $endDate = $_GET['end_date'] ?? '';
 
 try {
-    // Build query and parameters
-    $query = "
-        SELECT 
-            t.id,
-            t.title,
-            t.details as description,
-            p.name as project_name,
-            t.task_date,
-            t.hours,
-            u.name as assignee_name,
-            t.status
-        FROM tasks t
-        LEFT JOIN projects p ON p.id = t.project_id
-        LEFT JOIN users u ON u.user_id = t.assignee_id
-        WHERE t.project_id = %i
-    ";
+    // Build WHERE conditions
+    $where = ["t.project_id = %i", "t.status = 'Completed'"];
     $params = [$projectId];
 
     if ($startDate && $endDate) {
-        $query .= " AND t.task_date BETWEEN %s AND %s";
+        $where[] = "t.task_date BETWEEN %s AND %s";
         $params[] = $startDate;
         $params[] = $endDate;
     }
 
-    $query .= " ORDER BY t.task_date DESC";
+    $whereSql = implode(' AND ', $where);
+
+    $query = "
+        SELECT t.*, p.name as project_name, u.name as assignee_name
+        FROM tasks t
+        LEFT JOIN projects p ON t.project_id = p.id
+        LEFT JOIN users u ON t.assignee_id = u.user_id
+        WHERE $whereSql
+        ORDER BY t.task_date DESC
+    ";
 
     $tasks = DB::query($query, ...$params);
 
