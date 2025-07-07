@@ -779,7 +779,7 @@
         currentTimePeriod = period;
 
         $.ajax({
-            url: 'api/dashboard/task-activity.php',
+            url: 'ajax_helpers/dashboard_task_activity.php',
             method: 'GET',
             data: {
                 period: period
@@ -808,40 +808,71 @@
     }
 
     // Update task distribution chart
-    function updateTaskDistributionChart() {
-        $.ajax({
-            url: 'api/dashboard/task-distribution.php',
-            method: 'GET',
-            dataType: 'json',
-            success: function(data) {
-                if (data.success) {
-                    // Update chart
-                    taskDistributionChart.data.labels = data.labels;
-                    taskDistributionChart.data.datasets[0].data = data.data;
-                    taskDistributionChart.data.datasets[0].backgroundColor = data.backgroundColors;
-                    taskDistributionChart.data.datasets[0].borderColor = data.borderColors;
-                    taskDistributionChart.update();
-
-                    // Update legend
-                    let legendHtml = '';
-                    data.labels.forEach((label, index) => {
-                        legendHtml += `
-                            <div class="d-flex align-items-center mb-3">
-                                <span class="badge ${data.backgroundColors[index].replace('bg-', 'bg-')} me-2" style="width: 12px; height: 12px; padding: 0;"></span>
-                                <span class="text-muted small">${label}</span>
-                                <span class="ms-auto fw-bold">${data.data[index]}%</span>
-                            </div>
-                        `;
+        // Update task distribution chart
+  function updateTaskDistributionChart() {
+    $.ajax({
+        url: 'ajax_helpers/dashboard_task_distribution.php',
+        method: 'GET',
+        dataType: 'json',
+        success: function(response) {
+            if (response && response.labels && response.data) {
+                // Update chart data
+                const ctx = document.getElementById('taskDistributionChart').getContext('2d');
+                
+                // If chart doesn't exist, create it
+                if (typeof taskDistributionChart === 'undefined') {
+                    taskDistributionChart = new Chart(ctx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: response.labels,
+                            datasets: [{
+                                data: response.data,
+                                backgroundColor: response.backgroundColors || ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e'],
+                                borderColor: response.borderColors || '#fff',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            maintainAspectRatio: false,
+                            cutout: '70%',
+                            plugins: {
+                                legend: {
+                                    display: false
+                                }
+                            }
+                        }
                     });
-
-                    $('#taskDistributionLegend').html(legendHtml);
+                } else {
+                    // Update existing chart
+                    taskDistributionChart.data.labels = response.labels;
+                    taskDistributionChart.data.datasets[0].data = response.data;
+                    taskDistributionChart.update();
                 }
-            },
-            error: function() {
-                console.error('Error fetching task distribution data');
+
+                // Update legend
+                let legendHtml = '';
+                response.labels.forEach((label, index) => {
+                    const color = response.backgroundColors ? response.backgroundColors[index] : ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e'][index % 4];
+                    legendHtml += `
+                        <div class="legend-item d-flex align-items-center mb-2">
+                            <span class="color-indicator me-2" style="background-color: ${color}; width: 12px; height: 12px; border-radius: 50%;"></span>
+                            <span class="label small">${label}</span>
+                            <span class="value ms-auto fw-bold">${response.data[index]}%</span>
+                        </div>
+                    `;
+                });
+                $('#taskDistributionLegend').html(legendHtml);
             }
-        });
-    }
+        },
+        error: function(xhr, status, error) {
+            console.error('Error fetching task distribution data:', error);
+            $('#taskDistributionLegend').html('<div class="text-danger">Failed to load data</div>');
+        }
+    });
+}
+
+
+
 
     // Load projects for task modal
     function loadProjectsForTaskModal() {
