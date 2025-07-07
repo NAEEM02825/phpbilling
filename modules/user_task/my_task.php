@@ -115,6 +115,14 @@ if (!$userId) {
                         <input type="number" class="form-control" name="hours" id="taskHours" min="0.5" step="0.5" required>
                     </div>
                     <div class="mb-3">
+                        <label for="taskStatus" class="form-label">Status</label>
+                        <select class="form-select" name="status" id="taskStatus" required>
+                            <option value="Pending">Pending</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Completed">Completed</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
                         <label for="taskDetails" class="form-label">Details</label>
                         <textarea class="form-control" name="details" id="taskDetails" rows="3" maxlength="500"></textarea>
                     </div>
@@ -173,13 +181,14 @@ if (!$userId) {
                 &nbsp;|&nbsp; <i class="fas fa-clock me-1"></i> ${task.hours || '0'}h
             </div>
             <div class="mb-2">${escapeHtml(task.details || '')}</div>
-            <div>
-                ${task.clickup_link ? `<a href="${escapeHtml(task.clickup_link)}" target="_blank" class="btn btn-sm btn-outline-info me-2"><i class="fab fa-clickup"></i> ClickUp</a>` : ''}
-                ${task.status !== 'Completed' ? 
-                    `<button class="btn btn-sm btn-outline-success me-2" onclick="completeTask(${task.id})"><i class="fas fa-check"></i> Complete</button>` : 
-                    ''}
-                <button class="btn btn-sm btn-outline-danger" onclick="deleteTask(${task.id})"><i class="fas fa-trash"></i> Delete</button>
-            </div>
+           <div>
+    ${task.clickup_link ? `<a href="${escapeHtml(task.clickup_link)}" target="_blank" class="btn btn-sm btn-outline-info me-2"><i class="fab fa-clickup"></i> ClickUp</a>` : ''}
+    ${task.status !== 'Completed' ? 
+        `<button class="btn btn-sm btn-outline-success me-2" onclick="completeTask(${task.id})"><i class="fas fa-check"></i> Complete</button>` : 
+        ''}
+    <button class="btn btn-sm btn-outline-primary me-2" onclick="editTask(${task.id})"><i class="fas fa-edit"></i> Edit</button>
+    <button class="btn btn-sm btn-outline-danger" onclick="deleteTask(${task.id})"><i class="fas fa-trash"></i> Delete</button>
+</div>
         `;
                 container.appendChild(card);
             });
@@ -225,7 +234,49 @@ if (!$userId) {
                 showAlert(data.error || 'Failed to complete task', 'danger');
             }
         }
+        // Edit task
+        async function editTask(taskId) {
+            // Load task data
+            const res = await fetch('ajax_helpers/user_task_crud.php', {
+                method: 'POST',
+                body: new URLSearchParams({
+                    action: 'get_task',
+                    task_id: taskId,
+                    user_id: userId
+                })
+            });
+            const data = await res.json();
 
+            if (!data.success) {
+                showAlert(data.error || 'Failed to load task', 'danger');
+                return;
+            }
+
+            const task = data.task;
+
+            // Set modal title
+            document.getElementById('taskModalLabel').textContent = 'Edit Task';
+
+            // Load projects
+            await loadProjectOptions();
+
+            // Fill form with task data
+            document.getElementById('taskTitle').value = task.title;
+            document.getElementById('taskProject').value = task.project_id;
+            document.getElementById('taskDate').value = task.task_date;
+            document.getElementById('taskHours').value = task.hours;
+            document.getElementById('taskStatus').value = task.status;
+            document.getElementById('taskDetails').value = task.details || '';
+            document.getElementById('clickupLink').value = task.clickup_link || '';
+
+            // Store task ID in form for update
+            const form = document.getElementById('taskForm');
+            form.dataset.taskId = taskId;
+
+            // Show modal
+            const modal = new bootstrap.Modal(document.getElementById('taskModal'));
+            modal.show();
+        }
         // Delete task
         async function deleteTask(taskId) {
             if (!confirm('Are you sure you want to delete this task?')) return;
@@ -280,19 +331,27 @@ if (!$userId) {
         document.getElementById('btnNewTask').onclick = () => {
             document.getElementById('taskModalLabel').textContent = 'Create Task';
             document.getElementById('taskForm').reset();
+            delete document.getElementById('taskForm').dataset.taskId;
             loadProjectOptions();
             const modal = new bootstrap.Modal(document.getElementById('taskModal'));
             modal.show();
         };
 
-        // Handle form submit (create task)
+        // Handle form submit (create/update task)
         document.getElementById('taskForm').onsubmit = async function(e) {
             e.preventDefault();
             const formData = new FormData(this);
+            const isEdit = !!this.dataset.taskId;
+
+            if (isEdit) {
+                formData.append('action', 'update_task');
+                formData.append('task_id', this.dataset.taskId);
+            } else {
+                formData.append('action', 'create_task');
+                formData.append('assignee_id', userId);
+                // Status will come from the form selection
+            }
             formData.append('user_id', userId);
-            formData.append('assignee_id', userId);
-            formData.append('status', 'Pending'); // Default status for new tasks
-            formData.append('action', 'create_task');
 
             const res = await fetch('ajax_helpers/user_task_crud.php', {
                 method: 'POST',
@@ -300,11 +359,11 @@ if (!$userId) {
             });
             const data = await res.json();
             if (data.success) {
-                showAlert('Task created!');
+                showAlert(isEdit ? 'Task updated!' : 'Task created!');
                 bootstrap.Modal.getInstance(document.getElementById('taskModal')).hide();
                 loadTasks();
             } else {
-                showAlert(data.error || 'Failed to save task', 'danger');
+                showAlert(data.error || (isEdit ? 'Failed to update task' : 'Failed to create task'), 'danger');
             }
         };
 

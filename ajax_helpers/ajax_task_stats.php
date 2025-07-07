@@ -16,20 +16,23 @@ try {
     $statuses = DB::query("SELECT status FROM tasks WHERE assignee_id = %i", $user_id);
 
     $total = count($statuses);
-    $completed = $pending = $overdue = 0;
+    $completed = $pending = $in_progress = $overdue = 0;
 
     foreach ($statuses as $row) {
         switch ($row['status']) {
             case 'Completed': $completed++; break;
-            case 'pending': $pending++; break;
-            case 'overdue': $overdue++; break;
+            case 'Pending': $pending++; break;
+            case 'In Progress': $in_progress++; break;
+            // If you still want to track overdue separately
+            case 'Overdue': $overdue++; break;
         }
     }
 
     echo json_encode([
         'total' => $total,
-        'Completed' => $completed,
+        'completed' => $completed,
         'pending' => $pending,
+        'in_progress' => $in_progress,
         'overdue' => $overdue
     ]);
 } catch (Exception $e) {
