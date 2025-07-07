@@ -78,10 +78,11 @@ $projects = DB::query("SELECT * FROM projects ");
                                 </th>
                                 <th>Invoice #</th>
                                 <th>Client</th>
-                                <th>Project</th> <!-- Added this column -->
+                                <th>Project</th>
                                 <th>Date</th>
                                 <th>Due Date</th>
                                 <th>Status</th>
+                                <th>Change Status</th> <!-- New column -->
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -500,7 +501,7 @@ $projects = DB::query("SELECT * FROM projects ");
                 tbody.innerHTML = '';
 
                 if (invoices.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4 text-muted">No invoices found</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="9" class="text-center py-4 text-muted">No invoices found</td></tr>';
                     return;
                 }
 
@@ -524,14 +525,31 @@ $projects = DB::query("SELECT * FROM projects ");
                             statusBadge = '<span class="badge bg-secondary">Draft</span>';
                     }
 
+                    // Status change dropdown
+                    const statusDropdown = `
+            <div class="dropdown">
+                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" 
+                    data-bs-toggle="dropdown" aria-expanded="false">
+                    Change
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="#" onclick="invoiceManager.updateStatus(${invoice.id}, 'draft')">Draft</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="invoiceManager.updateStatus(${invoice.id}, 'pending')">Pending</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="invoiceManager.updateStatus(${invoice.id}, 'paid')">Paid</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="invoiceManager.updateStatus(${invoice.id}, 'overdue')">Overdue</a></li>
+                </ul>
+            </div>
+        `;
+
                     row.innerHTML = `
             <td><div class="form-check"><input class="form-check-input" type="checkbox" value="${invoice.id}"></div></td>
             <td>${invoice.invoice_number}</td>
             <td>${invoice.client_name}</td>
-            <td>${invoice.project_name || 'N/A'}</td>  <!-- Added project name column -->
+            <td>${invoice.project_name || 'N/A'}</td>
             <td>${issueDate}</td>
             <td>${dueDate}</td>
             <td>${statusBadge}</td>
+            <td>${statusDropdown}</td>
             <td>
                 <button class="btn btn-sm btn-outline-primary me-1 view-invoice-btn" title="View" data-invoice-id="${invoice.id}">
                     <i class="fas fa-eye"></i>
@@ -942,6 +960,29 @@ $projects = DB::query("SELECT * FROM projects ");
                         .catch(error => alert('Error sending invoice: ' + error.message));
                 }
             },
+            updateStatus: function(invoiceId, newStatus) {
+    if (confirm(`Are you sure you want to change this invoice's status to ${newStatus}?`)) {
+        fetch('ajax_helpers/updateInvoiceStatus.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+                invoice_id: invoiceId,
+                new_status: newStatus
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                this.loadInvoices();
+            } else {
+                throw new Error(data.error || 'Failed to update status');
+            }
+        })
+        .catch(error => alert('Error updating status: ' + error.message));
+    }
+},
 
             deleteInvoice: function(invoiceId) {
                 if (confirm('Are you sure you want to delete this invoice?')) {
