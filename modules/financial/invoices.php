@@ -203,6 +203,54 @@ $projects = DB::query("SELECT * FROM projects ");
         </div>
     </div>
 </div>
+<!-- Edit Invoice Modal -->
+<div class="modal fade" id="editInvoiceModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Invoice</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editInvoiceForm">
+                    <input type="hidden" id="editInvoiceId">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Client</label>
+                            <select class="form-select" id="editInvoiceClient" required>
+                                <option value="">Select Client</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Project</label>
+                            <select class="form-select" id="editInvoiceProject" required>
+                                <option value="">Select Project</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Issue Date</label>
+                            <input type="date" class="form-control" id="editInvoiceIssueDate" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Due Date</label>
+                            <input type="date" class="form-control" id="editInvoiceDueDate" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Notes</label>
+                        <textarea class="form-control" id="editInvoiceNotes" rows="3"></textarea>
+                    </div>
+                    <div class="d-flex justify-content-end">
+                        <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Update Invoice</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -310,32 +358,32 @@ $projects = DB::query("SELECT * FROM projects ");
                 };
             },
 
-          loadClients: function() {
-    fetch('ajax_helpers/getClients.php')
-        .then(response => response.json())
-        .then(clients => {
-            const clientFilter = document.getElementById('clientFilter');
-            const invoiceClient = document.getElementById('invoiceClient');
+            loadClients: function() {
+                fetch('ajax_helpers/getClients.php')
+                    .then(response => response.json())
+                    .then(clients => {
+                        const clientFilter = document.getElementById('clientFilter');
+                        const invoiceClient = document.getElementById('invoiceClient');
 
-            clients.forEach(client => {
-                // Combine first_name and last_name
-                const fullName = `${client.first_name} ${client.last_name}`;
-                
-                // For clientFilter
-                const option1 = document.createElement('option');
-                option1.value = client.id;
-                option1.textContent = fullName;
-                clientFilter.appendChild(option1);
+                        clients.forEach(client => {
+                            // Combine first_name and last_name
+                            const fullName = `${client.first_name} ${client.last_name}`;
 
-                // For invoiceClient
-                const option2 = document.createElement('option');
-                option2.value = client.id;
-                option2.textContent = fullName;
-                invoiceClient.appendChild(option2);
-            });
-        })
-        .catch(error => console.error('Error loading clients:', error));
-},
+                            // For clientFilter
+                            const option1 = document.createElement('option');
+                            option1.value = client.id;
+                            option1.textContent = fullName;
+                            clientFilter.appendChild(option1);
+
+                            // For invoiceClient
+                            const option2 = document.createElement('option');
+                            option2.value = client.id;
+                            option2.textContent = fullName;
+                            invoiceClient.appendChild(option2);
+                        });
+                    })
+                    .catch(error => console.error('Error loading clients:', error));
+            },
 
             loadProjectsForClient: function(clientId) {
                 if (!clientId) {
@@ -447,36 +495,36 @@ $projects = DB::query("SELECT * FROM projects ");
                     });
             },
 
-          renderInvoices: function(invoices) {
-    const tbody = document.getElementById('invoicesTableBody');
-    tbody.innerHTML = '';
+            renderInvoices: function(invoices) {
+                const tbody = document.getElementById('invoicesTableBody');
+                tbody.innerHTML = '';
 
-    if (invoices.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4 text-muted">No invoices found</td></tr>';
-        return;
-    }
+                if (invoices.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4 text-muted">No invoices found</td></tr>';
+                    return;
+                }
 
-    invoices.forEach(invoice => {
-        const row = document.createElement('tr');
-        const issueDate = new Date(invoice.issue_date).toLocaleDateString();
-        const dueDate = new Date(invoice.due_date).toLocaleDateString();
+                invoices.forEach(invoice => {
+                    const row = document.createElement('tr');
+                    const issueDate = new Date(invoice.issue_date).toLocaleDateString();
+                    const dueDate = new Date(invoice.due_date).toLocaleDateString();
 
-        let statusBadge;
-        switch (invoice.status) {
-            case 'paid':
-                statusBadge = '<span class="badge bg-success">Paid</span>';
-                break;
-            case 'pending':
-                statusBadge = '<span class="badge bg-primary">Pending</span>';
-                break;
-            case 'overdue':
-                statusBadge = '<span class="badge bg-danger">Overdue</span>';
-                break;
-            default:
-                statusBadge = '<span class="badge bg-secondary">Draft</span>';
-        }
+                    let statusBadge;
+                    switch (invoice.status) {
+                        case 'paid':
+                            statusBadge = '<span class="badge bg-success">Paid</span>';
+                            break;
+                        case 'pending':
+                            statusBadge = '<span class="badge bg-primary">Pending</span>';
+                            break;
+                        case 'overdue':
+                            statusBadge = '<span class="badge bg-danger">Overdue</span>';
+                            break;
+                        default:
+                            statusBadge = '<span class="badge bg-secondary">Draft</span>';
+                    }
 
-        row.innerHTML = `
+                    row.innerHTML = `
             <td><div class="form-check"><input class="form-check-input" type="checkbox" value="${invoice.id}"></div></td>
             <td>${invoice.invoice_number}</td>
             <td>${invoice.client_name}</td>
@@ -491,17 +539,14 @@ $projects = DB::query("SELECT * FROM projects ");
                 <button class="btn btn-sm btn-outline-success me-1" title="Edit" onclick="invoiceManager.editInvoice(${invoice.id})">
                     <i class="fas fa-edit"></i>
                 </button>
-                <button class="btn btn-sm btn-outline-info me-1" title="Send" onclick="invoiceManager.sendInvoice(${invoice.id})">
-                    <i class="fas fa-paper-plane"></i>
-                </button>
                 <button class="btn btn-sm btn-outline-danger" title="Delete" onclick="invoiceManager.deleteInvoice(${invoice.id})">
                     <i class="fas fa-trash"></i>
                 </button>
             </td>
         `;
-        tbody.appendChild(row);
-    });
-},
+                    tbody.appendChild(row);
+                });
+            },
 
             updatePagination: function() {
                 const totalPages = Math.ceil(this.totalInvoices / this.itemsPerPage);
@@ -631,53 +676,56 @@ $projects = DB::query("SELECT * FROM projects ");
                     });
             },
 
-          showInvoiceModal: function(invoice) {
-    try {
-        // Validate required fields
-        if (!invoice || !invoice.invoice_number) {
-            throw new Error('Invalid invoice data received');
-        }
+            showInvoiceModal: function(invoice) {
+                try {
+                    // Validate required fields
+                    if (!invoice || !invoice.invoice_number) {
+                        throw new Error('Invalid invoice data received');
+                    }
 
-        const modalContent = document.getElementById('invoiceDetailsContent');
+                    const modalContent = document.getElementById('invoiceDetailsContent');
 
-        // Format dates with fallbacks
-        const issueDate = invoice.issue_date ?
-            new Date(invoice.issue_date).toLocaleDateString() :
-            'Not specified';
+                    // Format dates with fallbacks
+                    const issueDate = invoice.issue_date ?
+                        new Date(invoice.issue_date).toLocaleDateString() :
+                        'Not specified';
 
-        const dueDate = invoice.due_date ?
-            new Date(invoice.due_date).toLocaleDateString() :
-            'Not specified';
+                    const dueDate = invoice.due_date ?
+                        new Date(invoice.due_date).toLocaleDateString() :
+                        'Not specified';
 
-        // Status badge with fallback
-        const status = invoice.status || 'draft';
-        const statusBadges = {
-            paid: 'bg-success',
-            pending: 'bg-primary',
-            overdue: 'bg-danger',
-            draft: 'bg-secondary'
-        };
-        const statusBadge = `<span class="badge ${statusBadges[status]}">${status}</span>`;
+                    // Status badge with fallback
+                    const status = invoice.status || 'draft';
+                    const statusBadges = {
+                        paid: 'bg-success',
+                        pending: 'bg-primary',
+                        overdue: 'bg-danger',
+                        draft: 'bg-secondary'
+                    };
+                    const statusBadge = `<span class="badge ${statusBadges[status]}">${status}</span>`;
 
-        // Build items table: Date, Task, Hours
-        let itemsHtml = '';
-        (invoice.items || []).forEach(item => {
-            const dateStr = item.date ? new Date(item.date).toLocaleDateString() : '';
-            itemsHtml += `
+                    // Build items table: Date, Task, Hours
+                    let itemsHtml = '';
+                    (invoice.items || []).forEach(item => {
+                        const dateStr = item.date ? new Date(item.date).toLocaleDateString() : '';
+                        itemsHtml += `
                 <tr>
                     <td>${dateStr}</td>
                     <td>${item.task_title || 'No title'}</td>
                     <td>${item.hours || ''}</td>
                 </tr>
             `;
-        });
+                    });
 
-        // Calculate and format total project rate
-        const totalProjectRate = invoice.total_project_rate || 0;
-        const formattedTotal = totalProjectRate.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+                    // Calculate and format total project rate
+                    const totalProjectRate = invoice.total_project_rate || 0;
+                    const formattedTotal = totalProjectRate.toLocaleString('en-US', {
+                        style: 'currency',
+                        currency: 'USD'
+                    });
 
-        // Build the modal content
-        modalContent.innerHTML = `
+                    // Build the modal content
+                    modalContent.innerHTML = `
             <div class="invoice-preview">
                 <div class="invoice-header d-flex justify-content-between mb-4">
                     <div>
@@ -725,13 +773,13 @@ $projects = DB::query("SELECT * FROM projects ");
             </div>
         `;
 
-        // Show the modal
-        const modal = new bootstrap.Modal(document.getElementById('viewInvoiceModal'));
-        modal.show();
+                    // Show the modal
+                    const modal = new bootstrap.Modal(document.getElementById('viewInvoiceModal'));
+                    modal.show();
 
-    } catch (error) {
-        console.error('Error displaying invoice:', error);
-        document.getElementById('invoiceDetailsContent').innerHTML = `
+                } catch (error) {
+                    console.error('Error displaying invoice:', error);
+                    document.getElementById('invoiceDetailsContent').innerHTML = `
             <div class="alert alert-danger">
                 <h4>Error Displaying Invoice</h4>
                 <p>${error.message}</p>
@@ -740,12 +788,143 @@ $projects = DB::query("SELECT * FROM projects ");
                 </button>
             </div>
         `;
-        new bootstrap.Modal(document.getElementById('viewInvoiceModal')).show();
-    }
-},
+                    new bootstrap.Modal(document.getElementById('viewInvoiceModal')).show();
+                }
+            },
 
             editInvoice: function(invoiceId) {
-                alert(`Edit invoice ${invoiceId} - This would open an edit form`);
+                // First fetch the invoice details
+                fetch(`ajax_helpers/getInvoiceDetails.php?id=${invoiceId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Load clients first
+                            this.loadClientsForEditModal().then(() => {
+                                // Then show the modal with data
+                                this.showEditModal(data.invoice);
+
+                                // Load projects for the selected client
+                                if (data.invoice.client_id) {
+                                    this.loadProjectsForEditModal(data.invoice.client_id, data.invoice.project_id);
+                                }
+                            });
+                        } else {
+                            throw new Error(data.error || 'Failed to load invoice for editing');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error loading invoice for editing:', error);
+                        alert('Error loading invoice: ' + error.message);
+                    });
+            },
+            showEditModal: function(invoice) {
+                // Populate the form fields
+                document.getElementById('editInvoiceId').value = invoice.id;
+
+                // Set client (after clients are loaded)
+                const clientSelect = document.getElementById('editInvoiceClient');
+                clientSelect.value = invoice.client_id;
+
+                // Set dates (handle potential date format issues)
+                const issueDate = invoice.issue_date ? invoice.issue_date.split('T')[0] : '';
+                const dueDate = invoice.due_date ? invoice.due_date.split('T')[0] : '';
+                document.getElementById('editInvoiceIssueDate').value = issueDate;
+                document.getElementById('editInvoiceDueDate').value = dueDate;
+
+                // Set notes
+                document.getElementById('editInvoiceNotes').value = invoice.notes || '';
+
+                // Set up client change handler
+                clientSelect.addEventListener('change', (e) => {
+                    this.loadProjectsForEditModal(e.target.value);
+                });
+
+                // Show the modal
+                const modal = new bootstrap.Modal(document.getElementById('editInvoiceModal'));
+                modal.show();
+
+                // Set up form submission
+                document.getElementById('editInvoiceForm').onsubmit = (e) => {
+                    e.preventDefault();
+                    this.updateInvoice(invoice.id);
+                };
+            },
+
+            loadClientsForEditModal: function() {
+                return fetch('ajax_helpers/getClients.php')
+                    .then(response => response.json())
+                    .then(clients => {
+                        const clientSelect = document.getElementById('editInvoiceClient');
+                        clientSelect.innerHTML = '<option value="">Select Client</option>';
+
+                        clients.forEach(client => {
+                            const option = document.createElement('option');
+                            option.value = client.id;
+                            option.textContent = `${client.first_name} ${client.last_name}`;
+                            clientSelect.appendChild(option);
+                        });
+
+                        return clients;
+                    });
+            },
+
+            loadProjectsForEditModal: function(clientId, selectedProjectId = null) {
+                if (!clientId) {
+                    document.getElementById('editInvoiceProject').innerHTML = '<option value="">Select Project</option>';
+                    document.getElementById('editInvoiceProject').disabled = true;
+                    return;
+                }
+
+                return fetch(`ajax_helpers/getProjects.php?client_id=${clientId}`)
+                    .then(response => response.json())
+                    .then(projects => {
+                        const projectSelect = document.getElementById('editInvoiceProject');
+                        projectSelect.innerHTML = '<option value="">Select Project</option>';
+                        projectSelect.disabled = false;
+
+                        projects.forEach(project => {
+                            const option = document.createElement('option');
+                            option.value = project.id;
+                            option.textContent = project.name;
+                            if (selectedProjectId && project.id == selectedProjectId) {
+                                option.selected = true;
+                            }
+                            projectSelect.appendChild(option);
+                        });
+                    });
+            },
+
+
+            updateInvoice: function(invoiceId) {
+                const form = document.getElementById('editInvoiceForm');
+                const formData = {
+                    action: 'update_invoice',
+                    id: invoiceId,
+                    client_id: form.querySelector('#editInvoiceClient').value,
+                    project_id: form.querySelector('#editInvoiceProject').value,
+                    issue_date: form.querySelector('#editInvoiceIssueDate').value,
+                    due_date: form.querySelector('#editInvoiceDueDate').value,
+                    notes: form.querySelector('#editInvoiceNotes').value
+                };
+
+                fetch('ajax_helpers/updateInvoice.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: new URLSearchParams(formData)
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            bootstrap.Modal.getInstance(document.getElementById('editInvoiceModal')).hide();
+                            this.loadInvoices();
+                            alert('Invoice updated successfully!');
+                        } else {
+                            throw new Error(data.error || 'Failed to update invoice');
+                        }
+                    })
+                    .catch(error => alert('Error updating invoice: ' + error.message));
             },
 
             sendInvoice: function(invoiceId) {
