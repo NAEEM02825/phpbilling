@@ -163,7 +163,7 @@
         <div class="card h-100 shadow-sm">
             <div class="card-header bg-white d-flex justify-content-between align-items-center border-bottom">
                 <h5 class="mb-0">Recent Tasks</h5>
-                <a href="./my_task.php" class="btn btn-sm btn-outline-primary">View All</a>
+                <a href="index.php?route=modules/task/my_task" class="btn btn-sm btn-outline-primary">View All</a>
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
@@ -568,7 +568,7 @@
     // Fetch recent tasks
     function fetchRecentTasks() {
         $.ajax({
-            url: 'api/dashboard/recent-tasks.php',
+            url: 'ajax_helpers/dashboard_recent_tasks.php',
             method: 'GET',
             dataType: 'json',
             success: function(data) {
@@ -613,33 +613,33 @@
     }
 
     // Fetch active projects
-   // Fetch active projects - Updated version
-function fetchActiveProjects() {
-    $.ajax({
-        url: 'ajax_helpers/dashboard_active_projects.php',
-        method: 'GET',
-        dataType: 'json',
-        success: function(data) {
-            if (data.success && data.data) {
-                let html = '';
-                
-                // Limit to 5 projects for the dashboard
-                const projectsToShow = data.data.slice(0, 5);
-                
-                projectsToShow.forEach(project => {
-                    // Calculate last updated time (simplified)
-                    const createdDate = new Date(project.created_at);
-                    const now = new Date();
-                    const diffDays = Math.floor((now - createdDate) / (1000 * 60 * 60 * 24));
-                    const lastUpdated = diffDays === 0 ? 'today' : `${diffDays} days ago`;
-                    
-                    // Default to 'web' if category is not set
-                    const category = project.category || 'web';
-                    
-                    const iconClass = getProjectIcon(category);
-                    const iconColor = getProjectColor(category);
-                    
-                    html += `
+    // Fetch active projects - Updated version
+    function fetchActiveProjects() {
+        $.ajax({
+            url: 'ajax_helpers/dashboard_active_projects.php',
+            method: 'GET',
+            dataType: 'json',
+            success: function(data) {
+                if (data.success && data.data) {
+                    let html = '';
+
+                    // Limit to 5 projects for the dashboard
+                    const projectsToShow = data.data.slice(0, 5);
+
+                    projectsToShow.forEach(project => {
+                        // Calculate last updated time (simplified)
+                        const createdDate = new Date(project.created_at);
+                        const now = new Date();
+                        const diffDays = Math.floor((now - createdDate) / (1000 * 60 * 60 * 24));
+                        const lastUpdated = diffDays === 0 ? 'today' : `${diffDays} days ago`;
+
+                        // Default to 'web' if category is not set
+                        const category = project.category || 'web';
+
+                        const iconClass = getProjectIcon(category);
+                        const iconColor = getProjectColor(category);
+
+                        html += `
                         <div class="list-group-item">
                             <div class="d-flex align-items-center">
                                 <div class="flex-shrink-0">
@@ -665,20 +665,20 @@ function fetchActiveProjects() {
                             </div>
                         </div>
                     `;
-                });
+                    });
 
-                $('#activeProjectsList').html(html);
-            } else {
-                console.error('Data format error:', data);
-                $('#activeProjectsList').html('<div class="list-group-item text-muted">No active projects found</div>');
+                    $('#activeProjectsList').html(html);
+                } else {
+                    console.error('Data format error:', data);
+                    $('#activeProjectsList').html('<div class="list-group-item text-muted">No active projects found</div>');
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error fetching active projects:', error);
+                $('#activeProjectsList').html('<div class="list-group-item text-danger">Error loading projects</div>');
             }
-        },
-        error: function(xhr, status, error) {
-            console.error('Error fetching active projects:', error);
-            $('#activeProjectsList').html('<div class="list-group-item text-danger">Error loading projects</div>');
-        }
-    });
-}
+        });
+    }
 
     // Fetch invoice statistics
     function fetchInvoiceStats() {
@@ -700,42 +700,78 @@ function fetchActiveProjects() {
         });
     }
 
-    // Fetch recent invoices
-    function fetchRecentInvoices() {
+    // First fetch projects, then fetch invoices for each
+    function fetchProjectsAndInvoices() {
         $.ajax({
-            url: 'api/dashboard/recent-invoices.php',
+            url: 'ajax_helpers/dashboard_active_projects.php',
+            method: 'GET',
+            success: function(projectsResponse) {
+                if (projectsResponse.success && projectsResponse.data && projectsResponse.data.length > 0) {
+                    // Get the first project's ID
+                    const firstProjectId = projectsResponse.data[0].id;
+                    // Fetch invoices for this project
+                    fetchRecentInvoices(firstProjectId);
+                } else {
+                    $('#invoicesTable').html('<tr><td colspan="7" class="text-muted">No projects found</td></tr>');
+                }
+            },
+            error: function() {
+                $('#invoicesTable').html('<tr><td colspan="7" class="text-danger">Error loading projects</td></tr>');
+            }
+        });
+    }
+    // Fetch recent invoices
+
+    function fetchRecentInvoices(limit = 5) {
+        $.ajax({
+            url: 'ajax_helpers/dashboard_recent_invoices.php',
             method: 'GET',
             dataType: 'json',
-            success: function(data) {
-                if (data.success) {
+            data: {
+                limit: limit
+            },
+            success: function(response) {
+                if (response.success) {
                     let html = '';
-                    data.invoices.forEach(invoice => {
+                    response.invoices.forEach(invoice => {
                         const statusClass = getInvoiceStatusClass(invoice.status);
                         const statusText = getInvoiceStatusText(invoice.status);
 
                         html += `
-                            <tr>
-                                <td><a href="#" class="text-primary">${invoice.invoice_number}</a></td>
-                                <td>${invoice.client_name}</td>
-                                <td>${invoice.issue_date}</td>
-                                <td>${invoice.due_date}</td>
-                                <td>$${invoice.total_amount.toFixed(2)}</td>
-                                <td><span class="badge ${statusClass}">${statusText}</span></td>
-                                <td>
-                                    <button class="btn btn-sm btn-outline-secondary"><i class="fas fa-eye"></i></button>
-                                    <button class="btn btn-sm btn-outline-secondary"><i class="fas fa-download"></i></button>
-                                </td>
-                            </tr>
-                        `;
+                        <tr>
+                            <td>${invoice.invoice_number || 'N/A'}</td>
+                            <td>${invoice.client_name || 'N/A'}</td>
+                            <td>${formatDate(invoice.issue_date)}</td>
+                            <td>${formatDate(invoice.due_date)}</td>
+                            <td>$${parseFloat(invoice.total_amount).toFixed(2)}</td>
+                            <td><span class="badge ${statusClass}">${statusText}</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary" onclick="viewInvoice(${invoice.id})">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
                     });
 
                     $('#invoicesTable').html(html);
+                } else {
+                    console.error("Error fetching invoices:", response.error);
+                    $('#invoicesTable').html('<tr><td colspan="7" class="text-muted">No invoices found</td></tr>');
                 }
             },
-            error: function() {
-                console.error('Error fetching recent invoices');
+            error: function(xhr) {
+                console.error("Request failed", xhr.responseText);
+                $('#invoicesTable').html('<tr><td colspan="7" class="text-danger">Error loading invoices</td></tr>');
             }
         });
+    }
+
+    // Helper function to format dates
+    function formatDate(dateString) {
+        if (!dateString) return 'N/A';
+        const date = new Date(dateString);
+        return date.toLocaleDateString();
     }
 
     // Update task activity chart based on time period
