@@ -809,59 +809,88 @@
 
     // Update task distribution chart
         // Update task distribution chart
-  function updateTaskDistributionChart() {
+ function updateTaskDistributionChart() {
     $.ajax({
         url: 'ajax_helpers/dashboard_task_distribution.php',
         method: 'GET',
         dataType: 'json',
         success: function(response) {
             if (response && response.labels && response.data) {
-                // Update chart data
-                const ctx = document.getElementById('taskDistributionChart').getContext('2d');
+                // Default colors if not provided
+                const defaultColors = [
+                    'rgba(78, 115, 223, 0.8)',
+                    'rgba(28, 200, 138, 0.8)',
+                    'rgba(54, 185, 204, 0.8)',
+                    'rgba(246, 194, 62, 0.8)',
+                    'rgba(231, 74, 59, 0.8)'
+                ];
                 
-                // If chart doesn't exist, create it
-                if (typeof taskDistributionChart === 'undefined') {
+                // Prepare chart data
+                const chartData = {
+                    labels: response.labels,
+                    datasets: [{
+                        data: response.data,
+                        backgroundColor: response.backgroundColors || defaultColors,
+                        borderColor: '#fff',
+                        borderWidth: 1
+                    }]
+                };
+
+                // If chart doesn't exist, create it as doughnut
+                if (!taskDistributionChart) {
+                    const ctx = document.getElementById('taskDistributionChart').getContext('2d');
                     taskDistributionChart = new Chart(ctx, {
                         type: 'doughnut',
-                        data: {
-                            labels: response.labels,
-                            datasets: [{
-                                data: response.data,
-                                backgroundColor: response.backgroundColors || ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e'],
-                                borderColor: response.borderColors || '#fff',
-                                borderWidth: 1
-                            }]
-                        },
+                        data: chartData,
                         options: {
                             maintainAspectRatio: false,
                             cutout: '70%',
                             plugins: {
                                 legend: {
                                     display: false
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            const label = context.label || '';
+                                            const value = context.raw || 0;
+                                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                            const percentage = Math.round((value / total) * 100);
+                                            return `${label}: ${value} (${percentage}%)`;
+                                        }
+                                    }
                                 }
                             }
                         }
                     });
                 } else {
                     // Update existing chart
-                    taskDistributionChart.data.labels = response.labels;
-                    taskDistributionChart.data.datasets[0].data = response.data;
+                    taskDistributionChart.data.labels = chartData.labels;
+                    taskDistributionChart.data.datasets[0].data = chartData.datasets[0].data;
+                    taskDistributionChart.data.datasets[0].backgroundColor = chartData.datasets[0].backgroundColor;
                     taskDistributionChart.update();
                 }
 
                 // Update legend
                 let legendHtml = '';
-                response.labels.forEach((label, index) => {
-                    const color = response.backgroundColors ? response.backgroundColors[index] : ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e'][index % 4];
+                chartData.labels.forEach((label, index) => {
+                    const color = chartData.datasets[0].backgroundColor[index];
+                    const value = chartData.datasets[0].data[index];
+                    const total = chartData.datasets[0].data.reduce((a, b) => a + b, 0);
+                    const percentage = Math.round((value / total) * 100);
+                    
                     legendHtml += `
                         <div class="legend-item d-flex align-items-center mb-2">
                             <span class="color-indicator me-2" style="background-color: ${color}; width: 12px; height: 12px; border-radius: 50%;"></span>
                             <span class="label small">${label}</span>
-                            <span class="value ms-auto fw-bold">${response.data[index]}%</span>
+                            <span class="value ms-auto fw-bold">${value} (${percentage}%)</span>
                         </div>
                     `;
                 });
                 $('#taskDistributionLegend').html(legendHtml);
+            } else {
+                console.error('Invalid response format:', response);
+                $('#taskDistributionLegend').html('<div class="text-danger">No data available</div>');
             }
         },
         error: function(xhr, status, error) {
