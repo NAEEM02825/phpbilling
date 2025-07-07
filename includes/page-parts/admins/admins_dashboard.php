@@ -189,7 +189,7 @@
         <div class="card h-100 shadow-sm">
             <div class="card-header bg-white d-flex justify-content-between align-items-center border-bottom">
                 <h5 class="mb-0">Active Projects</h5>
-                <a href="projects.php" class="btn btn-sm btn-outline-primary">View All</a>
+                <a href="index.php?route=modules/projects/projects" class="btn btn-sm btn-outline-primary">View All</a>
             </div>
             <div class="card-body p-0">
                 <div class="list-group list-group-flush" id="activeProjectsList">
@@ -613,54 +613,72 @@
     }
 
     // Fetch active projects
-    function fetchActiveProjects() {
-        $.ajax({
-            url: 'api/dashboard/active-projects.php',
-            method: 'GET',
-            dataType: 'json',
-            success: function(data) {
-                if (data.success) {
-                    let html = '';
-                    data.projects.forEach(project => {
-                        const iconClass = getProjectIcon(project.category);
-                        const iconColor = getProjectColor(project.category);
-
-                        html += `
-                            <div class="list-group-item">
-                                <div class="d-flex align-items-center">
-                                    <div class="flex-shrink-0">
-                                        <div class="project-icon ${iconColor}">
-                                            <i class="fas ${iconClass}"></i>
-                                        </div>
-                                    </div>
-                                    <div class="flex-grow-1 ms-3">
-                                        <h6 class="mb-1">${project.name}</h6>
-                                        <p class="mb-0 text-muted small">Last updated ${project.last_updated}</p>
-                                    </div>
-                                    <div class="text-end">
-                                        <div class="progress mb-1" style="height: 6px; width: 100px;">
-                                            <div class="progress-bar ${getProgressBarClass(project.completion_percentage)}" 
-                                                 role="progressbar" 
-                                                 style="width: ${project.completion_percentage}%" 
-                                                 aria-valuenow="${project.completion_percentage}" 
-                                                 aria-valuemin="0" 
-                                                 aria-valuemax="100"></div>
-                                        </div>
-                                        <span class="text-muted small">${project.completion_percentage}% complete</span>
+   // Fetch active projects - Updated version
+function fetchActiveProjects() {
+    $.ajax({
+        url: 'ajax_helpers/dashboard_active_projects.php',
+        method: 'GET',
+        dataType: 'json',
+        success: function(data) {
+            if (data.success && data.data) {
+                let html = '';
+                
+                // Limit to 5 projects for the dashboard
+                const projectsToShow = data.data.slice(0, 5);
+                
+                projectsToShow.forEach(project => {
+                    // Calculate last updated time (simplified)
+                    const createdDate = new Date(project.created_at);
+                    const now = new Date();
+                    const diffDays = Math.floor((now - createdDate) / (1000 * 60 * 60 * 24));
+                    const lastUpdated = diffDays === 0 ? 'today' : `${diffDays} days ago`;
+                    
+                    // Default to 'web' if category is not set
+                    const category = project.category || 'web';
+                    
+                    const iconClass = getProjectIcon(category);
+                    const iconColor = getProjectColor(category);
+                    
+                    html += `
+                        <div class="list-group-item">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-shrink-0">
+                                    <div class="project-icon ${iconColor}">
+                                        <i class="fas ${iconClass}"></i>
                                     </div>
                                 </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <h6 class="mb-1">${project.name}</h6>
+                                    <p class="mb-0 text-muted small">Created ${lastUpdated}</p>
+                                </div>
+                                <div class="text-end">
+                                    <div class="progress mb-1" style="height: 6px; width: 100px;">
+                                        <div class="progress-bar ${getProgressBarClass(project.progress)}" 
+                                             role="progressbar" 
+                                             style="width: ${project.progress}%" 
+                                             aria-valuenow="${project.progress}" 
+                                             aria-valuemin="0" 
+                                             aria-valuemax="100"></div>
+                                    </div>
+                                    <span class="text-muted small">${project.progress}% complete</span>
+                                </div>
                             </div>
-                        `;
-                    });
+                        </div>
+                    `;
+                });
 
-                    $('#activeProjectsList').html(html);
-                }
-            },
-            error: function() {
-                console.error('Error fetching active projects');
+                $('#activeProjectsList').html(html);
+            } else {
+                console.error('Data format error:', data);
+                $('#activeProjectsList').html('<div class="list-group-item text-muted">No active projects found</div>');
             }
-        });
-    }
+        },
+        error: function(xhr, status, error) {
+            console.error('Error fetching active projects:', error);
+            $('#activeProjectsList').html('<div class="list-group-item text-danger">Error loading projects</div>');
+        }
+    });
+}
 
     // Fetch invoice statistics
     function fetchInvoiceStats() {
