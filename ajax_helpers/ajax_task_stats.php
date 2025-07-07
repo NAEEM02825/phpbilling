@@ -20,7 +20,7 @@ try {
 
     foreach ($statuses as $row) {
         switch ($row['status']) {
-            case 'completed': $completed++; break;
+            case 'Completed': $completed++; break;
             case 'pending': $pending++; break;
             case 'overdue': $overdue++; break;
         }
@@ -28,7 +28,7 @@ try {
 
     echo json_encode([
         'total' => $total,
-        'completed' => $completed,
+        'Completed' => $completed,
         'pending' => $pending,
         'overdue' => $overdue
     ]);

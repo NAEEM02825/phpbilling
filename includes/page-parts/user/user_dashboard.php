@@ -128,7 +128,7 @@
 
                 // Update numbers
                 $('#total-tasks').text(total);
-                $('#completed-tasks').text(completed);
+                $('#Completed-tasks').text(completed);
                 $('#pending-tasks').text(pending);
                 $('#overdue-tasks').text(overdue);
 
@@ -137,7 +137,7 @@
 
                 // Update progress bars
                 $('#progress-total').css('width', `${(completed / safeDiv) * 100}%`);
-                $('#progress-completed').css('width', `${(completed / safeDiv) * 100}%`);
+                $('#progress-Completed').css('width', `${(completed / safeDiv) * 100}%`);
                 $('#progress-pending').css('width', `${(pending / safeDiv) * 100}%`);
                 $('#progress-overdue').css('width', `${(overdue / safeDiv) * 100}%`);
             },
