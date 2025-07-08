@@ -5,10 +5,9 @@
         <p class="mb-0 text-muted">Add a new task to your project</p>
     </div>
     <div class="btn-toolbar mb-2 mb-md-0">
-        <button type="button" class="btn btn-outline-secondary me-2">
+        <button type="button" class="btn btn-outline-secondary me-2" id="cancelButton">
             <i class="fas fa-times me-1"></i> Cancel
         </button>
-        <!-- Remove the Save Task button from the header toolbar -->
     </div>
 </div>
 
@@ -16,7 +15,6 @@
 <div class="row">
     <div class="col-lg-8 mx-auto">
         <div class="card shadow-sm mb-4">
-            <!-- Center the card-body content -->
             <div class="card-body d-flex flex-column align-items-center justify-content-center">
                 <form id="taskForm" class="w-100">
                     <!-- Task Title -->
@@ -36,7 +34,7 @@
                         <label for="projectSelect" class="form-label">Project <span class="text-danger">*</span></label>
                         <select class="form-select" id="projectSelect" name="project_id" required>
                             <option selected disabled value="">Select project</option>
-                            <!-- Populate with PHP or JS -->
+                            <!-- Populated via JavaScript -->
                         </select>
                     </div>
 
@@ -44,8 +42,8 @@
                     <div class="mb-4 w-100">
                         <label for="assigneeSelect" class="form-label">Assignee</label>
                         <select class="form-select" id="assigneeSelect" name="assignee_id">
-                            <option selected disabled value="">Select assignee</option>
-                            <!-- Populate with PHP or JS -->
+                            <option selected value="">Select assignee</option>
+                            <!-- Populated via JavaScript -->
                         </select>
                     </div>
 
@@ -53,9 +51,9 @@
                     <div class="mb-4 w-100">
                         <label for="statusSelect" class="form-label">Status</label>
                         <select class="form-select" id="statusSelect" name="status">
-                            <option selected>Pending</option>
-                            <option>In Progress</option>
-                            <option>Completed</option>
+                            <option selected value="Pending">Pending</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Completed">Completed</option>
                         </select>
                     </div>
 
@@ -88,6 +86,9 @@
         </div>
     </div>
 </div>
+
+<!-- Include SweetAlert CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 
 <style>
     /* New Task Page Specific Styles */
@@ -158,93 +159,170 @@
     }
 </style>
 
+<!-- Include SweetAlert JS -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
-    // Initialize form plugins
     document.addEventListener('DOMContentLoaded', function() {
-        // Initialize dropzone for file uploads
-        // This would be replaced with actual Dropzone.js initialization
-        console.log('Dropzone would be initialized here');
-        
-        // Initialize select2 for multiple select elements
-        // This would be replaced with actual Select2 initialization
-        console.log('Select2 would be initialized for multiple select elements');
-        
-        // Form validation would go here
-        const form = document.querySelector('form');
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            console.log('Form would be validated and submitted here');
-            // Actual form submission would go here
+        // Cancel button functionality
+        document.getElementById('cancelButton').addEventListener('click', function() {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: 'You will lose any unsaved changes.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, cancel it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = 'tasks.php'; // Redirect to tasks page
+                }
+            });
         });
-    });
 
-    document.addEventListener('DOMContentLoaded', function() {
         // --- Populate Project Dropdown ---
-        fetch('ajax_helpers/task_handler.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: 'action=get_projects'
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success && Array.isArray(data.data)) {
-                const projectSelect = document.getElementById('projectSelect');
-                data.data.forEach(project => {
-                    const opt = document.createElement('option');
-                    opt.value = project.id;
-                    opt.textContent = project.name;
-                    projectSelect.appendChild(opt);
-                });
-            }
-        });
-
+        fetchProjects();
+        
         // --- Populate Assignee Dropdown ---
-        fetch('ajax_helpers/task_handler.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: 'action=get_users'
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success && Array.isArray(data.users)) {
-                const assigneeSelect = document.getElementById('assigneeSelect');
-                data.users.forEach(user => {
-                    const opt = document.createElement('option');
-                    opt.value = user.user_id;
-                    opt.textContent = user.name;
-                    assigneeSelect.appendChild(opt);
-                });
-            }
-        });
+        fetchUsers();
 
+        // Form submission handler
         const form = document.getElementById('taskForm');
         form.addEventListener('submit', async function(e) {
             e.preventDefault();
+            
+            // Validate required fields
             if (!form.taskTitle.value.trim()) {
-                alert('Task Title is required');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Task Title is required',
+                    confirmButtonColor: '#3a4f8a'
+                });
                 return;
             }
+            
             if (!form.projectSelect.value) {
-                alert('Project is required');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Project is required',
+                    confirmButtonColor: '#3a4f8a'
+                });
                 return;
             }
-            const formData = new FormData(form);
-            formData.append('action', 'create_task');
+
+            // Show loading indicator
+            Swal.fire({
+                title: 'Creating Task...',
+                html: 'Please wait while we save your task.',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
             try {
+                const formData = new FormData(form);
+                formData.append('action', 'create_task');
+                
                 const response = await fetch('ajax_helpers/task_handler.php', {
                     method: 'POST',
                     body: formData
                 });
+                
                 const data = await response.json();
+                
                 if (!data.success) {
-                    alert(data.error || 'Failed to create task');
-                    return;
+                    throw new Error(data.error || 'Failed to create task');
                 }
-                alert('Task created successfully!');
-                form.reset();
+                
+                // Show success message
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: 'Task created successfully!',
+                    confirmButtonColor: '#3a4f8a',
+                    willClose: () => {
+                        form.reset();
+                        // Optionally redirect or refresh the page
+                        // window.location.href = 'tasks.php';
+                    }
+                });
+                
             } catch (error) {
-                alert('Error creating task: ' + error.message);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Error creating task: ' + error.message,
+                    confirmButtonColor: '#3a4f8a'
+                });
             }
         });
+
+        // Function to fetch projects
+        async function fetchProjects() {
+            try {
+                const response = await fetch('ajax_helpers/task_handler.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: 'action=get_projects'
+                });
+                
+                const data = await response.json();
+                
+                if (data.success && Array.isArray(data.data)) {
+                    const projectSelect = document.getElementById('projectSelect');
+                    data.data.forEach(project => {
+                        const opt = document.createElement('option');
+                        opt.value = project.id;
+                        opt.textContent = project.name;
+                        projectSelect.appendChild(opt);
+                    });
+                } else {
+                    throw new Error(data.error || 'Failed to load projects');
+                }
+            } catch (error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Failed to load projects: ' + error.message,
+                    confirmButtonColor: '#3a4f8a'
+                });
+            }
+        }
+
+        // Function to fetch users
+        async function fetchUsers() {
+            try {
+                const response = await fetch('ajax_helpers/task_handler.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: 'action=get_users'
+                });
+                
+                const data = await response.json();
+                
+                if (data.success && Array.isArray(data.users)) {
+                    const assigneeSelect = document.getElementById('assigneeSelect');
+                    data.users.forEach(user => {
+                        const opt = document.createElement('option');
+                        opt.value = user.user_id;
+                        opt.textContent = user.name;
+                        assigneeSelect.appendChild(opt);
+                    });
+                } else {
+                    throw new Error(data.error || 'Failed to load users');
+                }
+            } catch (error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Failed to load users: ' + error.message,
+                    confirmButtonColor: '#3a4f8a'
+                });
+            }
+        }
     });
 </script>

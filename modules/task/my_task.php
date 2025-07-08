@@ -290,6 +290,10 @@
     </div>
 </div>
 
+<!-- Include SweetAlert CSS and JS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <style>
     .nav-tabs {
         border-bottom: 1px solid #e9ecef;
@@ -692,8 +696,8 @@
                         ${task.clickup_link ? `<a href="${task.clickup_link}" target="_blank" class="text-info">View in ClickUp</a>` : 'No link'}
                     </td>
                     <td>
-                        <button class="btn btn-sm btn-success me-1">Complete</button>
-                        <button class="btn btn-sm btn-outline-secondary">Log Time</button>
+                        <button class="btn btn-sm btn-success me-1" onclick="completeTask(${task.id})">Complete</button>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="logTime(${task.id})">Log Time</button>
                     </td>
                 `;
                 tbody.appendChild(row);
@@ -795,7 +799,15 @@
             const modal = bootstrap.Modal.getInstance(document.getElementById('newTaskModal'));
             modal.hide();
 
-            showAlert('Task created successfully!', 'success');
+            Swal.fire({
+                title: 'Success!',
+                text: 'Task created successfully!',
+                icon: 'success',
+                confirmButtonColor: '#3a4f8a',
+                timer: 2000,
+                timerProgressBar: true
+            });
+            
             form.reset();
             loadTasks();
         } catch (error) {
@@ -805,7 +817,17 @@
 
     // Delete Task
     async function deleteTask(taskId) {
-        if (!confirm('Are you sure you want to delete this task?')) return;
+        const result = await Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3a4f8a',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, delete it!'
+        });
+
+        if (!result.isConfirmed) return;
 
         try {
             const response = await fetch('ajax_helpers/task_handler.php', {
@@ -821,7 +843,15 @@
                 throw new Error(data.error || 'Failed to delete task');
             }
 
-            showAlert('Task deleted successfully!', 'success');
+            Swal.fire({
+                title: 'Deleted!',
+                text: 'Task has been deleted.',
+                icon: 'success',
+                confirmButtonColor: '#3a4f8a',
+                timer: 2000,
+                timerProgressBar: true
+            });
+            
             loadTasks();
         } catch (error) {
             showError('Error deleting task: ' + error.message);
@@ -887,10 +917,146 @@
             const modal = bootstrap.Modal.getInstance(document.getElementById('editTaskModal'));
             modal.hide();
 
-            showAlert('Task updated successfully!', 'success');
+            Swal.fire({
+                title: 'Success!',
+                text: 'Task updated successfully!',
+                icon: 'success',
+                confirmButtonColor: '#3a4f8a',
+                timer: 2000,
+                timerProgressBar: true
+            });
+            
             loadTasks();
         } catch (error) {
             showError('Error updating task: ' + error.message);
+        }
+    }
+
+    // Complete Task
+    async function completeTask(taskId) {
+        try {
+            const response = await fetch('ajax_helpers/task_handler.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `action=complete_task&task_id=${taskId}`
+            });
+            const data = await response.json();
+
+            if (!data.success) {
+                throw new Error(data.error || 'Failed to complete task');
+            }
+
+            Swal.fire({
+                title: 'Task Completed!',
+                text: 'The task has been marked as completed.',
+                icon: 'success',
+                confirmButtonColor: '#3a4f8a',
+                timer: 2000,
+                timerProgressBar: true
+            });
+            
+            loadMyTasks();
+        } catch (error) {
+            showError('Error completing task: ' + error.message);
+        }
+    }
+
+    // Log Time for Task
+    async function logTime(taskId) {
+        const { value: hours } = await Swal.fire({
+            title: 'Log Time',
+            text: 'Enter hours spent on this task:',
+            input: 'number',
+            inputAttributes: {
+                step: '0.25',
+                min: '0.25'
+            },
+            inputPlaceholder: 'Enter hours (e.g. 2.5)',
+            showCancelButton: true,
+            confirmButtonColor: '#3a4f8a',
+            inputValidator: (value) => {
+                if (!value) {
+                    return 'You need to enter hours!';
+                }
+                if (parseFloat(value) <= 0) {
+                    return 'Hours must be greater than 0';
+                }
+            }
+        });
+
+        if (hours) {
+            try {
+                const response = await fetch('ajax_helpers/task_handler.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `action=log_time&task_id=${taskId}&hours=${hours}`
+                });
+                const data = await response.json();
+
+                if (!data.success) {
+                    throw new Error(data.error || 'Failed to log time');
+                }
+
+                Swal.fire({
+                    title: 'Time Logged!',
+                    text: `${hours} hours have been logged for this task.`,
+                    icon: 'success',
+                    confirmButtonColor: '#3a4f8a',
+                    timer: 2000,
+                    timerProgressBar: true
+                });
+                
+                loadMyTasks();
+            } catch (error) {
+                showError('Error logging time: ' + error.message);
+            }
+        }
+    }
+
+    // Delete Project
+    async function deleteProject(projectId) {
+        const result = await Swal.fire({
+            title: 'Are you sure?',
+            text: "This will delete the project and all associated tasks!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3a4f8a',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, delete it!'
+        });
+
+        if (!result.isConfirmed) return;
+
+        try {
+            const response = await fetch('ajax_helpers/task_handler.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `action=delete_project&project_id=${projectId}`
+            });
+            const data = await response.json();
+
+            if (!data.success) {
+                throw new Error(data.error || 'Failed to delete project');
+            }
+
+            Swal.fire({
+                title: 'Deleted!',
+                text: 'Project has been deleted.',
+                icon: 'success',
+                confirmButtonColor: '#3a4f8a',
+                timer: 2000,
+                timerProgressBar: true
+            });
+            
+            loadProjects();
+        } catch (error) {
+            showError('Error deleting project: ' + error.message);
         }
     }
 
@@ -911,36 +1077,37 @@
     }
 
     function showAlert(message, type = 'success') {
-        const alert = document.createElement('div');
-        alert.className = `alert alert-${type} alert-dismissible fade show position-fixed top-0 end-0 m-3`;
-        alert.style.zIndex = '1100';
-        alert.innerHTML = `
-            ${message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        `;
-
-        document.body.appendChild(alert);
-
-        setTimeout(() => {
-            const bsAlert = new bootstrap.Alert(alert);
-            bsAlert.close();
-        }, 5000);
+        Swal.fire({
+            title: type === 'success' ? 'Success!' : 'Error!',
+            text: message,
+            icon: type,
+            confirmButtonColor: '#3a4f8a',
+            timer: 3000,
+            timerProgressBar: true
+        });
     }
 
     function showError(message) {
-        showAlert(message, 'danger');
+        showAlert(message, 'error');
     }
 
     function viewProject(id) {
         // Implement view project modal or redirect
+        Swal.fire({
+            title: 'View Project',
+            text: 'Project details would be shown here',
+            icon: 'info',
+            confirmButtonColor: '#3a4f8a'
+        });
     }
     
-    function deleteProject(id) {
-        if (confirm('Are you sure you want to delete this project?')) {
-            // Implement AJAX delete logic
-        }
-    }
     function viewTask(id) {
         // Implement view task modal or redirect
+        Swal.fire({
+            title: 'View Task',
+            text: 'Task details would be shown here',
+            icon: 'info',
+            confirmButtonColor: '#3a4f8a'
+        });
     }
 </script>
