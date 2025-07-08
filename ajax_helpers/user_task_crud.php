@@ -13,11 +13,7 @@ try {
             break;
 
         case 'get_projects':
-            $projects = DB::query(
-                "SELECT id, name 
-         FROM projects
-         ORDER BY name"
-            );
+            $projects = DB::query("SELECT id, name FROM projects ORDER BY name");
             $response = ['success' => true, 'projects' => $projects];
             break;
 
@@ -27,12 +23,35 @@ try {
                 'project_id' => $_POST['project_id'],
                 'task_date' => $_POST['task_date'],
                 'hours' => $_POST['hours'],
-                'assignee_id' => $userId,
+                'assignee_id' => $_POST['assignee_id'],
                 'status' => $_POST['status'],
                 'details' => $_POST['details'] ?? '',
                 'clickup_link' => $_POST['clickup_link'] ?? '',
                 'created_at' => date('Y-m-d H:i:s')
             ]);
+            $response = ['success' => true];
+            break;
+
+        case 'start_task':
+            // Verify task belongs to user and is pending
+            $task = DB::queryFirstRow(
+                "SELECT id FROM tasks WHERE id = %i AND assignee_id = %i AND status = %s",
+                $_POST['task_id'],
+                $userId,
+                'Pending'
+            );
+            
+            if (!$task) {
+                $response['error'] = 'Task not found or cannot be started';
+                break;
+            }
+
+            // Update status to In Progress
+            DB::update('tasks', [
+                'status' => 'In Progress',
+                'updated_at' => date('Y-m-d H:i:s')
+            ], 'id = %i', $_POST['task_id']);
+            
             $response = ['success' => true];
             break;
 
@@ -48,6 +67,7 @@ try {
             DB::delete('tasks', 'id = %i AND assignee_id = %i', $_POST['task_id'], $userId);
             $response = ['success' => true];
             break;
+
         case 'get_task':
             $task = DB::queryFirstRow("SELECT * FROM tasks WHERE id = %i AND assignee_id = %i", $_POST['task_id'], $userId);
             if ($task) {
@@ -63,7 +83,7 @@ try {
                 'project_id' => $_POST['project_id'],
                 'task_date' => $_POST['task_date'],
                 'hours' => $_POST['hours'],
-                'status' => $_POST['status'], // Add this line for status update
+                'status' => $_POST['status'],
                 'details' => $_POST['details'] ?? '',
                 'clickup_link' => $_POST['clickup_link'] ?? '',
                 'updated_at' => date('Y-m-d H:i:s')
@@ -77,4 +97,5 @@ try {
 } catch (Exception $e) {
     $response['error'] = $e->getMessage();
 }
+
 echo json_encode($response);

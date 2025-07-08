@@ -71,6 +71,11 @@ if (!$userId) {
             z-index: 9999;
             min-width: 250px;
         }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 
@@ -181,15 +186,17 @@ if (!$userId) {
                 &nbsp;|&nbsp; <i class="fas fa-clock me-1"></i> ${task.hours || '0'}h
             </div>
             <div class="mb-2">${escapeHtml(task.details || '')}</div>
-           <div>
+<div>
     ${task.clickup_link ? `<a href="${escapeHtml(task.clickup_link)}" target="_blank" class="btn btn-sm btn-outline-info me-2"><i class="fab fa-clickup"></i> ClickUp</a>` : ''}
-    ${task.status !== 'Completed' ? 
-        `<button class="btn btn-sm btn-outline-success me-2" onclick="completeTask(${task.id})"><i class="fas fa-check"></i> Complete</button>` : 
+    ${task.status === 'Pending' ? 
+        `<button class="btn btn-sm btn-outline-warning me-2" onclick="startTask(${task.id})"><i class="fas fa-play"></i> Start</button>` : 
         ''}
-    <button class="btn btn-sm btn-outline-primary me-2" onclick="editTask(${task.id})"><i class="fas fa-edit"></i> Edit</button>
-    <button class="btn btn-sm btn-outline-danger" onclick="deleteTask(${task.id})"><i class="fas fa-trash"></i> Delete</button>
-</div>
-        `;
+    ${task.status !== 'Completed' ? 
+        `<button class="btn btn-sm btn-outline-success me-2" onclick="completeTask(${task.id})" ${task.status === 'Pending' ? 'disabled' : ''}><i class="fas fa-check"></i> Complete</button>` : 
+        ''}
+    <button class="btn btn-sm btn-outline-primary me-2" onclick="editTask(${task.id})" ${task.status === 'Completed' ? 'disabled' : ''}><i class="fas fa-edit"></i> Edit</button>
+    <button class="btn btn-sm btn-outline-danger" onclick="deleteTask(${task.id})" ${task.status === 'Completed' ? 'disabled' : ''}><i class="fas fa-trash"></i> Delete</button>
+</div>`;
                 container.appendChild(card);
             });
         }
@@ -276,6 +283,24 @@ if (!$userId) {
             // Show modal
             const modal = new bootstrap.Modal(document.getElementById('taskModal'));
             modal.show();
+        }
+        // Start task (change status to In Progress)
+        async function startTask(taskId) {
+            const res = await fetch('ajax_helpers/user_task_crud.php', {
+                method: 'POST',
+                body: new URLSearchParams({
+                    action: 'start_task',
+                    task_id: taskId,
+                    user_id: userId
+                })
+            });
+            const data = await res.json();
+            if (data.success) {
+                showAlert('Task started! Status changed to In Progress.');
+                loadTasks();
+            } else {
+                showAlert(data.error || 'Failed to start task', 'danger');
+            }
         }
         // Delete task
         async function deleteTask(taskId) {
