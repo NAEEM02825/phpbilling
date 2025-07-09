@@ -680,26 +680,6 @@
         });
     }
 
-    // Fetch invoice statistics
-    function fetchInvoiceStats() {
-        $.ajax({
-            url: 'api/dashboard/invoice-stats.php',
-            method: 'GET',
-            dataType: 'json',
-            success: function(data) {
-                if (data.success) {
-                    $('#totalInvoices').text(data.total_invoices);
-                    $('#paidInvoices').text(data.paid_invoices);
-                    $('#pendingInvoices').text(data.pending_invoices);
-                    $('#overdueInvoices').text(data.overdue_invoices);
-                }
-            },
-            error: function() {
-                console.error('Error fetching invoice statistics');
-            }
-        });
-    }
-
     // First fetch projects, then fetch invoices for each
     function fetchProjectsAndInvoices() {
         $.ajax({
@@ -807,7 +787,6 @@
         });
     }
 
-    // Update task distribution chart
  function updateTaskDistributionChart() {
     $.ajax({
         url: 'ajax_helpers/dashboard_task_distribution.php',
@@ -815,82 +794,64 @@
         dataType: 'json',
         success: function(response) {
             if (response && response.success && response.labels && response.data) {
+                // Get the canvas element
+                const ctx = document.getElementById('taskDistributionChart');
+                
+                if (!ctx) {
+                    console.error('Canvas element not found');
+                    return;
+                }
+
                 // Prepare chart data
                 const chartData = {
                     labels: response.labels,
                     datasets: [{
                         data: response.data,
                         backgroundColor: response.backgroundColors || [
-                            'rgba(78, 115, 223, 0.8)',
-                            'rgba(28, 200, 138, 0.8)',
-                            'rgba(246, 194, 62, 0.8)'
+                            '#4e73df',  // blue
+                            '#1cc88a',  // green
+                            '#f6c23e'   // yellow
                         ],
-                        borderColor: response.borderColors || '#fff',
+                        borderColor: '#fff',
                         borderWidth: 1
                     }]
                 };
 
-                // Get or create chart
-                const ctx = document.getElementById('taskDistributionChart').getContext('2d');
-                
-                // Destroy previous chart instance if exists
+                // Check if chart already exists
                 if (window.taskDistributionChart) {
-                    window.taskDistributionChart.destroy();
-                }
-
-                // Create new chart
-                window.taskDistributionChart = new Chart(ctx, {
-                    type: 'doughnut',
-                    data: chartData,
-                    options: {
-                        maintainAspectRatio: false,
-                        cutout: '70%',
-                        plugins: {
-                            legend: {
-                                display: false
-                            },
-                            tooltip: {
-                                callbacks: {
-                                    label: function(context) {
-                                        const label = context.label || '';
-                                        const value = context.raw || 0;
-                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                        const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
-                                        return `${label}: ${value} (${percentage}%)`;
+                    // Update existing chart
+                    window.taskDistributionChart.data = chartData;
+                    window.taskDistributionChart.update();
+                } else {
+                    // Create new chart
+                    window.taskDistributionChart = new Chart(ctx, {
+                        type: 'doughnut',
+                        data: chartData,
+                        options: {
+                            maintainAspectRatio: false,
+                            cutout: '70%',
+                            plugins: {
+                                legend: {
+                                    display: false
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            const label = context.label || '';
+                                            const value = context.raw || 0;
+                                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                            const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+                                            return `${label}: ${value} (${percentage}%)`;
+                                        }
                                     }
                                 }
                             }
                         }
-                    }
-                });
+                    });
+                }
 
                 // Update legend
-                let legendHtml = '';
-                chartData.labels.forEach((label, index) => {
-                    const color = chartData.datasets[0].backgroundColor[index];
-                    const value = chartData.datasets[0].data[index];
-                    const total = chartData.datasets[0].data.reduce((a, b) => a + b, 0);
-                    const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
-                    
-                    legendHtml += `
-                        <div class="legend-item d-flex align-items-center mb-2">
-                            <span class="color-indicator me-2" style="background-color: ${color}; width: 12px; height: 12px; border-radius: 50%;"></span>
-                            <span class="label small">${label}</span>
-                            <span class="value ms-auto fw-bold">${value} (${percentage}%)</span>
-                        </div>
-                    `;
-                });
-                
-                // Add a total count if needed
-                const totalTasks = chartData.datasets[0].data.reduce((a, b) => a + b, 0);
-                legendHtml += `
-                    <div class="legend-total mt-3 pt-2 border-top d-flex align-items-center">
-                        <span class="label small fw-bold">Total Tasks</span>
-                        <span class="value ms-auto fw-bold">${totalTasks}</span>
-                    </div>
-                `;
-                
-                $('#taskDistributionLegend').html(legendHtml);
+                updateTaskDistributionLegend(chartData);
             } else {
                 console.error('Invalid response format:', response);
                 $('#taskDistributionLegend').html('<div class="text-danger">No data available</div>');
@@ -903,11 +864,33 @@
     });
 }
 
-// Call the function initially and set interval for updates
-$(document).ready(function() {
-    updateTaskDistributionChart();
-    setInterval(updateTaskDistributionChart, 30000); // Update every 30 seconds
-});
+function updateTaskDistributionLegend(chartData) {
+    let legendHtml = '';
+    const total = chartData.datasets[0].data.reduce((a, b) => a + b, 0);
+
+    chartData.labels.forEach((label, index) => {
+        const color = chartData.datasets[0].backgroundColor[index];
+        const value = chartData.datasets[0].data[index];
+        const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+        
+        legendHtml += `
+            <div class="legend-item d-flex align-items-center mb-2">
+                <span class="color-indicator me-2" style="background-color: ${color}; width: 12px; height: 12px; border-radius: 50%;"></span>
+                <span class="label small">${label}</span>
+                <span class="value ms-auto fw-bold">${value} (${percentage}%)</span>
+            </div>
+        `;
+    });
+    
+    legendHtml += `
+        <div class="legend-total mt-3 pt-2 border-top d-flex align-items-center">
+            <span class="label small fw-bold">Total Tasks</span>
+            <span class="value ms-auto fw-bold">${total}</span>
+        </div>
+    `;
+    
+    $('#taskDistributionLegend').html(legendHtml);
+}
 
     // Add invoice item
     function addInvoiceItem() {
