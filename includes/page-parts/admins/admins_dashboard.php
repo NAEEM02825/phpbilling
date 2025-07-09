@@ -808,68 +808,61 @@
     }
 
     // Update task distribution chart
-        // Update task distribution chart
  function updateTaskDistributionChart() {
     $.ajax({
         url: 'ajax_helpers/dashboard_task_distribution.php',
         method: 'GET',
         dataType: 'json',
         success: function(response) {
-            if (response && response.labels && response.data) {
-                // Default colors if not provided
-                const defaultColors = [
-                    'rgba(78, 115, 223, 0.8)',
-                    'rgba(28, 200, 138, 0.8)',
-                    'rgba(54, 185, 204, 0.8)',
-                    'rgba(246, 194, 62, 0.8)',
-                    'rgba(231, 74, 59, 0.8)'
-                ];
-                
+            if (response && response.success && response.labels && response.data) {
                 // Prepare chart data
                 const chartData = {
                     labels: response.labels,
                     datasets: [{
                         data: response.data,
-                        backgroundColor: response.backgroundColors || defaultColors,
-                        borderColor: '#fff',
+                        backgroundColor: response.backgroundColors || [
+                            'rgba(78, 115, 223, 0.8)',
+                            'rgba(28, 200, 138, 0.8)',
+                            'rgba(246, 194, 62, 0.8)'
+                        ],
+                        borderColor: response.borderColors || '#fff',
                         borderWidth: 1
                     }]
                 };
 
-                // If chart doesn't exist, create it as doughnut
-                if (!taskDistributionChart) {
-                    const ctx = document.getElementById('taskDistributionChart').getContext('2d');
-                    taskDistributionChart = new Chart(ctx, {
-                        type: 'doughnut',
-                        data: chartData,
-                        options: {
-                            maintainAspectRatio: false,
-                            cutout: '70%',
-                            plugins: {
-                                legend: {
-                                    display: false
-                                },
-                                tooltip: {
-                                    callbacks: {
-                                        label: function(context) {
-                                            const label = context.label || '';
-                                            const value = context.raw || 0;
-                                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                            const percentage = Math.round((value / total) * 100);
-                                            return `${label}: ${value} (${percentage}%)`;
-                                        }
+                // Get or create chart
+                const ctx = document.getElementById('taskDistributionChart').getContext('2d');
+                
+                // Destroy previous chart instance if exists
+                if (window.taskDistributionChart) {
+                    window.taskDistributionChart.destroy();
+                }
+
+                // Create new chart
+                window.taskDistributionChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: chartData,
+                    options: {
+                        maintainAspectRatio: false,
+                        cutout: '70%',
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const label = context.label || '';
+                                        const value = context.raw || 0;
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+                                        return `${label}: ${value} (${percentage}%)`;
                                     }
                                 }
                             }
                         }
-                    });
-                } else {
-                    // Update existing chart
-                    taskDistributionChart.data.labels = chartData.labels;
-                    taskDistributionChart.data.datasets[0].data = chartData.datasets[0].data;
-                    taskDistributionChart.data.datasets[0].backgroundColor = chartData.datasets[0].backgroundColor;
-                    taskDistributionChart.update();
-                }
+                    }
+                });
 
                 // Update legend
                 let legendHtml = '';
@@ -877,7 +870,7 @@
                     const color = chartData.datasets[0].backgroundColor[index];
                     const value = chartData.datasets[0].data[index];
                     const total = chartData.datasets[0].data.reduce((a, b) => a + b, 0);
-                    const percentage = Math.round((value / total) * 100);
+                    const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
                     
                     legendHtml += `
                         <div class="legend-item d-flex align-items-center mb-2">
@@ -887,6 +880,16 @@
                         </div>
                     `;
                 });
+                
+                // Add a total count if needed
+                const totalTasks = chartData.datasets[0].data.reduce((a, b) => a + b, 0);
+                legendHtml += `
+                    <div class="legend-total mt-3 pt-2 border-top d-flex align-items-center">
+                        <span class="label small fw-bold">Total Tasks</span>
+                        <span class="value ms-auto fw-bold">${totalTasks}</span>
+                    </div>
+                `;
+                
                 $('#taskDistributionLegend').html(legendHtml);
             } else {
                 console.error('Invalid response format:', response);
@@ -900,209 +903,11 @@
     });
 }
 
-
-
-
-    // Load projects for task modal
-    function loadProjectsForTaskModal() {
-        $.ajax({
-            url: 'api/projects/list.php',
-            method: 'GET',
-            dataType: 'json',
-            success: function(data) {
-                if (data.success) {
-                    let options = '<option value="">Select Project</option>';
-                    data.projects.forEach(project => {
-                        options += `<option value="${project.id}">${project.name}</option>`;
-                    });
-                    $('#taskProject').html(options);
-                }
-            },
-            error: function() {
-                console.error('Error loading projects for task modal');
-            }
-        });
-    }
-
-    // Load clients for invoice modal
-    function loadClientsForInvoiceModal() {
-        $.ajax({
-            url: 'api/clients/list.php',
-            method: 'GET',
-            dataType: 'json',
-            success: function(data) {
-                if (data.success) {
-                    let options = '<option value="">Select Client</option>';
-                    data.clients.forEach(client => {
-                        options += `<option value="${client.id}">${client.name}</option>`;
-                    });
-                    $('#invoiceClient').html(options);
-
-                    // Load projects when client is selected
-                    $('#invoiceClient').change(function() {
-                        const clientId = $(this).val();
-                        if (clientId) {
-                            loadProjectsForClient(clientId);
-                        }
-                    });
-                }
-            },
-            error: function() {
-                console.error('Error loading clients for invoice modal');
-            }
-        });
-    }
-
-    // Load projects for a specific client
-    function loadProjectsForClient(clientId) {
-        $.ajax({
-            url: 'api/projects/list.php',
-            method: 'GET',
-            data: {
-                client_id: clientId
-            },
-            dataType: 'json',
-            success: function(data) {
-                if (data.success) {
-                    let options = '<option value="">Select Project</option>';
-                    data.projects.forEach(project => {
-                        options += `<option value="${project.id}">${project.name}</option>`;
-                    });
-                    $('#invoiceProject').html(options);
-                }
-            },
-            error: function() {
-                console.error('Error loading projects for client');
-            }
-        });
-    }
-
-    // Create new task
-    function createNewTask() {
-        const title = $('#taskTitle').val();
-        const projectId = $('#taskProject').val();
-        const dueDate = $('#taskDueDate').val();
-        const priority = $('#taskPriority').val();
-        const description = $('#taskDescription').val();
-
-        if (!title || !projectId || !dueDate) {
-            alert('Please fill in all required fields');
-            return;
-        }
-
-        $.ajax({
-            url: 'api/tasks/create.php',
-            method: 'POST',
-            data: {
-                title: title,
-                project_id: projectId,
-                due_date: dueDate,
-                priority: priority,
-                description: description
-            },
-            dataType: 'json',
-            success: function(data) {
-                if (data.success) {
-                    $('#newTaskModal').modal('hide');
-                    $('#newTaskForm')[0].reset();
-                    fetchDashboardData(); // Refresh dashboard data
-                } else {
-                    alert(data.message || 'Error creating task');
-                }
-            },
-            error: function() {
-                alert('Error creating task');
-            }
-        });
-    }
-
-    // Create new invoice
-    function createNewInvoice() {
-        const clientId = $('#invoiceClient').val();
-        const projectId = $('#invoiceProject').val();
-        const invoiceDate = $('#invoiceDate').val();
-        const dueDate = $('#invoiceDueDate').val();
-        const taxRate = $('#invoiceTax').val() || 0;
-        const notes = $('#invoiceNotes').val();
-
-        if (!clientId || !projectId || !invoiceDate || !dueDate) {
-            alert('Please fill in all required fields');
-            return;
-        }
-
-        // Collect invoice items
-        const items = [];
-        $('#invoiceItemsTable tbody tr').each(function() {
-            const description = $(this).find('.item-description').val();
-            const quantity = $(this).find('.item-quantity').val();
-            const price = $(this).find('.item-price').val();
-
-            if (description && quantity && price) {
-                items.push({
-                    description: description,
-                    quantity: quantity,
-                    unit_price: price
-                });
-            }
-        });
-
-        if (items.length === 0) {
-            alert('Please add at least one invoice item');
-            return;
-        }
-
-        $.ajax({
-            url: 'api/invoices/create.php',
-            method: 'POST',
-            data: {
-                client_id: clientId,
-                project_id: projectId,
-                invoice_date: invoiceDate,
-                due_date: dueDate,
-                tax_rate: taxRate,
-                notes: notes,
-                items: JSON.stringify(items)
-            },
-            dataType: 'json',
-            success: function(data) {
-                if (data.success) {
-                    $('#newInvoiceModal').modal('hide');
-                    $('#newInvoiceForm')[0].reset();
-                    fetchDashboardData(); // Refresh dashboard data
-                } else {
-                    alert(data.message || 'Error creating invoice');
-                }
-            },
-            error: function() {
-                alert('Error creating invoice');
-            }
-        });
-    }
-
-    // Update task status
-    function updateTaskStatus(taskId, isCompleted) {
-        $.ajax({
-            url: 'api/tasks/update-status.php',
-            method: 'POST',
-            data: {
-                task_id: taskId,
-                is_completed: isCompleted
-            },
-            dataType: 'json',
-            success: function(data) {
-                if (!data.success) {
-                    console.error('Error updating task status');
-                    // Revert checkbox state
-                    $(`.task-checkbox[data-task-id="${taskId}"]`).prop('checked', !isCompleted);
-                }
-            },
-            error: function() {
-                console.error('Error updating task status');
-                // Revert checkbox state
-                $(`.task-checkbox[data-task-id="${taskId}"]`).prop('checked', !isCompleted);
-            }
-        });
-    }
+// Call the function initially and set interval for updates
+$(document).ready(function() {
+    updateTaskDistributionChart();
+    setInterval(updateTaskDistributionChart, 30000); // Update every 30 seconds
+});
 
     // Add invoice item
     function addInvoiceItem() {

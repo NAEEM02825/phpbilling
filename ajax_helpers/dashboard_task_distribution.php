@@ -3,12 +3,32 @@ require('../functions.php');
 header('Content-Type: application/json');
 
 try {
-    // Sample data - replace with your actual data fetching logic
+    // Check if MeekroDB is available (assuming it's set up in functions.php)
+    if (!class_exists('DB')) {
+        throw new Exception("MeekroDB not available");
+    }
+    
+    // Query to get task counts by status using MeekroDB
+    $result = DB::queryFirstRow("SELECT 
+                SUM(CASE WHEN status = 'Completed' THEN 1 ELSE 0 END) as completed,
+                SUM(CASE WHEN status = 'In Progress' THEN 1 ELSE 0 END) as in_progress,
+                SUM(CASE WHEN status = 'Pending' THEN 1 ELSE 0 END) as pending
+              FROM tasks");
+    
+    if (!$result) {
+        throw new Exception("No data returned from query");
+    }
+    
+    // Prepare response data
     $data = [
-        'labels' => ['Completed', 'In Progress', 'Pending' ],
-        'data' => [35, 25, 20, 20],
+        'labels' => ['Completed', 'In Progress', 'Pending'],
+        'data' => [
+            $result['completed'] ?? 0,
+            $result['in_progress'] ?? 0,
+            $result['pending'] ?? 0
+        ],
         'backgroundColors' => ['#4e73df', '#1cc88a', '#f6c23e'],
-        'borderColors' => ['#ffffff', '#ffffff', '#ffffff' ],
+        'borderColors' => ['#ffffff', '#ffffff', '#ffffff'],
         'success' => true
     ];
 
