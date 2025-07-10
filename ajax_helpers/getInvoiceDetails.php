@@ -43,6 +43,14 @@ try {
           AND t.status = 'Completed'
     ", $invoiceId);
 
+    // Calculate total hours and total project rate
+    $totalHours = 0;
+    foreach ($items as $item) {
+        $totalHours += floatval($item['hours']);
+    }
+    
+    $totalProjectRate = floatval($invoice['project_rate']) * $totalHours;
+
     echo json_encode([
         'success' => true,
         'invoice' => [
@@ -57,10 +65,12 @@ try {
             'project_id' => $invoice['project_id'],
             'project_name' => $invoice['project_name'],
             'project_rate' => $invoice['project_rate'],
+            'total_hours' => $totalHours,
+            'total_project_rate' => $totalProjectRate,
             'issue_date' => $invoice['issue_date'],
             'due_date' => $invoice['due_date'],
             'status' => $invoice['status'],
-            'total_amount' => $invoice['total_amount'],
+            'total_amount' => $totalProjectRate, // Using calculated total
             'notes' => $invoice['notes'],
             'items' => array_map(function($item) {
                 // Prefer updated_at, fallback to created_at

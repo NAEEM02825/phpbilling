@@ -256,71 +256,71 @@ $projects = DB::query("SELECT * FROM projects");
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const invoiceManager = {
-        currentTab: 'all',
-        currentPage: 1,
-        itemsPerPage: 10,
-        totalInvoices: 0,
-        filters: {},
-        selectedClientId: null,
+    document.addEventListener('DOMContentLoaded', function() {
+        const invoiceManager = {
+            currentTab: 'all',
+            currentPage: 1,
+            itemsPerPage: 10,
+            totalInvoices: 0,
+            filters: {},
+            selectedClientId: null,
 
-        init: function() {
-            this.bindEvents();
-            this.loadClients();
-            this.loadInvoices();
-        },
+            init: function() {
+                this.bindEvents();
+                this.loadClients();
+                this.loadInvoices();
+            },
 
-        bindEvents: function() {
-            // View invoice button click
-            document.addEventListener('click', (e) => {
-                if (e.target.closest('.view-invoice-btn')) {
-                    const invoiceId = e.target.closest('.view-invoice-btn').getAttribute('data-invoice-id');
-                    this.viewInvoice(invoiceId);
-                }
-            });
+            bindEvents: function() {
+                // View invoice button click
+                document.addEventListener('click', (e) => {
+                    if (e.target.closest('.view-invoice-btn')) {
+                        const invoiceId = e.target.closest('.view-invoice-btn').getAttribute('data-invoice-id');
+                        this.viewInvoice(invoiceId);
+                    }
+                });
 
-            // Tab switching
-            document.querySelectorAll('#invoiceTabs button[data-bs-toggle="tab"]').forEach(tab => {
-                tab.addEventListener('click', (e) => {
-                    this.currentTab = e.target.getAttribute('data-bs-target').substring(1);
+                // Tab switching
+                document.querySelectorAll('#invoiceTabs button[data-bs-toggle="tab"]').forEach(tab => {
+                    tab.addEventListener('click', (e) => {
+                        this.currentTab = e.target.getAttribute('data-bs-target').substring(1);
+                        this.currentPage = 1;
+                        this.loadInvoices();
+                    });
+                });
+
+                // Filter form submission
+                document.getElementById('invoiceFilterForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
                     this.currentPage = 1;
+                    this.updateFilters();
                     this.loadInvoices();
                 });
-            });
 
-            // Filter form submission
-            document.getElementById('invoiceFilterForm').addEventListener('submit', (e) => {
-                e.preventDefault();
-                this.currentPage = 1;
-                this.updateFilters();
-                this.loadInvoices();
-            });
-
-            // New invoice modal client selection
-            document.getElementById('invoiceClient').addEventListener('change', (e) => {
-                this.selectedClientId = e.target.value;
-                this.loadProjectsForClient(this.selectedClientId);
-            });
-
-            // Select all tasks checkbox
-            document.getElementById('selectAllTasks').addEventListener('change', function() {
-                document.querySelectorAll('#tasksTableBody .task-checkbox').forEach(checkbox => {
-                    checkbox.checked = this.checked;
+                // New invoice modal client selection
+                document.getElementById('invoiceClient').addEventListener('change', (e) => {
+                    this.selectedClientId = e.target.value;
+                    this.loadProjectsForClient(this.selectedClientId);
                 });
-            });
 
-            // New invoice form submission
-            document.getElementById('newInvoiceForm').addEventListener('submit', (e) => {
-                e.preventDefault();
-                this.createNewInvoice();
-            });
+                // Select all tasks checkbox
+                document.getElementById('selectAllTasks').addEventListener('change', function() {
+                    document.querySelectorAll('#tasksTableBody .task-checkbox').forEach(checkbox => {
+                        checkbox.checked = this.checked;
+                    });
+                });
 
-            // Print invoice button
-            document.getElementById('printInvoiceBtn').addEventListener('click', function() {
-                const modalContent = document.getElementById('invoiceDetailsContent').innerHTML;
-                const printWindow = window.open('', '', 'width=900,height=700');
-                printWindow.document.write(`
+                // New invoice form submission
+                document.getElementById('newInvoiceForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.createNewInvoice();
+                });
+
+                // Print invoice button
+                document.getElementById('printInvoiceBtn').addEventListener('click', function() {
+                    const modalContent = document.getElementById('invoiceDetailsContent').innerHTML;
+                    const printWindow = window.open('', '', 'width=900,height=700');
+                    printWindow.document.write(`
                     <html>
                     <head>
                         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css">
@@ -342,121 +342,121 @@ document.addEventListener('DOMContentLoaded', function() {
                     </body>
                     </html>
                 `);
-                printWindow.document.close();
-                printWindow.focus();
-                printWindow.onload = function() {
-                    printWindow.print();
-                    printWindow.close();
+                    printWindow.document.close();
+                    printWindow.focus();
+                    printWindow.onload = function() {
+                        printWindow.print();
+                        printWindow.close();
+                    };
+                });
+            },
+
+            updateFilters: function() {
+                const form = document.getElementById('invoiceFilterForm');
+                this.filters = {
+                    client_id: form.querySelector('#clientFilter').value,
+                    date_from: form.querySelector('#dateFrom').value,
+                    date_to: form.querySelector('#dateTo').value,
+                    status: this.currentTab === 'all' ? '' : this.currentTab
                 };
-            });
-        },
+            },
 
-        updateFilters: function() {
-            const form = document.getElementById('invoiceFilterForm');
-            this.filters = {
-                client_id: form.querySelector('#clientFilter').value,
-                date_from: form.querySelector('#dateFrom').value,
-                date_to: form.querySelector('#dateTo').value,
-                status: this.currentTab === 'all' ? '' : this.currentTab
-            };
-        },
+            loadClients: function() {
+                fetch('ajax_helpers/getClients.php')
+                    .then(response => response.json())
+                    .then(clients => {
+                        const clientFilter = document.getElementById('clientFilter');
+                        const invoiceClient = document.getElementById('invoiceClient');
+                        const editInvoiceClient = document.getElementById('editInvoiceClient');
 
-        loadClients: function() {
-            fetch('ajax_helpers/getClients.php')
-                .then(response => response.json())
-                .then(clients => {
-                    const clientFilter = document.getElementById('clientFilter');
-                    const invoiceClient = document.getElementById('invoiceClient');
-                    const editInvoiceClient = document.getElementById('editInvoiceClient');
+                        // Clear existing options
+                        clientFilter.innerHTML = '<option value="">All Clients</option>';
+                        invoiceClient.innerHTML = '<option value="">Select Client</option>';
+                        editInvoiceClient.innerHTML = '<option value="">Select Client</option>';
 
-                    // Clear existing options
-                    clientFilter.innerHTML = '<option value="">All Clients</option>';
-                    invoiceClient.innerHTML = '<option value="">Select Client</option>';
-                    editInvoiceClient.innerHTML = '<option value="">Select Client</option>';
+                        clients.forEach(client => {
+                            const fullName = `${client.first_name} ${client.last_name}`;
 
-                    clients.forEach(client => {
-                        const fullName = `${client.first_name} ${client.last_name}`;
+                            // For client filter dropdown
+                            const option1 = document.createElement('option');
+                            option1.value = client.id;
+                            option1.textContent = fullName;
+                            clientFilter.appendChild(option1);
 
-                        // For client filter dropdown
-                        const option1 = document.createElement('option');
-                        option1.value = client.id;
-                        option1.textContent = fullName;
-                        clientFilter.appendChild(option1);
+                            // For new invoice client dropdown
+                            const option2 = document.createElement('option');
+                            option2.value = client.id;
+                            option2.textContent = fullName;
+                            invoiceClient.appendChild(option2);
 
-                        // For new invoice client dropdown
-                        const option2 = document.createElement('option');
-                        option2.value = client.id;
-                        option2.textContent = fullName;
-                        invoiceClient.appendChild(option2);
+                            // For edit invoice client dropdown
+                            const option3 = document.createElement('option');
+                            option3.value = client.id;
+                            option3.textContent = fullName;
+                            editInvoiceClient.appendChild(option3);
+                        });
+                    })
+                    .catch(error => console.error('Error loading clients:', error));
+            },
 
-                        // For edit invoice client dropdown
-                        const option3 = document.createElement('option');
-                        option3.value = client.id;
-                        option3.textContent = fullName;
-                        editInvoiceClient.appendChild(option3);
-                    });
-                })
-                .catch(error => console.error('Error loading clients:', error));
-        },
+            loadProjectsForClient: function(clientId) {
+                if (!clientId) {
+                    document.getElementById('invoiceProject').disabled = true;
+                    document.getElementById('invoiceProject').innerHTML = '<option value="">Select Project</option>';
+                    document.getElementById('tasksTableBody').innerHTML = '';
+                    return;
+                }
 
-        loadProjectsForClient: function(clientId) {
-            if (!clientId) {
-                document.getElementById('invoiceProject').disabled = true;
-                document.getElementById('invoiceProject').innerHTML = '<option value="">Select Project</option>';
-                document.getElementById('tasksTableBody').innerHTML = '';
-                return;
-            }
+                fetch(`ajax_helpers/getProjects.php?client_id=${clientId}`)
+                    .then(response => response.json())
+                    .then(projects => {
+                        const projectSelect = document.getElementById('invoiceProject');
+                        projectSelect.innerHTML = '<option value="">Select Project</option>';
+                        projectSelect.disabled = false;
 
-            fetch(`ajax_helpers/getProjects.php?client_id=${clientId}`)
-                .then(response => response.json())
-                .then(projects => {
-                    const projectSelect = document.getElementById('invoiceProject');
-                    projectSelect.innerHTML = '<option value="">Select Project</option>';
-                    projectSelect.disabled = false;
+                        projects.forEach(project => {
+                            const option = document.createElement('option');
+                            option.value = project.id;
+                            option.textContent = `${project.name} (Rate: ${project.rate})`;
+                            option.dataset.rate = project.rate;
+                            projectSelect.appendChild(option);
+                        });
 
-                    projects.forEach(project => {
-                        const option = document.createElement('option');
-                        option.value = project.id;
-                        option.textContent = `${project.name} (Rate: ${project.rate})`;
-                        option.dataset.rate = project.rate;
-                        projectSelect.appendChild(option);
-                    });
+                        projectSelect.addEventListener('change', (e) => {
+                            if (e.target.value) {
+                                this.loadTasksForProject(clientId, e.target.value);
+                            } else {
+                                document.getElementById('tasksTableBody').innerHTML = '';
+                            }
+                        });
+                    })
+                    .catch(error => console.error('Error loading projects:', error));
+            },
 
-                    projectSelect.addEventListener('change', (e) => {
-                        if (e.target.value) {
-                            this.loadTasksForProject(clientId, e.target.value);
-                        } else {
-                            document.getElementById('tasksTableBody').innerHTML = '';
+            loadTasksForProject: function(clientId, projectId) {
+                const endDate = new Date();
+                const startDate = new Date();
+                startDate.setDate(endDate.getDate() - 15);
+
+                const tbody = document.getElementById('tasksTableBody');
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4">Loading tasks...</td></tr>';
+
+                const url = `ajax_helpers/getTasks.php?project_id=${projectId}&start_date=${startDate.toISOString().split('T')[0]}&end_date=${endDate.toISOString().split('T')[0]}`;
+
+                fetch(url)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
                         }
-                    });
-                })
-                .catch(error => console.error('Error loading projects:', error));
-        },
+                        return response.json();
+                    })
+                    .then(data => {
+                        tbody.innerHTML = '';
 
-        loadTasksForProject: function(clientId, projectId) {
-            const endDate = new Date();
-            const startDate = new Date();
-            startDate.setDate(endDate.getDate() - 15);
-
-            const tbody = document.getElementById('tasksTableBody');
-            tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4">Loading tasks...</td></tr>';
-
-            const url = `ajax_helpers/getTasks.php?project_id=${projectId}&start_date=${startDate.toISOString().split('T')[0]}&end_date=${endDate.toISOString().split('T')[0]}`;
-
-            fetch(url)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    tbody.innerHTML = '';
-
-                    if (data && data.length > 0) {
-                        data.forEach(task => {
-                            const row = document.createElement('tr');
-                            row.innerHTML = `
+                        if (data && data.length > 0) {
+                            data.forEach(task => {
+                                const row = document.createElement('tr');
+                                row.innerHTML = `
                                 <td>
                                     <input type="checkbox" class="form-check-input task-checkbox" 
                                         data-task_id="${task.id}">
@@ -468,71 +468,71 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <td>${task.assignee_name || ''}</td>
                                 <td>${task.status || ''}</td>
                             `;
-                            tbody.appendChild(row);
-                        });
-                    } else {
-                        tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-muted">No tasks found for this project</td></tr>';
-                    }
-                })
-                .catch(error => {
-                    console.error('Error loading tasks:', error);
-                    tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-danger">Error loading tasks: ${error.message}</td></tr>`;
+                                tbody.appendChild(row);
+                            });
+                        } else {
+                            tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-muted">No tasks found for this project</td></tr>';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error loading tasks:', error);
+                        tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-danger">Error loading tasks: ${error.message}</td></tr>`;
+                    });
+            },
+
+            loadInvoices: function() {
+                const tbody = document.getElementById('invoicesTableBody');
+                tbody.innerHTML = '<tr><td colspan="9" class="text-center py-4">Loading invoices...</td></tr>';
+
+                const params = new URLSearchParams({
+                    page: this.currentPage,
+                    per_page: this.itemsPerPage,
+                    status: this.currentTab === 'all' ? '' : this.currentTab,
+                    ...this.filters
                 });
-        },
 
-        loadInvoices: function() {
-            const tbody = document.getElementById('invoicesTableBody');
-            tbody.innerHTML = '<tr><td colspan="9" class="text-center py-4">Loading invoices...</td></tr>';
+                fetch(`ajax_helpers/getInvoices.php?${params.toString()}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        this.totalInvoices = data.total;
+                        this.renderInvoices(data.invoices);
+                        this.updatePagination();
+                    })
+                    .catch(error => {
+                        tbody.innerHTML = '<tr><td colspan="9" class="text-center py-4 text-danger">Error loading invoices</td></tr>';
+                    });
+            },
 
-            const params = new URLSearchParams({
-                page: this.currentPage,
-                per_page: this.itemsPerPage,
-                status: this.currentTab === 'all' ? '' : this.currentTab,
-                ...this.filters
-            });
+            renderInvoices: function(invoices) {
+                const tbody = document.getElementById('invoicesTableBody');
+                tbody.innerHTML = '';
 
-            fetch(`ajax_helpers/getInvoices.php?${params.toString()}`)
-                .then(response => response.json())
-                .then(data => {
-                    this.totalInvoices = data.total;
-                    this.renderInvoices(data.invoices);
-                    this.updatePagination();
-                })
-                .catch(error => {
-                    tbody.innerHTML = '<tr><td colspan="9" class="text-center py-4 text-danger">Error loading invoices</td></tr>';
-                });
-        },
-
-        renderInvoices: function(invoices) {
-            const tbody = document.getElementById('invoicesTableBody');
-            tbody.innerHTML = '';
-
-            if (invoices.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="9" class="text-center py-4 text-muted">No invoices found</td></tr>';
-                return;
-            }
-
-            invoices.forEach(invoice => {
-                const row = document.createElement('tr');
-                const issueDate = new Date(invoice.issue_date).toLocaleDateString();
-                const dueDate = new Date(invoice.due_date).toLocaleDateString();
-
-                let statusBadge;
-                switch (invoice.status) {
-                    case 'paid':
-                        statusBadge = '<span class="badge bg-success">Paid</span>';
-                        break;
-                    case 'pending':
-                        statusBadge = '<span class="badge bg-primary">Pending</span>';
-                        break;
-                    case 'overdue':
-                        statusBadge = '<span class="badge bg-danger">Overdue</span>';
-                        break;
-                    default:
-                        statusBadge = '<span class="badge bg-secondary">Draft</span>';
+                if (invoices.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="9" class="text-center py-4 text-muted">No invoices found</td></tr>';
+                    return;
                 }
 
-                const statusDropdown = `
+                invoices.forEach(invoice => {
+                    const row = document.createElement('tr');
+                    const issueDate = new Date(invoice.issue_date).toLocaleDateString();
+                    const dueDate = new Date(invoice.due_date).toLocaleDateString();
+
+                    let statusBadge;
+                    switch (invoice.status) {
+                        case 'paid':
+                            statusBadge = '<span class="badge bg-success">Paid</span>';
+                            break;
+                        case 'pending':
+                            statusBadge = '<span class="badge bg-primary">Pending</span>';
+                            break;
+                        case 'overdue':
+                            statusBadge = '<span class="badge bg-danger">Overdue</span>';
+                            break;
+                        default:
+                            statusBadge = '<span class="badge bg-secondary">Draft</span>';
+                    }
+
+                    const statusDropdown = `
                     <div class="dropdown">
                         <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" 
                             data-bs-toggle="dropdown" aria-expanded="false">
@@ -547,7 +547,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                 `;
 
-                row.innerHTML = `
+                    row.innerHTML = `
                     <td><div class="form-check"><input class="form-check-input" type="checkbox" value="${invoice.id}"></div></td>
                     <td>${invoice.invoice_number}</td>
                     <td>${invoice.client_name}</td>
@@ -568,204 +568,212 @@ document.addEventListener('DOMContentLoaded', function() {
                         </button>
                     </td>
                 `;
-                tbody.appendChild(row);
-            });
-        },
+                    tbody.appendChild(row);
+                });
+            },
 
-        updatePagination: function() {
-            const totalPages = Math.ceil(this.totalInvoices / this.itemsPerPage);
-            const pagination = document.getElementById('paginationControls');
-            pagination.innerHTML = '';
+            updatePagination: function() {
+                const totalPages = Math.ceil(this.totalInvoices / this.itemsPerPage);
+                const pagination = document.getElementById('paginationControls');
+                pagination.innerHTML = '';
 
-            // Previous button
-            const prevLi = document.createElement('li');
-            prevLi.className = `page-item ${this.currentPage === 1 ? 'disabled' : ''}`;
-            prevLi.innerHTML = `<a class="page-link" href="#">Previous</a>`;
-            prevLi.addEventListener('click', (e) => {
-                e.preventDefault();
-                if (this.currentPage > 1) {
-                    this.currentPage--;
-                    this.loadInvoices();
-                }
-            });
-            pagination.appendChild(prevLi);
-
-            // Page numbers
-            const maxVisiblePages = 5;
-            let startPage = Math.max(1, this.currentPage - Math.floor(maxVisiblePages / 2));
-            let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-
-            if (endPage - startPage + 1 < maxVisiblePages) {
-                startPage = Math.max(1, endPage - maxVisiblePages + 1);
-            }
-
-            for (let i = startPage; i <= endPage; i++) {
-                const li = document.createElement('li');
-                li.className = `page-item ${i === this.currentPage ? 'active' : ''}`;
-                li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
-                li.addEventListener('click', (e) => {
+                // Previous button
+                const prevLi = document.createElement('li');
+                prevLi.className = `page-item ${this.currentPage === 1 ? 'disabled' : ''}`;
+                prevLi.innerHTML = `<a class="page-link" href="#">Previous</a>`;
+                prevLi.addEventListener('click', (e) => {
                     e.preventDefault();
-                    this.currentPage = i;
-                    this.loadInvoices();
-                });
-                pagination.appendChild(li);
-            }
-
-            // Next button
-            const nextLi = document.createElement('li');
-            nextLi.className = `page-item ${this.currentPage === totalPages ? 'disabled' : ''}`;
-            nextLi.innerHTML = `<a class="page-link" href="#">Next</a>`;
-            nextLi.addEventListener('click', (e) => {
-                e.preventDefault();
-                if (this.currentPage < totalPages) {
-                    this.currentPage++;
-                    this.loadInvoices();
-                }
-            });
-            pagination.appendChild(nextLi);
-
-            // Update showing text
-            const startItem = (this.currentPage - 1) * this.itemsPerPage + 1;
-            const endItem = Math.min(this.currentPage * this.itemsPerPage, this.totalInvoices);
-            document.getElementById('paginationInfo').textContent =
-                `Showing ${startItem} to ${endItem} of ${this.totalInvoices} invoices`;
-        },
-
-        createNewInvoice: function() {
-            const form = document.getElementById('newInvoiceForm');
-            const selectedTasks = Array.from(document.querySelectorAll('.task-checkbox:checked'))
-                .map(checkbox => checkbox.getAttribute('data-task_id'));
-
-            if (selectedTasks.length === 0) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'No Tasks Selected',
-                    text: 'Please select at least one task',
-                    confirmButtonColor: '#3085d6',
-                });
-                return;
-            }
-
-            const formData = {
-                action: 'create_invoice',
-                client_id: form.querySelector('#invoiceClient').value,
-                project_id: form.querySelector('#invoiceProject').value,
-                issue_date: form.querySelector('#invoiceIssueDate').value,
-                due_date: form.querySelector('#invoiceDueDate').value,
-                notes: form.querySelector('#invoiceNotes').value,
-                task_ids: JSON.stringify(selectedTasks)
-            };
-
-            const submitBtn = form.querySelector('button[type="submit"]');
-            const originalBtnText = submitBtn.innerHTML;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating...';
-            submitBtn.disabled = true;
-
-            fetch('ajax_helpers/create_New_Invoice.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: new URLSearchParams(formData)
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        bootstrap.Modal.getInstance(document.getElementById('newInvoiceModal')).hide();
+                    if (this.currentPage > 1) {
+                        this.currentPage--;
                         this.loadInvoices();
+                    }
+                });
+                pagination.appendChild(prevLi);
+
+                // Page numbers
+                const maxVisiblePages = 5;
+                let startPage = Math.max(1, this.currentPage - Math.floor(maxVisiblePages / 2));
+                let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+                if (endPage - startPage + 1 < maxVisiblePages) {
+                    startPage = Math.max(1, endPage - maxVisiblePages + 1);
+                }
+
+                for (let i = startPage; i <= endPage; i++) {
+                    const li = document.createElement('li');
+                    li.className = `page-item ${i === this.currentPage ? 'active' : ''}`;
+                    li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+                    li.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        this.currentPage = i;
+                        this.loadInvoices();
+                    });
+                    pagination.appendChild(li);
+                }
+
+                // Next button
+                const nextLi = document.createElement('li');
+                nextLi.className = `page-item ${this.currentPage === totalPages ? 'disabled' : ''}`;
+                nextLi.innerHTML = `<a class="page-link" href="#">Next</a>`;
+                nextLi.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (this.currentPage < totalPages) {
+                        this.currentPage++;
+                        this.loadInvoices();
+                    }
+                });
+                pagination.appendChild(nextLi);
+
+                // Update showing text
+                const startItem = (this.currentPage - 1) * this.itemsPerPage + 1;
+                const endItem = Math.min(this.currentPage * this.itemsPerPage, this.totalInvoices);
+                document.getElementById('paginationInfo').textContent =
+                    `Showing ${startItem} to ${endItem} of ${this.totalInvoices} invoices`;
+            },
+
+            createNewInvoice: function() {
+                const form = document.getElementById('newInvoiceForm');
+                const selectedTasks = Array.from(document.querySelectorAll('.task-checkbox:checked'))
+                    .map(checkbox => checkbox.getAttribute('data-task_id'));
+
+                if (selectedTasks.length === 0) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'No Tasks Selected',
+                        text: 'Please select at least one task',
+                        confirmButtonColor: '#3085d6',
+                    });
+                    return;
+                }
+
+                const formData = {
+                    action: 'create_invoice',
+                    client_id: form.querySelector('#invoiceClient').value,
+                    project_id: form.querySelector('#invoiceProject').value,
+                    issue_date: form.querySelector('#invoiceIssueDate').value,
+                    due_date: form.querySelector('#invoiceDueDate').value,
+                    notes: form.querySelector('#invoiceNotes').value,
+                    task_ids: JSON.stringify(selectedTasks)
+                };
+
+                const submitBtn = form.querySelector('button[type="submit"]');
+                const originalBtnText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating...';
+                submitBtn.disabled = true;
+
+                fetch('ajax_helpers/create_New_Invoice.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: new URLSearchParams(formData)
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            bootstrap.Modal.getInstance(document.getElementById('newInvoiceModal')).hide();
+                            this.loadInvoices();
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Success!',
+                                text: 'Invoice created successfully!',
+                                confirmButtonColor: '#3085d6',
+                            });
+                        } else {
+                            throw new Error(data.error || 'Failed to create invoice');
+                        }
+                    })
+                    .catch(error => {
                         Swal.fire({
-                            icon: 'success',
-                            title: 'Success!',
-                            text: 'Invoice created successfully!',
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Error creating invoice: ' + error.message,
                             confirmButtonColor: '#3085d6',
                         });
-                    } else {
-                        throw new Error(data.error || 'Failed to create invoice');
-                    }
-                })
-                .catch(error => {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: 'Error creating invoice: ' + error.message,
-                        confirmButtonColor: '#3085d6',
+                    })
+                    .finally(() => {
+                        submitBtn.innerHTML = originalBtnText;
+                        submitBtn.disabled = false;
                     });
-                })
-                .finally(() => {
-                    submitBtn.innerHTML = originalBtnText;
-                    submitBtn.disabled = false;
-                });
-        },
+            },
 
-        viewInvoice: function(invoiceId) {
-            fetch(`ajax_helpers/getInvoiceDetails.php?id=${invoiceId}`)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (!data.success) {
-                        throw new Error(data.error || 'Failed to load invoice');
-                    }
-                    this.showInvoiceModal(data.invoice);
-                })
-                .catch(error => {
-                    console.error('Error loading invoice:', error);
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: 'Error loading invoice details: ' + error.message,
-                        confirmButtonColor: '#3085d6',
+            viewInvoice: function(invoiceId) {
+                fetch(`ajax_helpers/getInvoiceDetails.php?id=${invoiceId}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (!data.success) {
+                            throw new Error(data.error || 'Failed to load invoice');
+                        }
+                        this.showInvoiceModal(data.invoice);
+                    })
+                    .catch(error => {
+                        console.error('Error loading invoice:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Error loading invoice details: ' + error.message,
+                            confirmButtonColor: '#3085d6',
+                        });
                     });
-                });
-        },
+            },
 
-        showInvoiceModal: function(invoice) {
-            try {
-                if (!invoice || !invoice.invoice_number) {
-                    throw new Error('Invalid invoice data received');
-                }
+            showInvoiceModal: function(invoice) {
+                try {
+                    if (!invoice || !invoice.invoice_number) {
+                        throw new Error('Invalid invoice data received');
+                    }
 
-                const modalContent = document.getElementById('invoiceDetailsContent');
+                    const modalContent = document.getElementById('invoiceDetailsContent');
 
-                const issueDate = invoice.issue_date ?
-                    new Date(invoice.issue_date).toLocaleDateString() :
-                    'Not specified';
+                    const issueDate = invoice.issue_date ?
+                        new Date(invoice.issue_date).toLocaleDateString() :
+                        'Not specified';
 
-                const dueDate = invoice.due_date ?
-                    new Date(invoice.due_date).toLocaleDateString() :
-                    'Not specified';
+                    const dueDate = invoice.due_date ?
+                        new Date(invoice.due_date).toLocaleDateString() :
+                        'Not specified';
 
-                const status = invoice.status || 'draft';
-                const statusBadges = {
-                    paid: 'bg-success',
-                    pending: 'bg-primary',
-                    overdue: 'bg-danger',
-                    draft: 'bg-secondary'
-                };
-                const statusBadge = `<span class="badge ${statusBadges[status]}">${status}</span>`;
+                    const status = invoice.status || 'draft';
+                    const statusBadges = {
+                        paid: 'bg-success',
+                        pending: 'bg-primary',
+                        overdue: 'bg-danger',
+                        draft: 'bg-secondary'
+                    };
+                    const projectRate = invoice.project_rate || 0;
+                    const totalHours = invoice.total_hours || 0;
+                    const totalProjectRate = invoice.total_project_rate || 0;
 
-                let itemsHtml = '';
-                (invoice.items || []).forEach(item => {
-                    const dateStr = item.date ? new Date(item.date).toLocaleDateString() : '';
-                    itemsHtml += `
+                    const formattedRate = projectRate.toLocaleString('en-US', {
+                        style: 'currency',
+                        currency: 'USD'
+                    });
+
+                    const formattedTotal = totalProjectRate.toLocaleString('en-US', {
+                        style: 'currency',
+                        currency: 'USD'
+                    });
+                    const statusBadge = `<span class="badge ${statusBadges[status]}">${status}</span>`;
+
+                    let itemsHtml = '';
+                    (invoice.items || []).forEach(item => {
+                        const dateStr = item.date ? new Date(item.date).toLocaleDateString() : '';
+                        itemsHtml += `
                         <tr>
                             <td>${dateStr}</td>
                             <td>${item.task_title || 'No title'}</td>
                             <td>${item.hours || ''}</td>
                         </tr>
                     `;
-                });
+                    });
 
-                const totalProjectRate = invoice.total_project_rate || 0;
-                const formattedTotal = totalProjectRate.toLocaleString('en-US', {
-                    style: 'currency',
-                    currency: 'USD'
-                });
 
-                modalContent.innerHTML = `
+                    modalContent.innerHTML = `
                     <div class="invoice-preview">
                         <div class="invoice-header d-flex justify-content-between mb-4">
                             <div>
@@ -785,40 +793,52 @@ document.addEventListener('DOMContentLoaded', function() {
                             </div>
                         </div>
                         
-                        <div class="invoice-items mb-4">
-                            <table class="table table-bordered">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Date</th>
-                                        <th>Task</th>
-                                        <th>Hours</th>
-                                    </tr>
-                                </thead>
-                                <tbody>${itemsHtml}</tbody>
-                            </table>
-                            <div class="d-flex justify-content-end align-items-center mt-2">
-                                <div class="bg-light p-3 rounded" style="min-width:220px;">
-                                    <span class="fw-bold me-2">Total Project Rate:</span>
-                                    <span class="fs-5 fw-bold text-success">${formattedTotal}</span>
-                                </div>
+                         <div class="invoice-items mb-4">
+                    <table class="table table-bordered">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Date</th>
+                                <th>Task</th>
+                                <th>Hours</th>
+                            </tr>
+                        </thead>
+                        <tbody>${itemsHtml}</tbody>
+                    </table>
+                    
+                    <div class="d-flex justify-content-end align-items-center mt-2">
+                        <div class="bg-light p-3 rounded" style="min-width:300px;">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span>Project Rate:</span>
+                                <span>${formattedRate}/hr</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-1">
+                                <span>Total Hours:</span>
+                                <span>${totalHours.toFixed(2)}</span>
+                            </div>
+                            <hr class="my-1">
+                            <div class="d-flex justify-content-between">
+                                <span class="fw-bold">Total Project Rate:</span>
+                                <span class="fs-5 fw-bold text-success">${formattedTotal}</span>
                             </div>
                         </div>
-                        
-                        ${invoice.notes ? `
-                        <div class="mt-4 p-3 bg-light rounded">
-                            <h5>Notes</h5>
-                            <p class="mb-0">${invoice.notes}</p>
-                        </div>
-                        ` : ''}
                     </div>
-                `;
+                </div>
+                
+                ${invoice.notes ? `
+                <div class="mt-4 p-3 bg-light rounded">
+                    <h5>Notes</h5>
+                    <p class="mb-0">${invoice.notes}</p>
+                </div>
+                ` : ''}
+            </div>
+        `;
 
-                const modal = new bootstrap.Modal(document.getElementById('viewInvoiceModal'));
-                modal.show();
+                    const modal = new bootstrap.Modal(document.getElementById('viewInvoiceModal'));
+                    modal.show();
 
-            } catch (error) {
-                console.error('Error displaying invoice:', error);
-                document.getElementById('invoiceDetailsContent').innerHTML = `
+                } catch (error) {
+                    console.error('Error displaying invoice:', error);
+                    document.getElementById('invoiceDetailsContent').innerHTML = `
                     <div class="alert alert-danger">
                         <h4>Error Displaying Invoice</h4>
                         <p>${error.message}</p>
@@ -827,274 +847,274 @@ document.addEventListener('DOMContentLoaded', function() {
                         </button>
                     </div>
                 `;
-                new bootstrap.Modal(document.getElementById('viewInvoiceModal')).show();
-            }
-        },
+                    new bootstrap.Modal(document.getElementById('viewInvoiceModal')).show();
+                }
+            },
 
-        editInvoice: function(invoiceId) {
-            fetch(`ajax_helpers/getInvoiceDetails.php?id=${invoiceId}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        this.loadClientsForEditModal().then(() => {
-                            this.showEditModal(data.invoice);
-                            if (data.invoice.client_id) {
-                                this.loadProjectsForEditModal(data.invoice.client_id, data.invoice.project_id);
-                            }
-                        });
-                    } else {
-                        throw new Error(data.error || 'Failed to load invoice for editing');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error loading invoice for editing:', error);
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: 'Error loading invoice: ' + error.message,
-                        confirmButtonColor: '#3085d6',
-                    });
-                });
-        },
-
-        showEditModal: function(invoice) {
-            document.getElementById('editInvoiceId').value = invoice.id;
-            document.getElementById('editInvoiceClient').value = invoice.client_id;
-
-            const issueDate = invoice.issue_date ? invoice.issue_date.split('T')[0] : '';
-            const dueDate = invoice.due_date ? invoice.due_date.split('T')[0] : '';
-            document.getElementById('editInvoiceIssueDate').value = issueDate;
-            document.getElementById('editInvoiceDueDate').value = dueDate;
-
-            document.getElementById('editInvoiceNotes').value = invoice.notes || '';
-
-            const clientSelect = document.getElementById('editInvoiceClient');
-            clientSelect.addEventListener('change', (e) => {
-                this.loadProjectsForEditModal(e.target.value);
-            });
-
-            const modal = new bootstrap.Modal(document.getElementById('editInvoiceModal'));
-            modal.show();
-
-            document.getElementById('editInvoiceForm').onsubmit = (e) => {
-                e.preventDefault();
-                this.updateInvoice(invoice.id);
-            };
-        },
-
-        loadClientsForEditModal: function() {
-            return fetch('ajax_helpers/getClients.php')
-                .then(response => response.json())
-                .then(clients => {
-                    const clientSelect = document.getElementById('editInvoiceClient');
-                    clientSelect.innerHTML = '<option value="">Select Client</option>';
-
-                    clients.forEach(client => {
-                        const option = document.createElement('option');
-                        option.value = client.id;
-                        option.textContent = `${client.first_name} ${client.last_name}`;
-                        clientSelect.appendChild(option);
-                    });
-
-                    return clients;
-                });
-        },
-
-        loadProjectsForEditModal: function(clientId, selectedProjectId = null) {
-            if (!clientId) {
-                document.getElementById('editInvoiceProject').innerHTML = '<option value="">Select Project</option>';
-                document.getElementById('editInvoiceProject').disabled = true;
-                return;
-            }
-
-            return fetch(`ajax_helpers/getProjects.php?client_id=${clientId}`)
-                .then(response => response.json())
-                .then(projects => {
-                    const projectSelect = document.getElementById('editInvoiceProject');
-                    projectSelect.innerHTML = '<option value="">Select Project</option>';
-                    projectSelect.disabled = false;
-
-                    projects.forEach(project => {
-                        const option = document.createElement('option');
-                        option.value = project.id;
-                        option.textContent = project.name;
-                        if (selectedProjectId && project.id == selectedProjectId) {
-                            option.selected = true;
+            editInvoice: function(invoiceId) {
+                fetch(`ajax_helpers/getInvoiceDetails.php?id=${invoiceId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            this.loadClientsForEditModal().then(() => {
+                                this.showEditModal(data.invoice);
+                                if (data.invoice.client_id) {
+                                    this.loadProjectsForEditModal(data.invoice.client_id, data.invoice.project_id);
+                                }
+                            });
+                        } else {
+                            throw new Error(data.error || 'Failed to load invoice for editing');
                         }
-                        projectSelect.appendChild(option);
-                    });
-                });
-        },
-
-        updateInvoice: function(invoiceId) {
-            const form = document.getElementById('editInvoiceForm');
-            const formData = {
-                action: 'update_invoice',
-                id: invoiceId,
-                client_id: form.querySelector('#editInvoiceClient').value,
-                project_id: form.querySelector('#editInvoiceProject').value,
-                issue_date: form.querySelector('#editInvoiceIssueDate').value,
-                due_date: form.querySelector('#editInvoiceDueDate').value,
-                notes: form.querySelector('#editInvoiceNotes').value
-            };
-
-            fetch('ajax_helpers/updateInvoice.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: new URLSearchParams(formData)
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        bootstrap.Modal.getInstance(document.getElementById('editInvoiceModal')).hide();
-                        this.loadInvoices();
+                    })
+                    .catch(error => {
+                        console.error('Error loading invoice for editing:', error);
                         Swal.fire({
-                            icon: 'success',
-                            title: 'Success!',
-                            text: 'Invoice updated successfully!',
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Error loading invoice: ' + error.message,
                             confirmButtonColor: '#3085d6',
                         });
-                    } else {
-                        throw new Error(data.error || 'Failed to update invoice');
-                    }
-                })
-                .catch(error => {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: 'Error updating invoice: ' + error.message,
-                        confirmButtonColor: '#3085d6',
                     });
+            },
+
+            showEditModal: function(invoice) {
+                document.getElementById('editInvoiceId').value = invoice.id;
+                document.getElementById('editInvoiceClient').value = invoice.client_id;
+
+                const issueDate = invoice.issue_date ? invoice.issue_date.split('T')[0] : '';
+                const dueDate = invoice.due_date ? invoice.due_date.split('T')[0] : '';
+                document.getElementById('editInvoiceIssueDate').value = issueDate;
+                document.getElementById('editInvoiceDueDate').value = dueDate;
+
+                document.getElementById('editInvoiceNotes').value = invoice.notes || '';
+
+                const clientSelect = document.getElementById('editInvoiceClient');
+                clientSelect.addEventListener('change', (e) => {
+                    this.loadProjectsForEditModal(e.target.value);
                 });
-        },
 
-        sendInvoice: function(invoiceId) {
-            Swal.fire({
-                title: 'Are you sure?',
-                text: `You are about to send invoice #${invoiceId} to the client?`,
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Yes, send it!'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    fetch(`ajax_helpers/sendInvoice.php?id=${invoiceId}`)
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                Swal.fire({
-                                    icon: 'success',
-                                    title: 'Sent!',
-                                    text: 'Invoice sent successfully',
-                                    confirmButtonColor: '#3085d6',
-                                });
-                                this.loadInvoices();
-                            } else {
-                                throw new Error(data.error || 'Failed to send invoice');
+                const modal = new bootstrap.Modal(document.getElementById('editInvoiceModal'));
+                modal.show();
+
+                document.getElementById('editInvoiceForm').onsubmit = (e) => {
+                    e.preventDefault();
+                    this.updateInvoice(invoice.id);
+                };
+            },
+
+            loadClientsForEditModal: function() {
+                return fetch('ajax_helpers/getClients.php')
+                    .then(response => response.json())
+                    .then(clients => {
+                        const clientSelect = document.getElementById('editInvoiceClient');
+                        clientSelect.innerHTML = '<option value="">Select Client</option>';
+
+                        clients.forEach(client => {
+                            const option = document.createElement('option');
+                            option.value = client.id;
+                            option.textContent = `${client.first_name} ${client.last_name}`;
+                            clientSelect.appendChild(option);
+                        });
+
+                        return clients;
+                    });
+            },
+
+            loadProjectsForEditModal: function(clientId, selectedProjectId = null) {
+                if (!clientId) {
+                    document.getElementById('editInvoiceProject').innerHTML = '<option value="">Select Project</option>';
+                    document.getElementById('editInvoiceProject').disabled = true;
+                    return;
+                }
+
+                return fetch(`ajax_helpers/getProjects.php?client_id=${clientId}`)
+                    .then(response => response.json())
+                    .then(projects => {
+                        const projectSelect = document.getElementById('editInvoiceProject');
+                        projectSelect.innerHTML = '<option value="">Select Project</option>';
+                        projectSelect.disabled = false;
+
+                        projects.forEach(project => {
+                            const option = document.createElement('option');
+                            option.value = project.id;
+                            option.textContent = project.name;
+                            if (selectedProjectId && project.id == selectedProjectId) {
+                                option.selected = true;
                             }
-                        })
-                        .catch(error => {
+                            projectSelect.appendChild(option);
+                        });
+                    });
+            },
+
+            updateInvoice: function(invoiceId) {
+                const form = document.getElementById('editInvoiceForm');
+                const formData = {
+                    action: 'update_invoice',
+                    id: invoiceId,
+                    client_id: form.querySelector('#editInvoiceClient').value,
+                    project_id: form.querySelector('#editInvoiceProject').value,
+                    issue_date: form.querySelector('#editInvoiceIssueDate').value,
+                    due_date: form.querySelector('#editInvoiceDueDate').value,
+                    notes: form.querySelector('#editInvoiceNotes').value
+                };
+
+                fetch('ajax_helpers/updateInvoice.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: new URLSearchParams(formData)
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            bootstrap.Modal.getInstance(document.getElementById('editInvoiceModal')).hide();
+                            this.loadInvoices();
                             Swal.fire({
-                                icon: 'error',
-                                title: 'Error',
-                                text: 'Error sending invoice: ' + error.message,
+                                icon: 'success',
+                                title: 'Success!',
+                                text: 'Invoice updated successfully!',
                                 confirmButtonColor: '#3085d6',
                             });
+                        } else {
+                            throw new Error(data.error || 'Failed to update invoice');
+                        }
+                    })
+                    .catch(error => {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Error updating invoice: ' + error.message,
+                            confirmButtonColor: '#3085d6',
                         });
-                }
-            });
-        },
+                    });
+            },
 
-        updateStatus: function(invoiceId, newStatus) {
-            Swal.fire({
-                title: 'Are you sure?',
-                text: `You are about to change this invoice's status to ${newStatus}`,
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Yes, update it!'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    fetch('ajax_helpers/updateInvoiceStatus.php', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/x-www-form-urlencoded',
-                            },
-                            body: new URLSearchParams({
-                                invoice_id: invoiceId,
-                                new_status: newStatus
+            sendInvoice: function(invoiceId) {
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: `You are about to send invoice #${invoiceId} to the client?`,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, send it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        fetch(`ajax_helpers/sendInvoice.php?id=${invoiceId}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Sent!',
+                                        text: 'Invoice sent successfully',
+                                        confirmButtonColor: '#3085d6',
+                                    });
+                                    this.loadInvoices();
+                                } else {
+                                    throw new Error(data.error || 'Failed to send invoice');
+                                }
                             })
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                this.loadInvoices();
+                            .catch(error => {
                                 Swal.fire({
-                                    icon: 'success',
-                                    title: 'Updated!',
-                                    text: 'Invoice status updated successfully',
+                                    icon: 'error',
+                                    title: 'Error',
+                                    text: 'Error sending invoice: ' + error.message,
                                     confirmButtonColor: '#3085d6',
                                 });
-                            } else {
-                                throw new Error(data.error || 'Failed to update status');
-                            }
-                        })
-                        .catch(error => {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Error',
-                                text: 'Error updating status: ' + error.message,
-                                confirmButtonColor: '#3085d6',
                             });
-                        });
-                }
-            });
-        },
+                    }
+                });
+            },
 
-        deleteInvoice: function(invoiceId) {
-            Swal.fire({
-                title: 'Are you sure?',
-                text: "You won't be able to revert this!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Yes, delete it!'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    fetch(`ajax_helpers/deleteInvoice.php?id=${invoiceId}`)
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
+            updateStatus: function(invoiceId, newStatus) {
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: `You are about to change this invoice's status to ${newStatus}`,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, update it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        fetch('ajax_helpers/updateInvoiceStatus.php', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/x-www-form-urlencoded',
+                                },
+                                body: new URLSearchParams({
+                                    invoice_id: invoiceId,
+                                    new_status: newStatus
+                                })
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    this.loadInvoices();
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Updated!',
+                                        text: 'Invoice status updated successfully',
+                                        confirmButtonColor: '#3085d6',
+                                    });
+                                } else {
+                                    throw new Error(data.error || 'Failed to update status');
+                                }
+                            })
+                            .catch(error => {
                                 Swal.fire({
-                                    icon: 'success',
-                                    title: 'Deleted!',
-                                    text: 'Invoice deleted successfully',
+                                    icon: 'error',
+                                    title: 'Error',
+                                    text: 'Error updating status: ' + error.message,
                                     confirmButtonColor: '#3085d6',
                                 });
-                                this.loadInvoices();
-                            } else {
-                                throw new Error(data.error || 'Failed to delete invoice');
-                            }
-                        })
-                        .catch(error => {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Error',
-                                text: 'Error deleting invoice: ' + error.message,
-                                confirmButtonColor: '#3085d6',
                             });
-                        });
-                }
-            });
-        }
-    };
+                    }
+                });
+            },
 
-    invoiceManager.init();
-    window.invoiceManager = invoiceManager;
-});
+            deleteInvoice: function(invoiceId) {
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "You won't be able to revert this!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, delete it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        fetch(`ajax_helpers/deleteInvoice.php?id=${invoiceId}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Deleted!',
+                                        text: 'Invoice deleted successfully',
+                                        confirmButtonColor: '#3085d6',
+                                    });
+                                    this.loadInvoices();
+                                } else {
+                                    throw new Error(data.error || 'Failed to delete invoice');
+                                }
+                            })
+                            .catch(error => {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error',
+                                    text: 'Error deleting invoice: ' + error.message,
+                                    confirmButtonColor: '#3085d6',
+                                });
+                            });
+                    }
+                });
+            }
+        };
+
+        invoiceManager.init();
+        window.invoiceManager = invoiceManager;
+    });
 </script>
