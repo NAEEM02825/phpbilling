@@ -58,9 +58,32 @@ try {
                 'data' => $tasks
             ];
             break;
+        case 'update_task_status':
+            $taskId = $_POST['task_id'];
+            $newStatus = strtolower($_POST['status']); // Convert to lowercase to match your DB
 
+            // Validate and sanitize inputs
+            $validStatuses = ['pending', 'in progress', 'completed'];
+            if (!in_array($newStatus, $validStatuses)) {
+                echo json_encode(['success' => false, 'error' => 'Invalid status']);
+                exit;
+            }
+
+            // Update in database
+            DB::update('tasks', [
+                'status' => $newStatus,
+                'updated_at' => date('Y-m-d H:i:s')
+            ], 'id = %i', $taskId);
+
+            $response = [
+                'success' => true,
+                'message' => 'Status updated successfully'
+            ];
+            break;
         case 'get_users':
-            $users = DB::query("SELECT user_id, CONCAT(name, ' ', last_name) as name FROM users");
+            $users = DB::query("SELECT user_id, CONCAT(name, ' ', last_name) as name 
+                       FROM users 
+                       WHERE role_id = 3");
             $response = [
                 'success' => true,
                 'users' => $users
@@ -80,7 +103,7 @@ try {
 
             // Initialize time_logs as empty array
             $timeLogs = [];
-            
+
             // Check if time_logs table exists before querying
             try {
                 $tableExists = DB::queryFirstField("
@@ -89,7 +112,7 @@ try {
                     WHERE table_schema = DATABASE() 
                     AND table_name = 'time_logs'
                 ");
-                
+
                 if ($tableExists) {
                     $timeLogs = DB::query("
                         SELECT tl.*, u.name as user_name
@@ -172,7 +195,7 @@ try {
                 'data' => $user
             ];
             break;
-            
+
         case 'get_my_tasks':
             $userId = $_SESSION['user_id'] ?? 0;
 

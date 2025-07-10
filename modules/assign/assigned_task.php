@@ -15,29 +15,30 @@
 
 <!-- Project Tabs -->
 <ul class="nav nav-tabs mb-4" id="projectTabs" role="tablist">
+    
     <li class="nav-item" role="presentation">
-        <button class="nav-link active" id="projects-tab" data-bs-toggle="tab" data-bs-target="#projects" type="button"
-            role="tab">
-            <i class="fas fa-project-diagram me-1"></i> Projects
-        </button>
-    </li>
-    <li class="nav-item" role="presentation">
-        <button class="nav-link" id="tasks-tab" data-bs-toggle="tab" data-bs-target="#tasks" type="button" role="tab">
+        <button class="nav-link active" id="tasks-tab" data-bs-toggle="tab" data-bs-target="#tasks" type="button" role="tab">
             <i class="fas fa-tasks me-1"></i> All Tasks
         </button>
     </li>
     <li class="nav-item" role="presentation">
+        <button class="nav-link" id="projects-tab" data-bs-toggle="tab" data-bs-target="#projects" type="button"
+            role="tab">
+            <i class="fas fa-project-diagram me-1"></i> Projects
+        </button>
+    </li>
+    <!-- <li class="nav-item" role="presentation">
         <button class="nav-link" id="my-tasks-tab" data-bs-toggle="tab" data-bs-target="#my-tasks" type="button"
             role="tab">
             <i class="fas fa-user-check me-1"></i> My Tasks
         </button>
-    </li>
+    </li> -->
 </ul>
 
 <!-- Project/Task Content -->
 <div class="tab-content" id="projectTabsContent">
     <!-- Projects Tab -->
-    <div class="tab-pane fade show active" id="projects" role="tabpanel">
+    <div class="tab-pane fade show" id="projects" role="tabpanel">
         <div class="card shadow-sm">
             <div class="card-body p-0">
                 <div class="table-responsive">
@@ -68,7 +69,7 @@
     </div>
 
     <!-- All Tasks Tab -->
-    <div class="tab-pane fade" id="tasks" role="tabpanel">
+    <div class="tab-pane fade show active" id="tasks" role="tabpanel">
         <div class="card shadow-sm">
             <div class="card-body p-0">
                 <!-- Filter/Search by Project -->
@@ -93,6 +94,7 @@
                                 <th>Assignee</th>
                                 <th>Status</th>
                                 <th>ClickUp Link</th>
+                                <th>Task Status</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -328,6 +330,35 @@
         font-weight: 600;
     }
 
+    /* Add to the style section */
+    .task-status-select {
+        width: 120px;
+        display: inline-block;
+        cursor: pointer;
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+    }
+
+    .task-status-select option {
+        padding: 0.5rem;
+    }
+
+    /* Color the dropdown based on status */
+    .task-status-select[value="Pending"] {
+        background-color: rgba(255, 193, 7, 0.1);
+        border-color: #ffc107;
+    }
+
+    .task-status-select[value="In Progress"] {
+        background-color: rgba(58, 79, 138, 0.1);
+        border-color: #3a4f8a;
+    }
+
+    .task-status-select[value="Completed"] {
+        background-color: rgba(40, 167, 69, 0.1);
+        border-color: #28a745;
+    }
+
     .avatar-sm {
         width: 24px;
         height: 24px;
@@ -418,11 +449,17 @@
             -webkit-overflow-scrolling: touch;
         }
     }
+
+    .task-status-select:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+        background-color: #f8f9fa;
+    }
 </style>
 
 <script>
     // Main Initialization Function
-    document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', function() {
         // Load initial data
         loadProjects();
         loadTasks();
@@ -430,7 +467,7 @@
         // New Task Modal Event Listeners
         const newTaskModal = document.getElementById('newTaskModal');
         if (newTaskModal) {
-            newTaskModal.addEventListener('show.bs.modal', function () {
+            newTaskModal.addEventListener('show.bs.modal', function() {
                 loadProjectOptions();
                 loadUserOptions();
             });
@@ -439,7 +476,7 @@
         // Edit Task Modal Event Listeners
         const editTaskModal = document.getElementById('editTaskModal');
         if (editTaskModal) {
-            editTaskModal.addEventListener('show.bs.modal', function () {
+            editTaskModal.addEventListener('show.bs.modal', function() {
                 loadProjectOptions('editTaskProject');
                 loadUserOptions('editTaskAssignee');
             });
@@ -448,7 +485,7 @@
         // Save Task Button Handler
         const saveTaskBtn = document.getElementById('saveTask');
         if (saveTaskBtn) {
-            saveTaskBtn.addEventListener('click', function () {
+            saveTaskBtn.addEventListener('click', function() {
                 const taskForm = document.getElementById('taskForm');
                 if (taskForm.checkValidity()) {
                     saveTask();
@@ -461,7 +498,7 @@
         // Tab Change Event Handlers
         const tabEls = document.querySelectorAll('button[data-bs-toggle="tab"]');
         tabEls.forEach(tabEl => {
-            tabEl.addEventListener('shown.bs.tab', function (event) {
+            tabEl.addEventListener('shown.bs.tab', function(event) {
                 const target = event.target.getAttribute('data-bs-target');
                 if (target === '#tasks') {
                     loadTasks();
@@ -475,27 +512,29 @@
 
         // Populate filterProject dropdown
         fetch('ajax_helpers/task_handler.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: 'action=get_projects'
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success && Array.isArray(data.data)) {
-                const filterSelect = document.getElementById('filterProject');
-                data.data.forEach(project => {
-                    const opt = document.createElement('option');
-                    opt.value = project.id;
-                    opt.textContent = project.name;
-                    filterSelect.appendChild(opt);
-                });
-            }
-        });
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: 'action=get_projects'
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success && Array.isArray(data.data)) {
+                    const filterSelect = document.getElementById('filterProject');
+                    data.data.forEach(project => {
+                        const opt = document.createElement('option');
+                        opt.value = project.id;
+                        opt.textContent = project.name;
+                        filterSelect.appendChild(opt);
+                    });
+                }
+            });
 
         // Add filter event
         const filterProject = document.getElementById('filterProject');
         if (filterProject) {
-            filterProject.addEventListener('change', function () {
+            filterProject.addEventListener('change', function() {
                 loadTasks();
             });
         }
@@ -548,6 +587,7 @@
                     <td><span class="badge ${project.completed_tasks == project.task_count ? 'bg-success' : 'bg-primary'}">
                         ${project.completed_tasks == project.task_count ? 'Completed' : 'In Progress'}
                     </span></td>
+
                     <td>
                         <div class="d-flex gap-2">
                             <a href="#" 
@@ -627,6 +667,16 @@
                     <td>
                         ${task.clickup_link ? `<a href="${task.clickup_link}" target="_blank" class="text-info">View</a>` : 'No link'}
                     </td>
+                   <td>
+        <select class="form-select form-select-sm task-status-select" 
+                data-task-id="${task.id}" 
+                data-previous-value="${task.status}"
+                onchange="updateTaskStatus(${task.id}, this.value)">
+            <option value="Pending" ${task.status === 'Pending' ? 'selected' : ''}>Pending</option>
+            <option value="In Progress" ${task.status === 'In Progress' ? 'selected' : ''}>In Progress</option>
+            <option value="Completed" ${task.status === 'Completed' ? 'selected' : ''}>Completed</option>
+        </select>
+    </td>
                     <td>
                         <div class="d-flex gap-2">
                             <a href="#" 
@@ -807,7 +857,7 @@
                 timer: 2000,
                 timerProgressBar: true
             });
-            
+
             form.reset();
             loadTasks();
         } catch (error) {
@@ -851,7 +901,7 @@
                 timer: 2000,
                 timerProgressBar: true
             });
-            
+
             loadTasks();
         } catch (error) {
             showError('Error deleting task: ' + error.message);
@@ -925,7 +975,7 @@
                 timer: 2000,
                 timerProgressBar: true
             });
-            
+
             loadTasks();
         } catch (error) {
             showError('Error updating task: ' + error.message);
@@ -956,7 +1006,7 @@
                 timer: 2000,
                 timerProgressBar: true
             });
-            
+
             loadMyTasks();
         } catch (error) {
             showError('Error completing task: ' + error.message);
@@ -965,7 +1015,9 @@
 
     // Log Time for Task
     async function logTime(taskId) {
-        const { value: hours } = await Swal.fire({
+        const {
+            value: hours
+        } = await Swal.fire({
             title: 'Log Time',
             text: 'Enter hours spent on this task:',
             input: 'number',
@@ -1009,7 +1061,7 @@
                     timer: 2000,
                     timerProgressBar: true
                 });
-                
+
                 loadMyTasks();
             } catch (error) {
                 showError('Error logging time: ' + error.message);
@@ -1017,6 +1069,49 @@
         }
     }
 
+    // Update the updateTaskStatus function
+    async function updateTaskStatus(taskId, newStatus) {
+        try {
+            const selectElement = document.querySelector(`.task-status-select[data-task-id="${taskId}"]`);
+            selectElement.disabled = true; // Disable the dropdown during update
+
+            const response = await fetch('ajax_helpers/task_handler.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `action=update_task_status&task_id=${taskId}&status=${encodeURIComponent(newStatus)}`
+            });
+
+            const data = await response.json();
+
+            if (!data.success) {
+                throw new Error(data.error || 'Failed to update task status');
+            }
+
+            // Show success message and reload the page after a short delay
+            Swal.fire({
+                title: 'Success!',
+                text: 'Task status updated successfully!',
+                icon: 'success',
+                confirmButtonColor: '#3a4f8a',
+                timer: 1000,
+                timerProgressBar: true,
+                didClose: () => {
+                    location.reload(); // Reload the page after the alert closes
+                }
+            });
+
+        } catch (error) {
+            showError('Error updating task status: ' + error.message);
+            // Re-enable the dropdown and revert to previous value
+            const select = document.querySelector(`.task-status-select[data-task-id="${taskId}"]`);
+            if (select) {
+                select.disabled = false;
+                select.value = select.getAttribute('data-previous-value');
+            }
+        }
+    }
     // Delete Project
     async function deleteProject(projectId) {
         const result = await Swal.fire({
@@ -1053,7 +1148,7 @@
                 timer: 2000,
                 timerProgressBar: true
             });
-            
+
             loadProjects();
         } catch (error) {
             showError('Error deleting project: ' + error.message);
@@ -1063,10 +1158,14 @@
     // Helper Functions
     function getStatusClass(status) {
         switch (status.toLowerCase()) {
-            case 'pending': return 'bg-warning';
-            case 'in progress': return 'bg-primary';
-            case 'completed': return 'bg-success';
-            default: return 'bg-secondary';
+            case 'pending':
+                return 'bg-warning';
+            case 'in progress':
+                return 'bg-primary';
+            case 'completed':
+                return 'bg-success';
+            default:
+                return 'bg-secondary';
         }
     }
 
@@ -1100,7 +1199,7 @@
             confirmButtonColor: '#3a4f8a'
         });
     }
-    
+
     function viewTask(id) {
         // Implement view task modal or redirect
         Swal.fire({
