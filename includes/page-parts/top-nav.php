@@ -169,17 +169,17 @@ if (isset($_SESSION['user_id'])) {
           <a class="dropdown-item  gap-2 py-2" href="javascript:;">
             <div class="text-center">
               <h6 class="user-name mb-0 fw-bold small text-truncate" style="max-width: 150px;">
-                <?php echo lang("topnavbar_hello"); ?>, <?= ucfirst($_SESSION['user_name']) ?>
+             <?= ucfirst($_SESSION['user_name']) ?>
               </h6>
             </div>
           </a>
           <hr class="dropdown-divider">
           <a class="dropdown-item d-flex align-items-center gap-2 py-2"
             href="index.php?route=modules/profile/profile"><i
-              class="material-icons-outlined">person_outline</i><?php echo lang("topnavbar_profile"); ?></a>
+              class="material-icons-outlined">person_outline</i>Profile</a>
           <hr class="dropdown-divider">
           <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="index.php?logout=1"><i
-              class="material-icons-outlined">power_settings_new</i><?php echo lang("topnavbar_logout"); ?></a>
+              class="material-icons-outlined">power_settings_new</i>Logout</a>
         </div>
       </li>
     </ul>
