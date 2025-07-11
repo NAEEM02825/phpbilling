@@ -30,8 +30,13 @@ try {
         // Handle AJAX profile picture upload
         if (isset($_POST['isAjaxUpload'])) {
             try {
-                if (empty($_FILES['profilePicInput']['name'])) {
-                    throw new Exception('No file uploaded');
+                if (empty($_FILES['profilePicInput']['tmp_name'])) {
+                    throw new Exception('No file uploaded or file is too large');
+                }
+
+                // Check for upload errors
+                if ($_FILES['profilePicInput']['error'] !== UPLOAD_ERR_OK) {
+                    throw new Exception('File upload error: ' . $_FILES['profilePicInput']['error']);
                 }
 
                 $uploadDir = __DIR__ . '/../../uploads/profileImages/';
@@ -113,7 +118,7 @@ try {
     $formattedUsername = isset($user['first_name']) && !empty($user['first_name'])
         ? strtolower(trim($user['first_name'] . ' ' . ($user['last_name'] ?? '')))
         : (isset($user['user_name']) ? strtolower($user['user_name']) : 'N/A');
-    
+
     if ($user['role_id'] == 1) {
         $roleText = 'Admin';
     } elseif ($user['role_id'] == 2) {
@@ -176,22 +181,22 @@ try {
                 <div class="card-body text-center">
                     <!-- Profile Picture -->
                     <div class="position-relative mx-auto mb-4" style="width: 150px; height: 150px;">
-                        <img id="profileImage" 
-                             src="<?= htmlspecialchars(!empty($user['picture']) ? $user['picture'] : 'https://placehold.co/150x150.png?text=' . substr($formattedName, 0, 1)) ?>" 
-                             alt="Profile Picture" 
-                             class="img-thumbnail rounded-circle w-100 h-100"
-                             onerror="this.src='https://placehold.co/150x150.png?text=<?= substr($formattedName, 0, 1) ?>'">
+                        <img id="profileImage"
+                            src="<?= htmlspecialchars(!empty($user['picture']) ? $user['picture'] : 'https://placehold.co/150x150.png?text=' . substr($formattedName, 0, 1)) ?>"
+                            alt="Profile Picture"
+                            class="img-thumbnail rounded-circle w-100 h-100"
+                            onerror="this.src='https://placehold.co/150x150.png?text=<?= substr($formattedName, 0, 1) ?>'">
                         <input type="file" id="profilePicInput" name="profilePicInput" accept="image/*" style="display: none;">
                         <label for="profilePicInput" class="position-absolute bottom-0 end-0 bg-primary text-white rounded-circle p-2" style="width: 40px; height: 40px; cursor: pointer;">
                             <i class="fas fa-camera"></i>
                         </label>
                     </div>
-                    
+
                     <!-- User Info -->
                     <h4 class="mb-1" id="displayName"><?= htmlspecialchars($formattedName) ?></h4>
                     <p class="text-muted mb-2" id="displayUsername">@<?= htmlspecialchars($formattedUsername) ?></p>
                     <span class="badge bg-primary mb-3"><?= htmlspecialchars($roleText) ?></span>
-                    
+
                     <!-- Stats -->
                     <div class="d-flex justify-content-center mb-4">
                         <div class="px-3 text-center">
@@ -207,7 +212,7 @@ try {
                             <small class="text-muted">Member</small>
                         </div>
                     </div>
-                    
+
                     <!-- Quick Actions -->
                     <div class="d-grid gap-2">
                         <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
@@ -220,7 +225,7 @@ try {
                 </div>
             </div>
         </div>
-        
+
         <!-- Right Column - Edit Form -->
         <div class="col-lg-8">
             <div class="card shadow-sm">
@@ -230,48 +235,48 @@ try {
                 <div class="card-body">
                     <form id="editProfileForm" method="POST" enctype="multipart/form-data">
                         <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
-                        
+
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label for="fullNameInput" class="form-label">Full Name</label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="fas fa-user"></i></span>
-                                    <input type="text" name="fullNameInput" class="form-control" 
-                                           placeholder="Full Name"
-                                           value="<?= htmlspecialchars(isset($user['name']) ? $user['name'] : 'Admin') ?>" required>
+                                    <input type="text" name="fullNameInput" class="form-control"
+                                        placeholder="Full Name"
+                                        value="<?= htmlspecialchars(isset($user['name']) ? $user['name'] : 'Admin') ?>" required>
                                 </div>
                             </div>
-                            
+
                             <div class="col-md-6">
                                 <label for="usernameInput" class="form-label">Username</label>
                                 <div class="input-group">
                                     <span class="input-group-text">@</span>
-                                    <input type="text" name="usernameInput" class="form-control" 
-                                           placeholder="Username"
-                                           value="<?= htmlspecialchars(isset($user['user_name']) ? $user['user_name'] : 'admin') ?>" required>
+                                    <input type="text" name="usernameInput" class="form-control"
+                                        placeholder="Username"
+                                        value="<?= htmlspecialchars(isset($user['user_name']) ? $user['user_name'] : 'admin') ?>" required>
                                 </div>
                             </div>
-                            
+
                             <div class="col-md-6">
                                 <label for="emailInput" class="form-label">Email</label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="fas fa-envelope"></i></span>
-                                    <input type="email" name="emailInput" class="form-control" 
-                                           placeholder="Email"
-                                           value="<?= htmlspecialchars(isset($user['email']) ? $user['email'] : '') ?>" required>
+                                    <input type="email" name="emailInput" class="form-control"
+                                        placeholder="Email"
+                                        value="<?= htmlspecialchars(isset($user['email']) ? $user['email'] : '') ?>" required>
                                 </div>
                             </div>
-                            
+
                             <div class="col-md-6">
                                 <label for="phoneInput" class="form-label">Phone</label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="fas fa-phone"></i></span>
-                                    <input type="text" name="phoneInput" class="form-control" 
-                                           placeholder="Phone"
-                                           value="<?= htmlspecialchars(isset($user['phone']) ? $user['phone'] : '-') ?>">
+                                    <input type="text" name="phoneInput" class="form-control"
+                                        placeholder="Phone"
+                                        value="<?= htmlspecialchars(isset($user['phone']) ? $user['phone'] : '-') ?>">
                                 </div>
                             </div>
-                            
+
                             <div class="col-12">
                                 <hr class="my-4">
                                 <div class="d-flex justify-content-end">
@@ -284,7 +289,7 @@ try {
                     </form>
                 </div>
             </div>
-            
+
             <!-- Additional Info Card -->
             <div class="card shadow-sm mt-4">
                 <div class="card-header bg-white">
@@ -383,280 +388,294 @@ try {
 <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.3/dist/heic2any.min.js"></script>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialize modal
-    const changePasswordModal = new bootstrap.Modal(document.getElementById('changePasswordModal'));
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize modal
+        const changePasswordModal = new bootstrap.Modal(document.getElementById('changePasswordModal'));
 
-    // Toggle password visibility
-    document.querySelectorAll('.toggle-password').forEach(button => {
-        button.addEventListener('click', function() {
-            const target = document.getElementById(this.getAttribute('data-target'));
-            const icon = this.querySelector('i');
+        // Toggle password visibility
+        document.querySelectorAll('.toggle-password').forEach(button => {
+            button.addEventListener('click', function() {
+                const target = document.getElementById(this.getAttribute('data-target'));
+                const icon = this.querySelector('i');
 
-            if (target.type === 'password') {
-                target.type = 'text';
-                icon.classList.remove('fa-eye');
-                icon.classList.add('fa-eye-slash');
-            } else {
-                target.type = 'password';
-                icon.classList.remove('fa-eye-slash');
-                icon.classList.add('fa-eye');
-            }
+                if (target.type === 'password') {
+                    target.type = 'text';
+                    icon.classList.remove('fa-eye');
+                    icon.classList.add('fa-eye-slash');
+                } else {
+                    target.type = 'password';
+                    icon.classList.remove('fa-eye-slash');
+                    icon.classList.add('fa-eye');
+                }
+            });
         });
-    });
 
-    // Password validation
-    function validatePassword() {
-        let isValid = true;
+        // Password validation
+       // Update the validatePassword function to be more thorough
+function validatePassword() {
+    let isValid = true;
+    const currentPass = currentPassword.value.trim();
+    const newPass = newPassword.value.trim();
+    const confirmPass = confirmPassword.value.trim();
 
-        // Validate new password is different from current password
-        if (currentPassword.value && newPassword.value &&
-            currentPassword.value === newPassword.value) {
-            document.getElementById('newPasswordFeedback').textContent = 'New password must be different from current password';
-            newPassword.classList.add('is-invalid');
-            isValid = false;
-        }
-        // Validate new password length
-        else if (newPassword.value.length < 8) {
-            document.getElementById('newPasswordFeedback').textContent = 'Password must be at least 8 characters long';
-            newPassword.classList.add('is-invalid');
-            isValid = false;
-        } else {
-            newPassword.classList.remove('is-invalid');
-        }
-
-        // Validate password match
-        if (newPassword.value !== confirmPassword.value && confirmPassword.value.length > 0) {
-            document.getElementById('confirmPasswordFeedback').textContent = 'New password and confirm password do not match';
-            confirmPassword.classList.add('is-invalid');
-            isValid = false;
-        } else {
-            confirmPassword.classList.remove('is-invalid');
-        }
-
-        return isValid;
+    // Validate current password
+    if (currentPass.length === 0) {
+        document.getElementById('currentPasswordFeedback').textContent = 'Current password is required';
+        currentPassword.classList.add('is-invalid');
+        isValid = false;
+    } else {
+        currentPassword.classList.remove('is-invalid');
     }
 
-    const currentPassword = document.getElementById('currentPassword');
-    const newPassword = document.getElementById('newPassword');
-    const confirmPassword = document.getElementById('confirmPassword');
+    // Validate new password
+    if (newPass.length < 8) {
+        document.getElementById('newPasswordFeedback').textContent = 'Password must be at least 8 characters long';
+        newPassword.classList.add('is-invalid');
+        isValid = false;
+    } else if (currentPass && newPass === currentPass) {
+        document.getElementById('newPasswordFeedback').textContent = 'New password must be different from current password';
+        newPassword.classList.add('is-invalid');
+        isValid = false;
+    } else {
+        newPassword.classList.remove('is-invalid');
+    }
 
-    currentPassword.addEventListener('input', validatePassword);
-    newPassword.addEventListener('input', validatePassword);
-    confirmPassword.addEventListener('input', validatePassword);
+    // Validate confirmation
+    if (newPass !== confirmPass) {
+        document.getElementById('confirmPasswordFeedback').textContent = 'Passwords do not match';
+        confirmPassword.classList.add('is-invalid');
+        isValid = false;
+    } else if (confirmPass.length === 0) {
+        document.getElementById('confirmPasswordFeedback').textContent = 'Please confirm your new password';
+        confirmPassword.classList.add('is-invalid');
+        isValid = false;
+    } else {
+        confirmPassword.classList.remove('is-invalid');
+    }
 
-    // Form submission
-    document.getElementById('changePasswordForm').addEventListener('submit', function(e) {
-        e.preventDefault();
+    return isValid;
+}
 
-        if (!validatePassword()) {
-            return;
-        }
+        const currentPassword = document.getElementById('currentPassword');
+        const newPassword = document.getElementById('newPassword');
+        const confirmPassword = document.getElementById('confirmPassword');
 
-        const formData = new FormData(this);
-        const submitBtn = this.querySelector('button[type="submit"]');
-        const originalBtnText = submitBtn.innerHTML;
+        currentPassword.addEventListener('input', validatePassword);
+        newPassword.addEventListener('input', validatePassword);
+        confirmPassword.addEventListener('input', validatePassword);
 
-        // Show loading state
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Updating...';
-        submitBtn.disabled = true;
+        // Form submission
+        document.getElementById('changePasswordForm').addEventListener('submit', function(e) {
+            e.preventDefault();
 
-        fetch('ajax_helpers/update_password.php', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.success) {
-                    // Show success message with SweetAlert
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Password Updated!',
-                        text: 'Your password has been changed successfully',
-                        timer: 3000,
-                        showConfirmButton: false
-                    });
+            if (!validatePassword()) {
+                return;
+            }
 
-                    // Close modal and reset form
-                    changePasswordModal.hide();
-                    this.reset();
-                } else {
-                    // Show error message with SweetAlert only for current password mismatch
-                    if (data.message.includes('Current password')) {
+            const formData = new FormData(this);
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalBtnText = submitBtn.innerHTML;
+
+            // Show loading state
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Updating...';
+            submitBtn.disabled = true;
+
+            fetch('ajax_helpers/update_password.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        // Show success message with SweetAlert
                         Swal.fire({
-                            icon: 'error',
-                            title: 'Incorrect Password',
-                            text: 'The current password you entered is incorrect',
+                            icon: 'success',
+                            title: 'Password Updated!',
+                            text: 'Your password has been changed successfully',
                             timer: 3000,
                             showConfirmButton: false
                         });
 
-                        document.getElementById('currentPasswordFeedback').textContent = data.message;
-                        document.getElementById('currentPassword').classList.add('is-invalid');
+                        // Close modal and reset form
+                        changePasswordModal.hide();
+                        this.reset();
                     } else {
-                        // For other errors, show inline feedback
-                        const errorAlert = document.createElement('div');
-                        errorAlert.className = 'alert alert-danger alert-dismissible fade show mt-3';
-                        errorAlert.innerHTML = `
+                        // Show error message with SweetAlert only for current password mismatch
+                        if (data.message.includes('Current password')) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Incorrect Password',
+                                text: 'The current password you entered is incorrect',
+                                timer: 3000,
+                                showConfirmButton: false
+                            });
+
+                            document.getElementById('currentPasswordFeedback').textContent = data.message;
+                            document.getElementById('currentPassword').classList.add('is-invalid');
+                        } else {
+                            // For other errors, show inline feedback
+                            const errorAlert = document.createElement('div');
+                            errorAlert.className = 'alert alert-danger alert-dismissible fade show mt-3';
+                            errorAlert.innerHTML = `
                             <i class="fas fa-exclamation-circle me-2"></i>
                             ${data.message}
                             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         `;
-                        document.getElementById('changePasswordForm').appendChild(errorAlert);
+                            document.getElementById('changePasswordForm').appendChild(errorAlert);
+                        }
                     }
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'An error occurred while updating your password',
+                        timer: 3000,
+                        showConfirmButton: false
+                    });
+                })
+                .finally(() => {
+                    submitBtn.innerHTML = originalBtnText;
+                    submitBtn.disabled = false;
+                });
+        });
+
+        // Profile picture upload handler with HEIC conversion
+        document.getElementById('profilePicInput').addEventListener('change', async function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            // Client-side validation
+            if (file.size > 20 * 1024 * 1024) {
                 Swal.fire({
                     icon: 'error',
-                    title: 'Error',
-                    text: 'An error occurred while updating your password',
-                    timer: 3000,
-                    showConfirmButton: false
+                    title: 'File too large',
+                    text: 'File size must be less than 20MB',
+                    timer: 3000
                 });
-            })
-            .finally(() => {
-                submitBtn.innerHTML = originalBtnText;
-                submitBtn.disabled = false;
-            });
-    });
-
-    // Profile picture upload handler with HEIC conversion
-    document.getElementById('profilePicInput').addEventListener('change', async function(e) {
-        const file = e.target.files[0];
-        if (!file) return;
-
-        // Client-side validation
-        if (file.size > 20 * 1024 * 1024) {
-            Swal.fire({
-                icon: 'error',
-                title: 'File too large',
-                text: 'File size must be less than 20MB',
-                timer: 3000
-            });
-            this.value = '';
-            return;
-        }
-
-        try {
-            // Show loading indicator
-            const swalInstance = Swal.fire({
-                title: 'Processing Image',
-                html: 'Please wait while we prepare your image...',
-                allowOutsideClick: false,
-                didOpen: () => Swal.showLoading()
-            });
-
-            // Convert HEIC to JPG if needed
-            const processedFile = await processImageFile(file);
-
-            // Update preview
-            await updateImagePreview(processedFile);
-
-            // Upload via AJAX
-            await uploadProfilePicture(processedFile);
-
-            // Success notification
-            await swalInstance.close();
-            Swal.fire({
-                icon: 'success',
-                title: 'Success!',
-                text: 'Profile picture updated successfully',
-                timer: 2000,
-                showConfirmButton: false
-            });
-            
-            // Reload the page after upload
-            setTimeout(() => {
-                window.location.reload();
-            }, 2100); // Slight delay to let the success message show
-        } catch (error) {
-            console.error('Upload error:', error);
-            Swal.fire({
-                icon: 'error',
-                title: 'Upload Failed',
-                text: error.message || 'An error occurred while uploading the image',
-                timer: 3000
-            });
-            this.value = '';
-        }
-    });
-
-    // Helper functions
-    async function processImageFile(file) {
-        const isHEIC = file.name.toLowerCase().endsWith('.heic') ||
-            file.type === 'image/heic' ||
-            file.type === 'image/heif';
-
-        if (!isHEIC) return file;
-
-        try {
-            const conversionResult = await heic2any({
-                blob: file,
-                toType: 'image/jpeg',
-                quality: 0.8
-            });
-
-            return new File([conversionResult], file.name.replace(/\.[^/.]+$/, '.jpg'), {
-                type: 'image/jpeg',
-                lastModified: new Date().getTime()
-            });
-        } catch (error) {
-            console.error('HEIC conversion failed:', error);
-            throw new Error('Failed to convert HEIC image. Please try another file.');
-        }
-    }
-
-    function updateImagePreview(file) {
-        return new Promise((resolve) => {
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                document.getElementById('profileImage').src = event.target.result;
-                resolve();
-            };
-            reader.readAsDataURL(file);
-        });
-    }
-
-    async function uploadProfilePicture(file) {
-        const formData = new FormData();
-        formData.append('profilePicInput', file);
-        formData.append('csrf_token', document.querySelector('input[name="csrf_token"]').value);
-        formData.append('isAjaxUpload', 'true');
-
-        const response = await fetch(window.location.href, {
-            method: 'POST',
-            body: formData
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            throw new Error(errorData.message || 'Upload failed');
-        }
-    }
-
-    // Regular form submission handler
-    const editProfileForm = document.getElementById('editProfileForm');
-    if (editProfileForm) {
-        editProfileForm.addEventListener('submit', function(e) {
-            // Prevent default if we're handling an image upload
-            if (document.getElementById('profilePicInput').files.length > 0) {
-                e.preventDefault();
+                this.value = '';
                 return;
             }
 
-            // Show loading state for regular form submission
-            const saveBtn = this.querySelector('button[type="submit"]');
-            const originalBtnText = saveBtn.innerHTML;
-            saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Saving...';
-            saveBtn.disabled = true;
+            try {
+                // Show loading indicator
+                const swalInstance = Swal.fire({
+                    title: 'Processing Image',
+                    html: 'Please wait while we prepare your image...',
+                    allowOutsideClick: false,
+                    didOpen: () => Swal.showLoading()
+                });
+
+                // Convert HEIC to JPG if needed
+                const processedFile = await processImageFile(file);
+
+                // Update preview
+                await updateImagePreview(processedFile);
+
+                // Upload via AJAX
+                await uploadProfilePicture(processedFile);
+
+                // Success notification
+                await swalInstance.close();
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: 'Profile picture updated successfully',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+
+                // Reload the page after upload
+                setTimeout(() => {
+                    window.location.reload();
+                }, 2100); // Slight delay to let the success message show
+            } catch (error) {
+                console.error('Upload error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Upload Failed',
+                    text: error.message || 'An error occurred while uploading the image',
+                    timer: 3000
+                });
+                this.value = '';
+            }
         });
-    }
-});
+
+        // Helper functions
+        async function processImageFile(file) {
+            const isHEIC = file.name.toLowerCase().endsWith('.heic') ||
+                file.type === 'image/heic' ||
+                file.type === 'image/heif';
+
+            if (!isHEIC) return file;
+
+            try {
+                const conversionResult = await heic2any({
+                    blob: file,
+                    toType: 'image/jpeg',
+                    quality: 0.8
+                });
+
+                return new File([conversionResult], file.name.replace(/\.[^/.]+$/, '.jpg'), {
+                    type: 'image/jpeg',
+                    lastModified: new Date().getTime()
+                });
+            } catch (error) {
+                console.error('HEIC conversion failed:', error);
+                throw new Error('Failed to convert HEIC image. Please try another file.');
+            }
+        }
+
+        function updateImagePreview(file) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    document.getElementById('profileImage').src = event.target.result;
+                    resolve();
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        async function uploadProfilePicture(file) {
+            const formData = new FormData();
+            formData.append('profilePicInput', file);
+            formData.append('csrf_token', document.querySelector('input[name="csrf_token"]').value);
+            formData.append('isAjaxUpload', 'true');
+
+            const response = await fetch(window.location.href, {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.message || 'Upload failed');
+            }
+        }
+
+        // Regular form submission handler
+        const editProfileForm = document.getElementById('editProfileForm');
+        if (editProfileForm) {
+            editProfileForm.addEventListener('submit', function(e) {
+                // Prevent default if we're handling an image upload
+                if (document.getElementById('profilePicInput').files.length > 0) {
+                    e.preventDefault();
+                    return;
+                }
+
+                // Show loading state for regular form submission
+                const saveBtn = this.querySelector('button[type="submit"]');
+                const originalBtnText = saveBtn.innerHTML;
+                saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Saving...';
+                saveBtn.disabled = true;
+            });
+        }
+    });
 </script>
