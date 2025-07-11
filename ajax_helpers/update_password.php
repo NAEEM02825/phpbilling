@@ -1,7 +1,12 @@
 <?php
-session_start();
 require('../functions.php');
+
 header('Content-Type: application/json');
+
+// Start session if not already started
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 try {
     // Verify CSRF token
@@ -9,19 +14,24 @@ try {
         throw new Exception('Invalid CSRF token');
     }
 
-    // Verify user is logged in
+    // Check authentication
     if (!isset($_SESSION['user_id'])) {
-        throw new Exception('Session expired. Please login again.');
+        throw new Exception('Unauthorized access');
     }
 
-    $user_id = (int)$_SESSION['user_id'];
+    // Get POST data
     $current_password = $_POST['current_password'] ?? '';
     $new_password = $_POST['new_password'] ?? '';
     $confirm_password = $_POST['confirm_password'] ?? '';
+    $user_id = (int) $_SESSION['user_id'];
 
     // Validate inputs
-    if (empty($current_password)){
+    if (empty($current_password)) {
         throw new Exception('Current password is required');
+    }
+
+    if (empty($new_password)) {
+        throw new Exception('New password is required');
     }
 
     if (strlen($new_password) < 8) {
@@ -32,24 +42,23 @@ try {
         throw new Exception('New passwords do not match');
     }
 
-    // Get current user data
+    // Get user data - fetch plain text password (assuming it's stored in plain text)
     $user = DB::queryFirstRow("SELECT password FROM users WHERE user_id = %i", $user_id);
     if (!$user) {
         throw new Exception('User not found');
     }
 
-    // Verify current password - adjust this according to your password hashing method
-    if (!password_verify($current_password, $user['password'])) {
+    // Verify current password (plain text comparison)
+    if ($current_password !== $user['password']) {
         throw new Exception('Current password is incorrect');
     }
 
-    // Update password
-    $hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
+    // Update password (store in plain text)
     DB::update('users', [
-        'password' => $hashed_password
+        'password' => $new_password
     ], "user_id = %i", $user_id);
 
-    echo json_encode(['success' => true]);
+    echo json_encode(['success' => true, 'message' => 'Password updated successfully']);
 } catch (Exception $e) {
     http_response_code(400);
     echo json_encode([
@@ -57,3 +66,4 @@ try {
         'message' => $e->getMessage()
     ]);
 }
+?>

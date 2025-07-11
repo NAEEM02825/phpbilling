@@ -123,17 +123,9 @@ try {
         $roleText = 'Admin';
     } elseif ($user['role_id'] == 2) {
         $roleText = 'Manager';
-    } elseif ($user['role_id'] == 5) {
-        $roleText = 'Craftman';
     } elseif ($user['role_id'] == 3) {
-        $roleText = 'Foreman';
-    } elseif ($user['role_id'] == 6) {
-        $roleText = 'Superindendent';
-    } elseif ($user['role_id'] == 7) {
-        $roleText = 'Tool Manager';
-    } elseif ($user['role_id'] == 8) {
-        $roleText = 'HR';
-    } else {
+        $roleText = 'Employee';
+    }  else {
         $roleText = 'User';
     }
 } catch (Exception $e) {
