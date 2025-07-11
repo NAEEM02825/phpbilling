@@ -186,25 +186,8 @@ try {
 
                     <!-- User Info -->
                     <h4 class="mb-1" id="displayName"><?= htmlspecialchars($formattedName) ?></h4>
-                    <p class="text-muted mb-2" id="displayUsername">@<?= htmlspecialchars($formattedUsername) ?></p>
+                    <p class="text-muted mb-2" id="displayUsername">@<?= htmlspecialchars(isset($user['user_name']) ? $user['user_name'] : ($user['role'] ?? 'user')) ?></p>
                     <span class="badge bg-primary mb-3"><?= htmlspecialchars($roleText) ?></span>
-
-                    <!-- Stats -->
-                    <div class="d-flex justify-content-center mb-4">
-                        <div class="px-3 text-center">
-                            <h5 class="mb-0">24</h5>
-                            <small class="text-muted">Projects</small>
-                        </div>
-                        <div class="px-3 text-center">
-                            <h5 class="mb-0">142</h5>
-                            <small class="text-muted">Tasks</small>
-                        </div>
-                        <div class="px-3 text-center">
-                            <h5 class="mb-0">2.5y</h5>
-                            <small class="text-muted">Member</small>
-                        </div>
-                    </div>
-
                     <!-- Quick Actions -->
                     <div class="d-grid gap-2">
                         <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
@@ -296,12 +279,8 @@ try {
                                     <td><?= htmlspecialchars($roleText) ?></td>
                                 </tr>
                                 <tr>
-                                    <th class="text-muted">Last Login</th>
-                                    <td><?= htmlspecialchars(isset($user['last_login']) ? date('M j, Y g:i A', strtotime($user['last_login'])) : 'Never') ?></td>
-                                </tr>
-                                <tr>
-                                    <th class="text-muted">Account Created</th>
-                                    <td><?= htmlspecialchars(isset($user['created_at']) ? date('M j, Y', strtotime($user['created_at'])) : 'Unknown') ?></td>
+                                    <th class="text-muted">Status</th>
+                                    <td><?= isset($user['status']) ? htmlspecialchars($user['status']) : '' ?></td>
                                 </tr>
                             </tbody>
                         </table>
