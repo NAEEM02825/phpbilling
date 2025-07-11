@@ -1,8 +1,5 @@
 <?php
 
-
-// Fetch last 5 applicants (customize as needed)
-$applicants = DB::query("SELECT first_name, last_name, created_at FROM applicants ORDER BY created_at DESC LIMIT 5");
 if (isset($_SESSION['user_id'])) {
   try {
     $user = DB::queryFirstRow(
