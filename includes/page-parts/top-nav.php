@@ -131,57 +131,99 @@ if (isset($_SESSION['user_id'])) {
       </div>
 
       <li class="nav-item dropdown">
-        <a href="javascrpt:;" class="dropdown-toggle dropdown-toggle-nocaret" data-bs-toggle="dropdown">
-          <?php
-          // Start the session at the very beginning
-          if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-          }
+  <a href="javascript:;" class="dropdown-toggle dropdown-toggle-nocaret" data-bs-toggle="dropdown">
+    <?php
+    // Start the session at the very beginning
+    if (session_status() === PHP_SESSION_NONE) {
+      session_start();
+    }
 
-          $defaultImage = 'https://placehold.co/110x110/png';
-          $userImage = $defaultImage;
+    $defaultImage = 'https://placehold.co/110x110/png';
+    $userImage = $defaultImage;
 
-          if (isset($_SESSION['user_id'])) {
-            try {
-              // Get user data from database using MeekroDB
-              $user = DB::queryFirstRow(
-                "SELECT picture FROM users WHERE user_id = %i",
-                $_SESSION['user_id']
-              );
+    if (isset($_SESSION['user_id'])) {
+      try {
+        // Get user data from database using MeekroDB
+        $user = DB::queryFirstRow(
+          "SELECT picture FROM users WHERE user_id = %i",
+          $_SESSION['user_id']
+        );
 
-              if ($user && !empty($user['picture'])) {
-                // Assuming the path in the database is relative to your web root
-                $userImage = $user['picture'];
-              }
-            } catch (Exception $e) {
-              error_log("Profile image error: " . $e->getMessage());
-            }
-          }
-          ?>
-          <img src="<?= htmlspecialchars($userImage) ?>"
-            class="rounded-circle p-1 border"
-            width="45"
-            height="45"
-            alt="Profile Picture"
-            onerror="this.onerror=null;this.src='<?= htmlspecialchars($defaultImage) ?>'">
-        </a>
-        <div class="dropdown-menu dropdown-user dropdown-menu-end shadow">
-          <a class="dropdown-item  gap-2 py-2" href="javascript:;">
-            <div class="text-center">
-              <h6 class="user-name mb-0 fw-bold small text-truncate" style="max-width: 150px;">
-             <?= ucfirst($_SESSION['user_name']) ?>
-              </h6>
-            </div>
-          </a>
-          <hr class="dropdown-divider">
-          <a class="dropdown-item d-flex align-items-center gap-2 py-2"
-            href="index.php?route=modules/profile/profile"><i
-              class="material-icons-outlined">person_outline</i>Profile</a>
-          <hr class="dropdown-divider">
-          <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="index.php?logout=1"><i
-              class="material-icons-outlined">power_settings_new</i>Logout</a>
+        if ($user && !empty($user['picture'])) {
+          // Assuming the path in the database is relative to your web root
+          $userImage = $user['picture'];
+        }
+      } catch (Exception $e) {
+        error_log("Profile image error: " . $e->getMessage());
+      }
+    }
+    ?>
+    <div class="position-relative">
+      <img src="<?= htmlspecialchars($userImage) ?>"
+        class="rounded-circle border-2 border-white"
+        width="40"
+        height="40"
+        alt="Profile Picture"
+        onerror="this.onerror=null;this.src='<?= htmlspecialchars($defaultImage) ?>'">
+      <span class="position-absolute bottom-0 end-0 bg-success rounded-circle border border-2 border-white" style="width: 10px; height: 10px;"></span>
+    </div>
+  </a>
+  <div class="dropdown-menu dropdown-menu-end p-0 shadow-lg" style="min-width: 250px; border: none;">
+    <div class="bg-primary text-white p-3 rounded-top">
+      <div class="d-flex align-items-center gap-3">
+        <img src="<?= htmlspecialchars($userImage) ?>"
+          class="rounded-circle border border-2 border-white"
+          width="60"
+          height="60"
+          alt="Profile Picture"
+          onerror="this.onerror=null;this.src='<?= htmlspecialchars($defaultImage) ?>'">
+        <div>
+          <h6 class="mb-0 fw-semibold text-truncate" style="max-width: 160px;"><?= ucfirst($_SESSION['user_name']) ?></h6>
+          <small class="opacity-75"><?= $_SESSION['user_email'] ?? '' ?></small>
         </div>
-      </li>
+      </div>
+    </div>
+    
+    <div class="p-2">
+      <a class="dropdown-item d-flex align-items-center gap-3 px-3 py-2 rounded-2"
+        href="index.php?route=modules/profile/profile">
+        <div class="icon-box bg-light-primary rounded-circle p-2">
+          <i class="material-icons-outlined text-primary">person_outline</i>
+        </div>
+        <div>
+          <h6 class="mb-0">Profile</h6>
+          <small class="text-muted">View your profile</small>
+        </div>
+      </a>
+      
+      <a class="dropdown-item d-flex align-items-center gap-3 px-3 py-2 rounded-2"
+        href="index.php?route=modules/settings">
+        <div class="icon-box bg-light-warning rounded-circle p-2">
+          <i class="material-icons-outlined text-warning">settings</i>
+        </div>
+        <div>
+          <h6 class="mb-0">Settings</h6>
+          <small class="text-muted">Account settings</small>
+        </div>
+      </a>
+    </div>
+    
+    <div class="dropdown-divider m-0"></div>
+    
+    <div class="p-2">
+      <a class="dropdown-item d-flex align-items-center gap-3 px-3 py-2 rounded-2 text-danger"
+        href="index.php?logout=1">
+        <div class="icon-box bg-light-danger rounded-circle p-2">
+          <i class="material-icons-outlined text-danger">power_settings_new</i>
+        </div>
+        <div>
+          <h6 class="mb-0">Logout</h6>
+          <small class="text-muted">Sign out from system</small>
+        </div>
+      </a>
+    </div>
+  </div>
+</li>
     </ul>
 
   </nav>
