@@ -605,13 +605,13 @@
                 const lastActive = user.last_active ? formatDate(user.last_active) : 'Never';
 
                 // Avatar handling
-                let avatar;
-                if (user.avatar) {
-                    avatar = `<img src="${user.avatar}" class="avatar-img rounded-circle" alt="${user.first_name}">`;
-                } else {
-                    const initials = (user.first_name?.charAt(0) || '') + (user.last_name?.charAt(0) || '');
-                    avatar = `<span class="avatar-title rounded-circle bg-primary text-white">${initials}</span>`;
-                }
+               let avatar;
+        if (user.picture) { // Changed from user.avatar to user.picture
+            avatar = `<img src="${user.picture}" class="avatar-img rounded-circle" alt="${user.first_name}">`;
+        } else {
+            const initials = (user.first_name?.charAt(0) || '') + (user.last_name?.charAt(0) || '');
+            avatar = `<span class="avatar-title rounded-circle bg-primary text-white">${initials}</span>`;
+        }
 
                 // Role handling
                 const roleDisplay = user.role_name || user.role || 'No role';
