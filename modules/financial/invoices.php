@@ -746,91 +746,86 @@ $projects = DB::query("SELECT * FROM projects");
                         draft: 'bg-secondary'
                     };
                     const projectRate = invoice.project_rate || 0;
-                    const totalHours = invoice.total_hours || 0;
-                    const totalProjectRate = invoice.total_project_rate || 0;
 
                     const formattedRate = projectRate.toLocaleString('en-US', {
                         style: 'currency',
                         currency: 'USD'
                     });
 
-                    const formattedTotal = totalProjectRate.toLocaleString('en-US', {
+                    const formattedTotal = projectRate.toLocaleString('en-US', {
                         style: 'currency',
                         currency: 'USD'
                     });
                     const statusBadge = `<span class="badge ${statusBadges[status]}">${status}</span>`;
 
+                    // Generate items HTML if items exist
                     let itemsHtml = '';
-                    (invoice.items || []).forEach(item => {
-                        const dateStr = item.date ? new Date(item.date).toLocaleDateString() : '';
-                        itemsHtml += `
-                        <tr>
-                            <td>${dateStr}</td>
-                            <td>${item.task_title || 'No title'}</td>
-                            <td>${item.hours || ''}</td>
-                        </tr>
-                    `;
-                    });
-
+                    if (invoice.items && invoice.items.length > 0) {
+                        invoice.items.forEach(item => {
+                            const dateStr = item.date ? new Date(item.date).toLocaleDateString() : '';
+                            itemsHtml += `
+                <tr>
+                    <td>${dateStr}</td>
+                    <td>${item.task_title || 'No title'}</td>
+                    <td>${item.hours || ''}</td>
+                </tr>
+                `;
+                        });
+                    }
 
                     modalContent.innerHTML = `
-                    <div class="invoice-preview">
-                        <div class="invoice-header d-flex justify-content-between mb-4">
-                            <div>
-                                <h4>Invoice ${invoice.invoice_number}</h4>
-                                <p class="mb-1"><strong>Project:</strong> ${invoice.project_name || 'N/A'}</p>
-                                <p class="mb-1"><strong>Status:</strong> ${statusBadge}</p>
-                                <p class="mb-1"><strong>Issue Date:</strong> ${issueDate}</p>
-                                <p class="mb-1"><strong>Due Date:</strong> ${dueDate}</p>
-                            </div>
-                            <div class="text-end">
-                                <h4>${invoice.client_name || 'No client'}</h4>
-                                ${invoice.client_info ? `
-                                <p class="mb-1">${invoice.client_info.address || ''}</p>
-                                <p class="mb-1">Phone: ${invoice.client_info.phone || ''}</p>
-                                <p class="mb-1">Email: ${invoice.client_info.email || ''}</p>
-                                ` : ''}
-                            </div>
+        <div class="invoice-preview">
+            <div class="invoice-header d-flex justify-content-between mb-4">
+                <div>
+                    <h4>Invoice ${invoice.invoice_number}</h4>
+                    <p class="mb-1"><strong>Project:</strong> ${invoice.project_name || 'N/A'}</p>
+                    <p class="mb-1"><strong>Status:</strong> ${statusBadge}</p>
+                    <p class="mb-1"><strong>Issue Date:</strong> ${issueDate}</p>
+                    <p class="mb-1"><strong>Due Date:</strong> ${dueDate}</p>
+                </div>
+                <div class="text-end">
+                    <h4>${invoice.client_name || 'No client'}</h4>
+                    ${invoice.client_info ? `
+                    <p class="mb-1">${invoice.client_info.address || ''}</p>
+                    <p class="mb-1">Phone: ${invoice.client_info.phone || ''}</p>
+                    <p class="mb-1">Email: ${invoice.client_info.email || ''}</p>
+                    ` : ''}
+                </div>
+            </div>
+            
+            <div class="invoice-summary mb-4">
+                <table class="table table-bordered">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Date</th>
+                            <th>Task</th>
+                            <th>Hours</th>
+                        </tr>
+                    </thead>
+                    <tbody>${itemsHtml}</tbody>
+                </table>
+                <div class="d-flex justify-content-end mt-3">
+                    <div class="bg-light p-3 rounded" style="min-width:300px;">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>Project Rate:</span>
+                            <span>$${formattedRate}</span>
                         </div>
-                        
-                         <div class="invoice-items mb-4">
-                    <table class="table table-bordered">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Date</th>
-                                <th>Task</th>
-                                <th>Hours</th>
-                            </tr>
-                        </thead>
-                        <tbody>${itemsHtml}</tbody>
-                    </table>
-                    
-                    <div class="d-flex justify-content-end align-items-center mt-2">
-                        <div class="bg-light p-3 rounded" style="min-width:300px;">
-                            <div class="d-flex justify-content-between mb-1">
-                                <span>Project Rate:</span>
-                                <span>${formattedRate}/hr</span>
-                            </div>
-                            <div class="d-flex justify-content-between mb-1">
-                                <span>Total Hours:</span>
-                                <span>${totalHours.toFixed(2)}</span>
-                            </div>
-                            <hr class="my-1">
-                            <div class="d-flex justify-content-between">
-                                <span class="fw-bold">Total Project Rate:</span>
-                                <span class="fs-5 fw-bold text-success">${formattedTotal}</span>
-                            </div>
+                        <hr class="my-1">
+                        <div class="d-flex justify-content-between">
+                            <span class="fw-bold">Total Amount:</span>
+                            <span class="fs-5 fw-bold text-success">$${formattedTotal}</span>
                         </div>
                     </div>
                 </div>
-                
-                ${invoice.notes ? `
-                <div class="mt-4 p-3 bg-light rounded">
-                    <h5>Notes</h5>
-                    <p class="mb-0">${invoice.notes}</p>
-                </div>
-                ` : ''}
             </div>
+            
+            ${invoice.notes ? `
+            <div class="mt-4 p-3 bg-light rounded">
+                <h5>Notes</h5>
+                <p class="mb-0">${invoice.notes}</p>
+            </div>
+            ` : ''}
+        </div>
         `;
 
                     const modal = new bootstrap.Modal(document.getElementById('viewInvoiceModal'));
@@ -839,18 +834,17 @@ $projects = DB::query("SELECT * FROM projects");
                 } catch (error) {
                     console.error('Error displaying invoice:', error);
                     document.getElementById('invoiceDetailsContent').innerHTML = `
-                    <div class="alert alert-danger">
-                        <h4>Error Displaying Invoice</h4>
-                        <p>${error.message}</p>
-                        <button class="btn btn-sm btn-secondary" onclick="window.location.reload()">
-                            Reload Page
-                        </button>
-                    </div>
-                `;
+        <div class="alert alert-danger">
+            <h4>Error Displaying Invoice</h4>
+            <p>${error.message}</p>
+            <button class="btn btn-sm btn-secondary" onclick="window.location.reload()">
+                Reload Page
+            </button>
+        </div>
+        `;
                     new bootstrap.Modal(document.getElementById('viewInvoiceModal')).show();
                 }
             },
-
             editInvoice: function(invoiceId) {
                 fetch(`ajax_helpers/getInvoiceDetails.php?id=${invoiceId}`)
                     .then(response => response.json())
