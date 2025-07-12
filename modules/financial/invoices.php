@@ -3,6 +3,8 @@ $projects = DB::query("SELECT * FROM projects");
 ?>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <!-- Invoices Page Header -->
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-4 pb-3 mb-4 border-bottom">
@@ -20,11 +22,11 @@ $projects = DB::query("SELECT * FROM projects");
             <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="exportDropdown" data-bs-toggle="dropdown">
                 <i class="fas fa-download me-1"></i> Export
             </button>
-            <ul class="dropdown-menu" aria-labelledby="exportDropdown">
-                <li><a class="dropdown-item" href="#"><i class="fas fa-file-excel me-2"></i> Excel</a></li>
-                <li><a class="dropdown-item" href="#"><i class="fas fa-file-pdf me-2"></i> PDF</a></li>
-                <li><a class="dropdown-item" href="#"><i class="fas fa-file-csv me-2"></i> CSV</a></li>
-            </ul>
+<ul class="dropdown-menu" aria-labelledby="exportDropdown">
+    <li><a class="dropdown-item" href="#" onclick="invoiceManager.handleExport('csv')"><i class="fas fa-file-csv me-2"></i> CSV</a></li>
+    <li><a class="dropdown-item" href="#" onclick="invoiceManager.handleExport('excel')"><i class="fas fa-file-excel me-2"></i> Excel</a></li>
+    <li><a class="dropdown-item" href="#" onclick="invoiceManager.handleExport('pdf')"><i class="fas fa-file-pdf me-2"></i> PDF</a></li>
+</ul>
         </div>
     </div>
 </div>
@@ -83,6 +85,7 @@ $projects = DB::query("SELECT * FROM projects");
                                 <th>Date</th>
                                 <th>Due Date</th>
                                 <th>Status</th>
+                                <th>Change Status</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -253,18 +256,6 @@ $projects = DB::query("SELECT * FROM projects");
         </div>
     </div>
 </div>
-<style>
-    /* Ensure dropdown works in table cells */
-.table-responsive {
-    position: relative;
-}
-
-.dropdown-menu {
-    position: absolute;
-    z-index: 1000;
-}
-</style>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -558,39 +549,27 @@ $projects = DB::query("SELECT * FROM projects");
                     </div>
                 `;
 
-                   row.innerHTML = `
-    <td><div class="form-check"><input class="form-check-input" type="checkbox" value="${invoice.id}"></div></td>
-    <td>${invoice.invoice_number}</td>
-    <td>${invoice.client_name}</td>
-    <td>${invoice.project_name || 'N/A'}</td>
-    <td>${issueDate}</td>
-    <td>${dueDate}</td>
-    <td>
-        <div class="dropdown">
-            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" 
-                data-bs-toggle="dropdown" aria-expanded="false">
-                ${statusBadge} <span class="caret"></span>
-            </button>
-            <ul class="dropdown-menu dropdown-menu-end">
-                <li><a class="dropdown-item" href="#" onclick="invoiceManager.updateStatus(${invoice.id}, 'draft')">Mark as Draft</a></li>
-                <li><a class="dropdown-item" href="#" onclick="invoiceManager.updateStatus(${invoice.id}, 'pending')">Mark as Pending</a></li>
-                <li><a class="dropdown-item" href="#" onclick="invoiceManager.updateStatus(${invoice.id}, 'paid')">Mark as Paid</a></li>
-                <li><a class="dropdown-item" href="#" onclick="invoiceManager.updateStatus(${invoice.id}, 'overdue')">Mark as Overdue</a></li>
-            </ul>
-        </div>
-    </td>
-    <td>
-        <button class="btn btn-sm btn-outline-primary me-1 view-invoice-btn" title="View" data-invoice-id="${invoice.id}">
-            <i class="fas fa-eye"></i>
-        </button>
-        <button class="btn btn-sm btn-outline-success me-1" title="Edit" onclick="invoiceManager.editInvoice(${invoice.id})">
-            <i class="fas fa-edit"></i>
-        </button>
-        <button class="btn btn-sm btn-outline-danger" title="Delete" onclick="invoiceManager.deleteInvoice(${invoice.id})">
-            <i class="fas fa-trash"></i>
-        </button>
-    </td>
-`;
+                    row.innerHTML = `
+                    <td><div class="form-check"><input class="form-check-input" type="checkbox" value="${invoice.id}"></div></td>
+                    <td>${invoice.invoice_number}</td>
+                    <td>${invoice.client_name}</td>
+                    <td>${invoice.project_name || 'N/A'}</td>
+                    <td>${issueDate}</td>
+                    <td>${dueDate}</td>
+                    <td>${statusBadge}</td>
+                    <td>${statusDropdown}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary me-1 view-invoice-btn" title="View" data-invoice-id="${invoice.id}">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-success me-1" title="Edit" onclick="invoiceManager.editInvoice(${invoice.id})">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" title="Delete" onclick="invoiceManager.deleteInvoice(${invoice.id})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
                     tbody.appendChild(row);
                 });
             },
@@ -1045,65 +1024,116 @@ $projects = DB::query("SELECT * FROM projects");
                 });
             },
 
-           updateStatus: function(invoiceId, newStatus) {
-    console.log(`Attempting to update invoice ${invoiceId} to status ${newStatus}`); // Debug log
-    
+            updateStatus: function(invoiceId, newStatus) {
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: `You are about to change this invoice's status to ${newStatus}`,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, update it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        fetch('ajax_helpers/updateInvoiceStatus.php', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/x-www-form-urlencoded',
+                                },
+                                body: new URLSearchParams({
+                                    invoice_id: invoiceId,
+                                    new_status: newStatus
+                                })
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    this.loadInvoices();
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Updated!',
+                                        text: 'Invoice status updated successfully',
+                                        confirmButtonColor: '#3085d6',
+                                    });
+                                } else {
+                                    throw new Error(data.error || 'Failed to update status');
+                                }
+                            })
+                            .catch(error => {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error',
+                                    text: 'Error updating status: ' + error.message,
+                                    confirmButtonColor: '#3085d6',
+                                });
+                            });
+                    }
+                });
+            },
+handleExport: function(exportType) {
     Swal.fire({
-        title: 'Are you sure?',
-        text: `You are about to change this invoice's status to ${newStatus}`,
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Yes, update it!'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            console.log('User confirmed status change'); // Debug log
+        title: 'Preparing Export',
+        html: 'Please wait while we prepare your export...',
+        allowOutsideClick: false,
+        didOpen: () => {
+            Swal.showLoading();
             
-            fetch('ajax_helpers/updateInvoiceStatus.php', {
+            // Prepare the data to send
+            const exportData = {
+                exportType: exportType,
+                filters: this.filters
+            };
+            
+            fetch('ajax_helpers/export_invoices.php', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'Content-Type': 'application/json',
                 },
-                body: new URLSearchParams({
-                    invoice_id: invoiceId,
-                    new_status: newStatus
-                })
+                body: JSON.stringify(exportData)
             })
             .then(response => {
-                console.log('Received response from server'); // Debug log
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log('Response data:', data); // Debug log
-                if (data.success) {
-                    this.loadInvoices();
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Updated!',
-                        text: 'Invoice status updated successfully',
-                        confirmButtonColor: '#3085d6',
+                if (exportType === 'pdf') {
+                    // For PDF, we return HTML that will trigger print dialog
+                    return response.text().then(html => {
+                        // Open a new window with the HTML
+                        const printWindow = window.open('', '_blank');
+                        printWindow.document.write(html);
+                        printWindow.document.close();
+                        Swal.close();
                     });
                 } else {
-                    throw new Error(data.error || 'Failed to update status');
+                    // For CSV and Excel, handle as blob
+                    return response.blob().then(blob => {
+                        // Create a download link
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        
+                        // Set appropriate file extension
+                        const extension = exportType === 'excel' ? 'xls' : exportType;
+                        a.download = `invoices_export.${extension}`;
+                        
+                        document.body.appendChild(a);
+                        a.click();
+                        
+                        // Clean up
+                        window.URL.revokeObjectURL(url);
+                        a.remove();
+                        Swal.close();
+                    });
                 }
             })
             .catch(error => {
-                console.error('Error updating status:', error); // Debug log
                 Swal.fire({
                     icon: 'error',
-                    title: 'Error',
-                    text: 'Error updating status: ' + error.message,
+                    title: 'Export Failed',
+                    text: error.message || 'An error occurred during export',
                     confirmButtonColor: '#3085d6',
                 });
             });
         }
     });
 },
-
             deleteInvoice: function(invoiceId) {
                 Swal.fire({
                     title: 'Are you sure?',
@@ -1146,4 +1176,6 @@ $projects = DB::query("SELECT * FROM projects");
         invoiceManager.init();
         window.invoiceManager = invoiceManager;
     });
+
+    
 </script>
