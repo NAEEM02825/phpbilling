@@ -496,7 +496,7 @@ const invoiceManager = {
                     filters: this.filters
                 };
                 
-                fetch('ajax_helpers/export_taks.php', {
+                fetch('ajax_helpers/export_tasks.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
