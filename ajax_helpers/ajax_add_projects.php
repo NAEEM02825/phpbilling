@@ -84,8 +84,7 @@ try {
                 'type' => $_POST['type'],
                 'rate' => (float)$_POST['rate'],
                 'payment_cycle' => $_POST['payment_cycle'],
-                'category' => strpos($_POST['name'], 'SF') === 0 ? 'SF' : 'Other',
-                'updated_at' => DB::sqleval('NOW()')
+                'category' => strpos($_POST['name'], 'SF') === 0 ? 'SF' : 'Other'
             ];
             
             // For backward compatibility, store client name if available
