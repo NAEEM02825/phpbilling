@@ -20,31 +20,30 @@ function get_full_user_name($user_id ="") {
 }
  
  
-function attempt_login_user($email, $password) {
-	// build a check here to put appropriate fields in the session
-	session_destroy();
-	session_start();
-	$is_logged = DB::queryFirstRow("SELECT * FROM users u WHERE u.`email` LIKE '".$email."' AND u.`password`='".$password."' ");	
- 
-	if ($is_logged) {
-	
-		$_SESSION['is_logged'] = 1;
-		// $_SESSION['company_name'] = DB::queryFirstField("SELECT company_name FROM companies WHERE company_id = $company_id ");
-		// $_SESSION['company_logo'] = DB::queryFirstField("SELECT company_logo FROM companies WHERE company_id = $company_id ");
-		// $_SESSION['company_url'] = DB::queryFirstField("SELECT website FROM companies WHERE company_id = $company_id ");
-		$_SESSION['user_id'] = $is_logged['user_id'];	
-		$_SESSION['user_name'] = $is_logged['name']; 
-		$_SESSION['user_email'] = $is_logged['email']; 
-		$_SESSION['role_id'] = getUserRoleID($is_logged['user_id']); 
-		
-		$cookie_name = "user_id";
-		$cookie_value = $is_logged['user_id'];
-		setcookie($cookie_name, $cookie_value, time() + (86400 * 30 * 15), "/"); // 86400 = 1 day //set for 15 days
-		return true;
-
-	}else{
-		return false;
-	}
+function attempt_login_user($email_or_username, $password) {
+    // build a check here to put appropriate fields in the session
+    session_destroy();
+    session_start();
+    
+    // Check if login is by email or username
+    $is_logged = DB::queryFirstRow("SELECT * FROM users u WHERE 
+                                  (u.`email` LIKE '".$email_or_username."' OR u.`user_name` LIKE '".$email_or_username."') 
+                                  AND u.`password`='".$password."'");    
+    
+    if ($is_logged) {
+        $_SESSION['is_logged'] = 1;
+        $_SESSION['user_id'] = $is_logged['user_id'];    
+        $_SESSION['user_name'] = $is_logged['user_name']; 
+        $_SESSION['user_email'] = $is_logged['email']; 
+        $_SESSION['role_id'] = getUserRoleID($is_logged['user_id']); 
+        
+        $cookie_name = "user_id";
+        $cookie_value = $is_logged['user_id'];
+        setcookie($cookie_name, $cookie_value, time() + (86400 * 30 * 15), "/"); // 86400 = 1 day //set for 15 days
+        return true;
+    } else {
+        return false;
+    }
 }
 	
 	

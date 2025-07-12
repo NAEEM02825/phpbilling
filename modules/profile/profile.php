@@ -102,7 +102,7 @@ try {
         // Update user data
         DB::update('users', [
             'name' => $name,
-            'user_name' => $username,
+            'name' => $username,
             'email' => $email,
             'phone' => $phone
         ], "user_id = %i", $user_id);
@@ -117,7 +117,7 @@ try {
     $formattedName = isset($user['name']) ? ucfirst($user['name']) : 'Admin';
     $formattedUsername = isset($user['first_name']) && !empty($user['first_name'])
         ? strtolower(trim($user['first_name'] . ' ' . ($user['last_name'] ?? '')))
-        : (isset($user['user_name']) ? strtolower($user['user_name']) : 'N/A');
+        : (isset($user['name']) ? strtolower($user['name']) : 'N/A');
 
     if ($user['role_id'] == 1) {
         $roleText = 'Admin';
@@ -186,7 +186,7 @@ try {
 
                     <!-- User Info -->
                     <h4 class="mb-1" id="displayName"><?= htmlspecialchars($formattedName) ?></h4>
-                    <p class="text-muted mb-2" id="displayUsername">@<?= htmlspecialchars(isset($user['user_name']) ? $user['user_name'] : ($user['role'] ?? 'user')) ?></p>
+                    <p class="text-muted mb-2" id="displayUsername">@<?= htmlspecialchars(isset($user['name']) ? $user['name'] : ($user['role'] ?? 'user')) ?></p>
                     <span class="badge bg-primary mb-3"><?= htmlspecialchars($roleText) ?></span>
                     <!-- Quick Actions -->
                     <div class="d-grid gap-2">
@@ -228,7 +228,7 @@ try {
                                     <span class="input-group-text">@</span>
                                     <input type="text" name="usernameInput" class="form-control"
                                         placeholder="Username"
-                                        value="<?= htmlspecialchars(isset($user['user_name']) ? $user['user_name'] : 'admin') ?>" required>
+                                        value="<?= htmlspecialchars(isset($user['name']) ? $user['name'] : 'admin') ?>" required>
                                 </div>
                             </div>
 

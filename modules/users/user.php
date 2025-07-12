@@ -165,6 +165,10 @@
                         <input type="text" class="form-control" id="userUsername" name="name" required>
                     </div>
                     <div class="mb-3">
+                        <label for="phone" class="form-label">Mobile Number</label>
+                        <input type="text" class="form-control" id="phone" name="phone" required>
+                    </div>
+                    <div class="mb-3">
                         <label for="userRole" class="form-label">Role</label>
                         <select class="form-select" id="userRole" name="role_id" required>
                             <!-- Will be populated by JavaScript -->

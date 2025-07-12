@@ -254,12 +254,12 @@ include_once('includes/page-parts/header.php');
             
             <form method="POST" role="form" id="login_form">
                 <div class="form-group">
-                    <label for="email" class="form-label">Email Address</label>
-                    <div class="position-relative">
-                        <i class="input-icon uil uil-envelope"></i>
-                        <input type="email" name="email" class="form-control" placeholder="Enter your email" id="email" autocomplete="off" required>
-                    </div>
-                </div>
+    <label for="email" class="form-label">Email or Username</label>
+    <div class="position-relative">
+        <i class="input-icon uil uil-user-circle"></i>
+        <input type="text" name="email" class="form-control" placeholder="Enter your email or username" id="email" autocomplete="off" required>
+    </div>
+</div>
                 
                 <div class="form-group">
                     <label for="password" class="form-label">Password</label>
@@ -300,64 +300,64 @@ include_once('includes/page-parts/header.php');
             }, 3000);
         }
 
-        $(document).ready(function () {
-            // Form submission handler
-            $("#login_form").on('submit', function (event) {
-                event.preventDefault();
-                var email = $('#email').val();
-                var password = $('#password').val();
-                
-                if (email.trim() === '' || password.trim() === '') {
-                    showErrorMessage("Please enter both email and password");
-                    return;
-                }
-                
-                attempLogin();
-            });
-            
-            // Also handle the button click for backward compatibility
-            $('#log_in').click(function (event) {
-                event.preventDefault();
-                $("#login_form").trigger('submit');
-            });
-            
-            // Handle Enter key in inputs
-            $('input').keydown(function (e) {
-                if (e.which == 13) {
-                    e.preventDefault();
-                    $("#login_form").trigger('submit');
-                }
-            });
-        });
-
-        function attempLogin() {
-            var email = $('#email').val();
-            var password = $('#password').val();
-            var posted = { 'email': email, 'password': password};
-            
-            $('#log_in').html('<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span> Signing in...').prop('disabled', true);
-            
-            $.ajax({
-                type: "POST",
-                url: "ajax_helpers/ajax_check_login.php",
-                data: posted,
-                success: function (data) {
-                    if ($.trim(data) == '1') {
-                        showSuccessMessage('Login successful. Redirecting...');
-                        setTimeout(() => {
-                            window.location.href = 'index.php';
-                        }, 1000);
-                    } else {
-                        showErrorMessage("Invalid email or password");
-                        $('#log_in').html('Sign In').prop('disabled', false);
-                    }
-                },
-                error: function() {
-                    showErrorMessage("Network error. Please try again.");
-                    $('#log_in').html('Sign In').prop('disabled', false);
-                }
-            });
+       $(document).ready(function () {
+    // Form submission handler
+    $("#login_form").on('submit', function (event) {
+        event.preventDefault();
+        var emailOrUsername = $('#email').val();
+        var password = $('#password').val();
+        
+        if (emailOrUsername.trim() === '' || password.trim() === '') {
+            showErrorMessage("Please enter both email/username and password");
+            return;
         }
+        
+        attempLogin();
+    });
+    
+    // Also handle the button click for backward compatibility
+    $('#log_in').click(function (event) {
+        event.preventDefault();
+        $("#login_form").trigger('submit');
+    });
+    
+    // Handle Enter key in inputs
+    $('input').keydown(function (e) {
+        if (e.which == 13) {
+            e.preventDefault();
+            $("#login_form").trigger('submit');
+        }
+    });
+});
+
+function attempLogin() {
+    var emailOrUsername = $('#email').val();
+    var password = $('#password').val();
+    var posted = { 'email': emailOrUsername, 'password': password};
+    
+    $('#log_in').html('<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span> Signing in...').prop('disabled', true);
+    
+    $.ajax({
+        type: "POST",
+        url: "ajax_helpers/ajax_check_login.php",
+        data: posted,
+        success: function (data) {
+            if ($.trim(data) == '1') {
+                showSuccessMessage('Login successful. Redirecting...');
+                setTimeout(() => {
+                    window.location.href = 'index.php';
+                }, 1000);
+            } else {
+                showErrorMessage("Invalid email/username or password");
+                $('#log_in').html('Sign In').prop('disabled', false);
+            }
+        },
+        error: function() {
+            showErrorMessage("Network error. Please try again.");
+            $('#log_in').html('Sign In').prop('disabled', false);
+        }
+    });
+}
     </script>
 
     <style>

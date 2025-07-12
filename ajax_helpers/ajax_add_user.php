@@ -8,7 +8,7 @@ try {
 
     switch ($action) {
         case 'add_user':
-            $required = ['first_name', 'last_name', 'email', 'name', 'password', 'role_id'];
+            $required = ['first_name', 'last_name', 'email', 'name', 'phone' ,'password', 'role_id'];
             foreach ($required as $field) {
                 if (empty($_POST[$field])) {
                     throw new Exception("Field $field is required");
@@ -29,6 +29,7 @@ try {
                 'last_name' => $_POST['last_name'],
                 'email' => $_POST['email'],
                 'name' => $_POST['name'],
+                'phone' => $_POST['phone'] ?? null, // Added phone field
                 'password' => $_POST['password'],
                 'role_id' => $_POST['role_id'],
                 'status' => $_POST['status'] ?? 'active',
@@ -51,6 +52,7 @@ try {
                 'last_name' => $_POST['last_name'],
                 'email' => $_POST['email'],
                 'name' => $_POST['name'],
+                'phone' => $_POST['phone'] ?? null, // Added phone field
                 'role_id' => $_POST['role_id'],
                 'status' => $_POST['status'] ?? 'active',
                 'picture' => $_POST['avatar'] ?? null, // Changed from 'avatar' to 'picture'
