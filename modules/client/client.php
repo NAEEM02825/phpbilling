@@ -1,6 +1,8 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <!-- Clients Page Header -->
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-4 pb-3 mb-4 border-bottom">
@@ -42,11 +44,11 @@
         <!-- Client Filters -->
         <div class="card mb-4 shadow-sm">
             <div class="card-body">
-                <form class="row g-3">
+                <form class="row g-3" id="clientFiltersForm">
                     <div class="col-md-3">
                         <label for="industryFilter" class="form-label">Industry</label>
                         <select class="form-select" id="industryFilter">
-                            <option selected>All Industries</option>
+                            <option selected value="">All Industries</option>
                             <option>Technology</option>
                             <option>Finance</option>
                             <option>Healthcare</option>
@@ -57,7 +59,7 @@
                     <div class="col-md-3">
                         <label for="statusFilter" class="form-label">Status</label>
                         <select class="form-select" id="statusFilter">
-                            <option selected>All Statuses</option>
+                            <option selected value="">All Statuses</option>
                             <option>Active</option>
                             <option>Inactive</option>
                             <option>VIP</option>
@@ -66,7 +68,7 @@
                     <div class="col-md-3">
                         <label for="countryFilter" class="form-label">Country</label>
                         <select class="form-select" id="countryFilter">
-                            <option selected>All Countries</option>
+                            <option selected value="">All Countries</option>
                             <option>United States</option>
                             <option>United Kingdom</option>
                             <option>Canada</option>
@@ -79,7 +81,7 @@
                 </form>
             </div>
         </div>
-        <div id="alertsContainer" class="container mt-3"></div>
+        
         <!-- Client List -->
         <div class="card shadow-sm">
             <div class="card-body p-0">
@@ -108,16 +110,14 @@
             <div class="card-footer bg-white">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <p class="mb-0 text-muted showing-count">Showing <span class="fw-bold">1</span> to <span class="fw-bold">4</span> of <span class="fw-bold">24</span> clients</p>
+                        <p class="mb-0 text-muted showing-count">Showing <span class="fw-bold">0</span> to <span class="fw-bold">0</span> of <span class="fw-bold">0</span> clients</p>
                     </div>
                     <nav>
-                        <ul class="pagination mb-0">
+                        <ul class="pagination mb-0" id="paginationContainer">
                             <li class="page-item disabled">
                                 <a class="page-link" href="#" tabindex="-1">Previous</a>
                             </li>
                             <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                            <li class="page-item"><a class="page-link" href="#">2</a></li>
-                            <li class="page-item"><a class="page-link" href="#">3</a></li>
                             <li class="page-item">
                                 <a class="page-link" href="#">Next</a>
                             </li>
@@ -293,55 +293,86 @@
         // Initialize variables
         let currentPage = 1;
         const perPage = 10;
+        let currentFilters = {};
 
         // Load clients on page load
         loadClients();
 
-        // Add client form submission
-        $('#saveClientBtn').on('click', function() {
-            addClient();
+        // Form submission handler for filters
+        $('#clientFiltersForm').on('submit', function(e) {
+            e.preventDefault();
+            currentPage = 1; // Reset to first page when filters change
+            currentFilters = {
+                industry: $('#industryFilter').val(),
+                status: $('#statusFilter').val(),
+                country: $('#countryFilter').val()
+            };
+            loadClients();
         });
 
-        // Handle form submission
-        $('#addClientForm').on('submit', function(e) {
-            e.preventDefault();
-            addClient();
+        // Save client handler
+        $('#saveClientBtn').on('click', function() {
+            handleClientSave();
         });
 
         // Delete client handler
-        $(document).on('click', '.delete-client', function() {
+        $(document).on('click', '.delete-client', function(e) {
+            e.preventDefault();
             const clientId = $(this).data('id');
-            if (confirm('Are you sure you want to delete this client?')) {
-                deleteClient(clientId);
-            }
+            confirmDeleteClient(clientId);
         });
 
         // Pagination handlers
         $(document).on('click', '.page-link:not(.disabled)', function(e) {
             e.preventDefault();
             const target = $(this).text().toLowerCase();
+            const pageNum = $(this).data('page');
 
             if (target === 'next') {
                 currentPage++;
             } else if (target === 'previous') {
                 currentPage--;
-            } else {
-                currentPage = parseInt(target);
+            } else if (pageNum) {
+                currentPage = parseInt(pageNum);
             }
 
             loadClients();
         });
 
         // Open edit modal and fill data
-        $(document).on('click', '.edit-client', function (e) {
+        $(document).on('click', '.edit-client', function(e) {
             e.preventDefault();
             const clientId = $(this).data('id');
+            loadClientForEdit(clientId);
+        });
+
+        // Reset modal on close
+        $('#addClientModal').on('hidden.bs.modal', function() {
+            resetClientForm();
+        });
+
+        // Function to load client for editing
+        function loadClientForEdit(clientId) {
             $.ajax({
                 url: 'ajax_helpers/client_handle.php',
                 type: 'GET',
-                data: { action: 'get_client', id: clientId },
+                data: { 
+                    action: 'get_client', 
+                    id: clientId 
+                },
                 dataType: 'json',
+                beforeSend: function() {
+                    // Show loading state
+                    Swal.fire({
+                        title: 'Loading client...',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+                },
                 success: function(response) {
+                    Swal.close();
                     if (response.success && response.data) {
                         const c = response.data;
                         $('#addClientModalLabel').text('Edit Client');
@@ -355,43 +386,53 @@
                         $('#addClientModal').modal('show');
                         $('#saveClientBtn').text('Update Client');
                     } else {
-                        showAlert('danger', response.message || 'Could not load client.');
+                        showSweetAlert('error', 'Error', response.message || 'Could not load client.');
                     }
                 },
                 error: function() {
-                    showAlert('danger', 'Failed to load client.');
+                    Swal.close();
+                    showSweetAlert('error', 'Error', 'Failed to load client. Please try again.');
                 }
             });
-        });
-
-        // Reset modal on close
-        $('#addClientModal').on('hidden.bs.modal', function () {
-            $('#addClientForm')[0].reset();
-            $('#addClientForm').removeData('edit-id');
-            $('#addClientModalLabel').text('Add New Client');
-            $('#saveClientBtn').text('Save Client');
-        });
+        }
 
         // Function to load clients
         function loadClients() {
+            const requestData = {
+                action: 'get_clients',
+                page: currentPage,
+                per_page: perPage,
+                ...currentFilters
+            };
+
             $.ajax({
                 url: 'ajax_helpers/client_handle.php',
                 type: 'GET',
-                data: {
-                    action: 'get_clients',
-                    page: currentPage,
-                    per_page: perPage
+                data: requestData,
+                beforeSend: function() {
+                    // Show loading state in table
+                    $('#clientsTable tbody').html(`
+                        <tr>
+                            <td colspan="7" class="text-center py-4">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </td>
+                        </tr>
+                    `);
                 },
                 success: function(response) {
                     if (response.success) {
                         renderClientsTable(response.data, response.total);
                         updatePagination(response.total);
                     } else {
-                        showAlert('danger', response.message);
+                        showSweetAlert('error', 'Error', response.message);
+                        renderEmptyTable();
                     }
                 },
                 error: function() {
-                    showAlert('danger', 'Failed to load clients. Please try again.');
+                    showSweetAlert('error', 'Error', 'Failed to load clients. Please try again.');
+                    renderEmptyTable();
                 }
             });
         }
@@ -402,7 +443,7 @@
             $tbody.empty();
 
             if (clients.length === 0) {
-                $tbody.append('<tr><td colspan="7" class="text-center py-4">No clients found</td></tr>');
+                renderEmptyTable();
                 return;
             }
 
@@ -414,7 +455,7 @@
                 <tr>
                     <td>
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox">
+                            <input class="form-check-input" type="checkbox" data-id="${client.id}">
                         </div>
                     </td>
                     <td>
@@ -461,19 +502,29 @@
             $('.showing-count').html(`Showing <span class="fw-bold">${start}</span> to <span class="fw-bold">${end}</span> of <span class="fw-bold">${total}</span> clients`);
         }
 
+        // Function to render empty table state
+        function renderEmptyTable() {
+            $('#clientsTable tbody').html(`
+                <tr>
+                    <td colspan="7" class="text-center py-4">No clients found</td>
+                </tr>
+            `);
+            $('.showing-count').html(`Showing <span class="fw-bold">0</span> to <span class="fw-bold">0</span> of <span class="fw-bold">0</span> clients`);
+        }
+
         // Function to update pagination
         function updatePagination(total) {
             const totalPages = Math.ceil(total / perPage);
-            const $pagination = $('.pagination');
+            const $pagination = $('#paginationContainer');
             $pagination.empty();
 
             // Previous button
             const prevDisabled = currentPage === 1 ? 'disabled' : '';
             $pagination.append(`
-            <li class="page-item ${prevDisabled}">
-                <a class="page-link" href="#" tabindex="-1">Previous</a>
-            </li>
-        `);
+                <li class="page-item ${prevDisabled}">
+                    <a class="page-link" href="#" data-page="previous">Previous</a>
+                </li>
+            `);
 
             // Page numbers
             const maxVisiblePages = 5;
@@ -494,10 +545,10 @@
             for (let i = startPage; i <= endPage; i++) {
                 const active = i === currentPage ? 'active' : '';
                 $pagination.append(`
-                <li class="page-item ${active}">
-                    <a class="page-link" href="#" data-page="${i}">${i}</a>
-                </li>
-            `);
+                    <li class="page-item ${active}">
+                        <a class="page-link" href="#" data-page="${i}">${i}</a>
+                    </li>
+                `);
             }
 
             if (endPage < totalPages) {
@@ -505,23 +556,27 @@
                     $pagination.append('<li class="page-item disabled"><span class="page-link">...</span></li>');
                 }
                 $pagination.append(`
-                <li class="page-item">
-                    <a class="page-link" href="#" data-page="${totalPages}">${totalPages}</a>
-                </li>
-            `);
+                    <li class="page-item">
+                        <a class="page-link" href="#" data-page="${totalPages}">${totalPages}</a>
+                    </li>
+                `);
             }
 
             // Next button
             const nextDisabled = currentPage === totalPages ? 'disabled' : '';
             $pagination.append(`
-            <li class="page-item ${nextDisabled}">
-                <a class="page-link" href="#">Next</a>
-            </li>
-        `);
+                <li class="page-item ${nextDisabled}">
+                    <a class="page-link" href="#" data-page="next">Next</a>
+                </li>
+            `);
         }
 
-        // Function to add a new client
-        function addClient() {
+        // Main function to handle client save/update
+        function handleClientSave() {
+            // Show loading state
+            const $saveBtn = $('#saveClientBtn');
+            $saveBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...');
+            
             const editId = $('#addClientForm').data('edit-id');
             const formData = {
                 action: editId ? 'update_client' : 'add_client',
@@ -532,40 +587,72 @@
                 company: $('#clientCompany').val().trim(),
                 address: $('#clientAddress').val().trim()
             };
+            
             if (editId) formData.id = editId;
 
-            // Basic validation
-            if (!formData.first_name || !formData.last_name) {
-                showAlert('danger', 'First name and last name are required');
+            // Validate form
+            if (!validateClientForm(formData)) {
+                $saveBtn.prop('disabled', false).html(editId ? 'Update Client' : 'Save Client');
                 return;
             }
 
-            if (!formData.email) {
-                showAlert('danger', 'Email is required');
-                return;
-            }
-
-            if (!isValidEmail(formData.email)) {
-                showAlert('danger', 'Please enter a valid email address');
-                return;
-            }
-
+            // Submit the form
             $.ajax({
                 url: 'ajax_helpers/client_handle.php',
                 type: 'POST',
                 data: formData,
+                dataType: 'json',
                 success: function(response) {
+                    $saveBtn.prop('disabled', false).html(editId ? 'Update Client' : 'Save Client');
+                    
                     if (response.success) {
                         $('#addClientModal').modal('hide');
-                        resetForm();
-                        showAlert('success', response.message);
+                        showSweetAlert('success', 'Success', response.message);
                         loadClients();
                     } else {
-                        showAlert('danger', response.message);
+                        showSweetAlert('error', 'Error', response.message);
                     }
                 },
                 error: function() {
-                    showAlert('danger', 'Failed to save client. Please try again.');
+                    $saveBtn.prop('disabled', false).html(editId ? 'Update Client' : 'Save Client');
+                    showSweetAlert('error', 'Error', 'Failed to save client. Please try again.');
+                }
+            });
+        }
+
+        // Form validation
+        function validateClientForm(formData) {
+            if (!formData.first_name || !formData.last_name) {
+                showSweetAlert('warning', 'Validation Error', 'First name and last name are required');
+                return false;
+            }
+
+            if (!formData.email) {
+                showSweetAlert('warning', 'Validation Error', 'Email is required');
+                return false;
+            }
+
+            if (!isValidEmail(formData.email)) {
+                showSweetAlert('warning', 'Validation Error', 'Please enter a valid email address');
+                return false;
+            }
+
+            return true;
+        }
+
+        // Function to confirm client deletion
+        function confirmDeleteClient(clientId) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3a4f8a',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    deleteClient(clientId);
                 }
             });
         }
@@ -579,34 +666,48 @@
                     action: 'delete_client',
                     id: id
                 },
+                beforeSend: function() {
+                    Swal.fire({
+                        title: 'Deleting client...',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+                },
                 success: function(response) {
+                    Swal.close();
                     if (response.success) {
-                        showAlert('success', response.message);
+                        showSweetAlert('success', 'Deleted!', response.message);
                         loadClients();
                     } else {
-                        showAlert('danger', response.message);
+                        showSweetAlert('error', 'Error', response.message);
                     }
                 },
                 error: function() {
-                    showAlert('danger', 'Failed to delete client. Please try again.');
+                    Swal.close();
+                    showSweetAlert('error', 'Error', 'Failed to delete client. Please try again.');
                 }
             });
         }
 
-        // Helper function to show alerts
-        function showAlert(type, message) {
-            const alert = `
-            <div class="alert alert-${type} alert-dismissible fade show" role="alert">
-                ${message}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        `;
-            $('#alertsContainer').html(alert);
+        // Helper function to reset form
+        function resetClientForm() {
+            $('#addClientForm')[0].reset();
+            $('#addClientForm').removeData('edit-id');
+            $('#addClientModalLabel').text('Add New Client');
+            $('#saveClientBtn').text('Save Client');
         }
 
-        // Helper function to reset form
-        function resetForm() {
-            $('#addClientForm')[0].reset();
+        // Helper function to show SweetAlert notifications
+        function showSweetAlert(icon, title, text) {
+            Swal.fire({
+                icon: icon,
+                title: title,
+                text: text,
+                timer: 3000,
+                showConfirmButton: false
+            });
         }
 
         // Helper function to get initials from name
