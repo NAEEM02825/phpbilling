@@ -30,7 +30,7 @@ try {
                 'email' => $_POST['email'],
                 'user_name' => $_POST['user_name'],
                 'phone' => $_POST['phone'] ?? null,
-                'password' => $_POST['password'], // Removed password_hash()
+                'password' => $_POST['password'],
                 'role_id' => $_POST['role_id'],
                 'status' => $_POST['status'] ?? 'active',
                 'picture' => $_POST['avatar'] ?? null,
@@ -60,11 +60,33 @@ try {
             ];
 
             if (!empty($_POST['password'])) {
-                $data['password'] = $_POST['password']; // Removed password_hash()
+                $data['password'] = $_POST['password'];
             }
 
             DB::update('users', $data, 'user_id=%i', $_POST['user_id']);
             echo json_encode(['success' => true, 'message' => 'User updated successfully']);
+            break;
+
+        case 'change_status':
+            if (empty($_POST['user_id']) || empty($_POST['status'])) {
+                throw new Exception("User ID and status are required");
+            }
+            
+            DB::update('users', [
+                'status' => $_POST['status'],
+                'updated_at' => date('Y-m-d H:i:s')
+            ], 'user_id=%i', $_POST['user_id']);
+            
+            echo json_encode(['success' => true, 'message' => 'Status updated successfully']);
+            break;
+            
+        case 'delete_user':
+            if (empty($_POST['user_id'])) {
+                throw new Exception("User ID is required");
+            }
+            
+            DB::delete('users', 'user_id=%i', $_POST['user_id']);
+            echo json_encode(['success' => true, 'message' => 'User deleted successfully']);
             break;
 
         case 'get_roles':

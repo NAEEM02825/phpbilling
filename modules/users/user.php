@@ -1,3 +1,6 @@
+<!-- Add this to your HTML head -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <!-- Users Page Header -->
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-4 pb-3 mb-4 border-bottom">
     <div>
@@ -402,7 +405,11 @@
 
         // Validate passwords match
         if (data.password !== data.confirm_password) {
-            alert('Passwords do not match!');
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Passwords do not match!'
+            });
             return;
         }
 
@@ -414,18 +421,34 @@
             type: 'POST',
             dataType: 'json',
             data: data,
+            // In the add user function
             success: function(response) {
                 if (response.success) {
                     $('#addUserModal').modal('hide');
                     form[0].reset();
-                    alert('User added successfully');
-                    window.location.reload(); // Page will refresh
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success!',
+                        text: 'User added successfully',
+                        timer: 2000,
+                        showConfirmButton: false
+                    }).then(() => {
+                        window.location.reload();
+                    });
                 } else {
-                    alert(response.message);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: response.message
+                    });
                 }
             },
             error: function(xhr, status, error) {
-                alert('Error adding user: ' + error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Error adding user: ' + error
+                });
             }
         });
     });
@@ -464,15 +487,6 @@
             e.preventDefault();
             updateUser();
         });
-
-        // Delete user
-        $(document).on('click', '.delete-user', function() {
-            const userId = $(this).data('user_id');
-            if (confirm('Are you sure you want to delete this user?')) {
-                deleteUser(userId);
-            }
-        });
-
         // Change status
         $(document).on('click', '.change-status', function() {
             const userId = $(this).data('user_id');
@@ -492,17 +506,33 @@
             type: 'POST',
             dataType: 'json',
             data: data,
+            // In the update user function
             success: function(response) {
                 if (response.success) {
                     $('#editUserModal').modal('hide');
-                    loadUsers();
-                    alert('User updated successfully');
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success!',
+                        text: 'User updated successfully',
+                        timer: 2000,
+                        showConfirmButton: false
+                    }).then(() => {
+                        loadUsers();
+                    });
                 } else {
-                    alert(response.message);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: response.message
+                    });
                 }
             },
             error: function(xhr, status, error) {
-                alert('Error updating user: ' + error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Error updating user: ' + error
+                });
             }
         });
     });
@@ -718,7 +748,11 @@
         });
 
         if (data.password !== data.confirm_password) {
-            alert('Passwords do not match');
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Passwords do not match!'
+            });
             return;
         }
 
@@ -746,43 +780,43 @@
         });
     }
 
-  function loadUserData(userId) {
-    $.ajax({
-        url: 'ajax_helpers/ajax_add_user.php',
-        type: 'POST',
-        dataType: 'json',
-        data: {
-            action: 'get_user',
-            user_id: userId
-        },
-        success: function(response) {
-            if (response.success && response.data) {
-                const user = response.data;
-                $('#editUserId').val(user.user_id);
-                $('#editFirstName').val(user.first_name);
-                $('#editLastName').val(user.last_name);
-                $('#editEmail').val(user.email);
-                $('#editUsername').val(user.user_name);
-                $('#editPhone').val(user.phone || ''); // Handle null phone numbers
-                
-                // Set the role dropdown
-                if (user.role_id) {
-                    $('#editRole').val(user.role_id);
-                }
+    function loadUserData(userId) {
+        $.ajax({
+            url: 'ajax_helpers/ajax_add_user.php',
+            type: 'POST',
+            dataType: 'json',
+            data: {
+                action: 'get_user',
+                user_id: userId
+            },
+            success: function(response) {
+                if (response.success && response.data) {
+                    const user = response.data;
+                    $('#editUserId').val(user.user_id);
+                    $('#editFirstName').val(user.first_name);
+                    $('#editLastName').val(user.last_name);
+                    $('#editEmail').val(user.email);
+                    $('#editUsername').val(user.user_name);
+                    $('#editPhone').val(user.phone || ''); // Handle null phone numbers
 
-                // Set the status dropdown
-                if (user.status) {
-                    $('#editStatus').val(user.status.toLowerCase());
+                    // Set the role dropdown
+                    if (user.role_id) {
+                        $('#editRole').val(user.role_id);
+                    }
+
+                    // Set the status dropdown
+                    if (user.status) {
+                        $('#editStatus').val(user.status.toLowerCase());
+                    }
+                } else {
+                    alert(response.message || 'Error loading user data');
                 }
-            } else {
-                alert(response.message || 'Error loading user data');
+            },
+            error: function(xhr, status, error) {
+                alert('Error loading user data: ' + error);
             }
-        },
-        error: function(xhr, status, error) {
-            alert('Error loading user data: ' + error);
-        }
-    });
-}
+        });
+    }
 
     function updateUser() {
         const formData = $('#editUserForm').serializeArray();
@@ -819,49 +853,124 @@
         });
     }
 
-    function deleteUser(userId) {
-        $.ajax({
-            url: 'ajax_helpers/ajax_add_user.php',
-            type: 'POST',
-            dataType: 'json',
-            data: {
-                action: 'delete_user',
-                user_id: userId
-            },
-            success: function(response) {
-                if (response.success) {
-                    loadUsers();
-                    alert('User deleted successfully');
-                } else {
-                    alert(response.message);
+  $(document).on('click', '.delete-user', function(e) {
+    e.preventDefault(); // Prevent default action if it's a link
+    const userId = $(this).data('user_id');
+    
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "You won't be able to revert this!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Show loading indicator while processing
+            Swal.fire({
+                title: 'Deleting',
+                html: 'Please wait...',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
                 }
-            },
-            error: function(xhr, status, error) {
-                alert('Error deleting user: ' + error);
+            });
+            
+            // Call your delete function
+            deleteUser(userId);
+        }
+    });
+});
+
+function deleteUser(userId) {
+    $.ajax({
+        url: 'ajax_helpers/ajax_add_user.php',
+        type: 'POST',
+        dataType: 'json',
+        data: {
+            action: 'delete_user',
+            user_id: userId
+        },
+        success: function(response) {
+            Swal.close(); // Close loading dialog
+            
+            if (response.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Deleted!',
+                    text: 'User has been deleted successfully.',
+                    timer: 2000,
+                    showConfirmButton: false
+                }).then(() => {
+                    loadUsers(); // Refresh your user list
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: response.message || 'Failed to delete user'
+                });
             }
-        });
-    }
+        },
+        error: function(xhr, status, error) {
+            Swal.close(); // Close loading dialog
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Error deleting user: ' + error
+            });
+        }
+    });
+}
 
     function changeStatus(userId, status) {
-        $.ajax({
-            url: 'ajax_helpers/ajax_add_user.php',
-            type: 'POST',
-            dataType: 'json',
-            data: {
-                action: 'change_status',
-                user_id: userId, // <-- FIXED: was 'id'
-                status: status
-            },
-            success: function(response) {
-                if (response.success) {
-                    loadUsers();
-                    alert('Status updated successfully');
-                } else {
-                    alert(response.message);
-                }
-            },
-            error: function(xhr, status, error) {
-                alert('Error changing status: ' + error);
+        const action = status === 'Active' ? 'activate' : 'deactivate';
+        Swal.fire({
+            title: `Are you sure you want to ${action} this user?`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: `Yes, ${action} it!`
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: 'ajax_helpers/ajax_add_user.php',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {
+                        action: 'change_status',
+                        user_id: userId,
+                        status: status
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Success!',
+                                text: `User ${action}d successfully`,
+                                timer: 2000,
+                                showConfirmButton: false
+                            }).then(() => {
+                                loadUsers();
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: response.message
+                            });
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: `Error ${action}ing user: ` + error
+                        });
+                    }
+                });
             }
         });
     }
@@ -943,6 +1052,7 @@
         const projectIds = $('#assignProjectsForm input[name="project_ids[]"]:checked').map(function() {
             return this.value;
         }).get();
+
         $.post('ajax_helpers/user_project_assign.php', {
             action: 'assign_projects_to_user',
             user_id: userId,
@@ -950,9 +1060,19 @@
         }, function(res) {
             if (res.success) {
                 $('#assignProjectsModal').modal('hide');
-                alert('Projects assigned!');
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: 'Projects assigned successfully',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
             } else {
-                alert(res.error || 'Failed to assign projects');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: res.error || 'Failed to assign projects'
+                });
             }
         }, 'json');
     });
