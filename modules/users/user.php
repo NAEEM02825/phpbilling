@@ -162,7 +162,7 @@
                     </div>
                     <div class="mb-3">
                         <label for="userUsername" class="form-label">Username</label>
-                        <input type="text" class="form-control" id="userUsername" name="name" required>
+                        <input type="text" class="form-control" id="userUsername" name="user_name" required>
                     </div>
                     <div class="mb-3">
                         <label for="phone" class="form-label">Mobile Number</label>
@@ -225,7 +225,7 @@
                     </div>
                     <div class="mb-3">
                         <label for="editUsername" class="form-label">Username</label>
-                        <input type="text" class="form-control" id="editUsername" name="name" required>
+                        <input type="text" class="form-control" id="editUsername" name="user_name" required>
                     </div>
                     <div class="mb-3">
                         <label for="editRole" class="form-label">Role</label>
@@ -252,23 +252,23 @@
 
 <!-- Assign Projects Modal -->
 <div class="modal fade" id="assignProjectsModal" tabindex="-1" aria-labelledby="assignProjectsModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="assignProjectsModalLabel">Assign Projects</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
-        <form id="assignProjectsForm">
-          <input type="hidden" id="assignUserId" name="user_id">
-          <div id="projectsCheckboxList"></div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-primary" id="saveProjectAssignments">Save</button>
-      </div>
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="assignProjectsModalLabel">Assign Projects</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="assignProjectsForm">
+                    <input type="hidden" id="assignUserId" name="user_id">
+                    <div id="projectsCheckboxList"></div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="saveProjectAssignments">Save</button>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
 
 <style>
@@ -596,7 +596,7 @@
                 console.log('Processing user:', user.user_id, user.first_name, user.last_name);
 
                 // Safely handle username
-                const usernameDisplay = user.name ? `@${user.name}` : 'No username';
+                const usernameDisplay = user.user_name ? `@${user.user_name}` : 'No username';
 
                 // Status handling
                 const status = user.status || 'Inactive';
@@ -607,13 +607,13 @@
                 const lastActive = user.last_active ? formatDate(user.last_active) : 'Never';
 
                 // Avatar handling
-               let avatar;
-        if (user.picture) { // Changed from user.avatar to user.picture
-            avatar = `<img src="${user.picture}" class="avatar-img rounded-circle" alt="${user.first_name}">`;
-        } else {
-            const initials = (user.first_name?.charAt(0) || '') + (user.last_name?.charAt(0) || '');
-            avatar = `<span class="avatar-title rounded-circle bg-primary text-white">${initials}</span>`;
-        }
+                let avatar;
+                if (user.picture) { // Changed from user.avatar to user.picture
+                    avatar = `<img src="${user.picture}" class="avatar-img rounded-circle" alt="${user.first_name}">`;
+                } else {
+                    const initials = (user.first_name?.charAt(0) || '') + (user.last_name?.charAt(0) || '');
+                    avatar = `<span class="avatar-title rounded-circle bg-primary text-white">${initials}</span>`;
+                }
 
                 // Role handling
                 const roleDisplay = user.role_name || user.role || 'No role';
@@ -907,7 +907,9 @@
         const userId = $(this).data('user-id');
         $('#assignUserId').val(userId);
         // Load all projects
-        $.get('ajax_helpers/task_handler.php', {action: 'get_projects'}, function(data) {
+        $.get('ajax_helpers/task_handler.php', {
+            action: 'get_projects'
+        }, function(data) {
             let html = '';
             data.data.forEach(p => {
                 html += `<div class="form-check">
@@ -917,7 +919,10 @@
             });
             $('#projectsCheckboxList').html(html);
             // Load user's assigned projects
-            $.get('ajax_helpers/user_project_assign.php', {action: 'get_user_projects', user_id: userId}, function(res) {
+            $.get('ajax_helpers/user_project_assign.php', {
+                action: 'get_user_projects',
+                user_id: userId
+            }, function(res) {
                 if (res.success) {
                     res.projects.forEach(p => {
                         $(`#projectCheck${p.id}`).prop('checked', true);
@@ -930,8 +935,14 @@
 
     $('#saveProjectAssignments').on('click', function() {
         const userId = $('#assignUserId').val();
-        const projectIds = $('#assignProjectsForm input[name="project_ids[]"]:checked').map(function(){return this.value;}).get();
-        $.post('ajax_helpers/user_project_assign.php', {action: 'assign_projects_to_user', user_id: userId, project_ids: projectIds}, function(res) {
+        const projectIds = $('#assignProjectsForm input[name="project_ids[]"]:checked').map(function() {
+            return this.value;
+        }).get();
+        $.post('ajax_helpers/user_project_assign.php', {
+            action: 'assign_projects_to_user',
+            user_id: userId,
+            project_ids: projectIds
+        }, function(res) {
             if (res.success) {
                 $('#assignProjectsModal').modal('hide');
                 alert('Projects assigned!');

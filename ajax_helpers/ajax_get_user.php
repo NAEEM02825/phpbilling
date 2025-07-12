@@ -38,7 +38,7 @@ try {
                 u.first_name,
                 u.last_name,
                 u.email,
-                u.name,
+                u.user_name,
                 u.status,
                 u.last_active,
                 u.picture,

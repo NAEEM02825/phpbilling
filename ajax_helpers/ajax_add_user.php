@@ -8,7 +8,7 @@ try {
 
     switch ($action) {
         case 'add_user':
-            $required = ['first_name', 'last_name', 'email', 'name', 'phone' ,'password', 'role_id'];
+            $required = ['first_name', 'last_name', 'email', 'user_name', 'phone' ,'password', 'role_id'];
             foreach ($required as $field) {
                 if (empty($_POST[$field])) {
                     throw new Exception("Field $field is required");
@@ -18,7 +18,7 @@ try {
             $existing = DB::queryFirstRow(
                 "SELECT user_id FROM users WHERE email = %s OR name = %s",
                 $_POST['email'],
-                $_POST['name']
+                $_POST['user_name']
             );
             if ($existing) {
                 throw new Exception("Email or name already exists");
@@ -28,7 +28,7 @@ try {
                 'first_name' => $_POST['first_name'],
                 'last_name' => $_POST['last_name'],
                 'email' => $_POST['email'],
-                'name' => $_POST['name'],
+                'user_name' => $_POST['user_name'],
                 'phone' => $_POST['phone'] ?? null, // Added phone field
                 'password' => $_POST['password'],
                 'role_id' => $_POST['role_id'],
@@ -51,7 +51,7 @@ try {
                 'first_name' => $_POST['first_name'],
                 'last_name' => $_POST['last_name'],
                 'email' => $_POST['email'],
-                'name' => $_POST['name'],
+                'user_name' => $_POST['user_name'],
                 'phone' => $_POST['phone'] ?? null, // Added phone field
                 'role_id' => $_POST['role_id'],
                 'status' => $_POST['status'] ?? 'active',
