@@ -199,7 +199,7 @@
     </div>
 </div>
 
-<!-- Edit user  -->
+<!-- Edit user modal -->
 <div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -226,6 +226,10 @@
                     <div class="mb-3">
                         <label for="editUsername" class="form-label">Username</label>
                         <input type="text" class="form-control" id="editUsername" name="user_name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editPhone" class="form-label">Mobile Number</label>
+                        <input type="text" class="form-control" id="editPhone" name="phone">
                     </div>
                     <div class="mb-3">
                         <label for="editRole" class="form-label">Role</label>
@@ -742,42 +746,43 @@
         });
     }
 
-    function loadUserData(userId) {
-        $.ajax({
-            url: 'ajax_helpers/ajax_add_user.php',
-            type: 'POST',
-            dataType: 'json',
-            data: {
-                action: 'get_user',
-                user_id: userId
-            },
-            success: function(response) {
-                if (response.success && response.data) {
-                    const user = response.data;
-                    $('#editUserId').val(user.user_id);
-                    $('#editFirstName').val(user.first_name);
-                    $('#editLastName').val(user.last_name);
-                    $('#editEmail').val(user.email);
-                    $('#editUsername').val(user.name);
-
-                    // Set the role dropdown
-                    if (user.role_id) {
-                        $('#editRole').val(user.role_id);
-                    }
-
-                    // Set the status dropdown
-                    if (user.status) {
-                        $('#editStatus').val(user.status.toLowerCase());
-                    }
-                } else {
-                    alert(response.message || 'Error loading user data');
+  function loadUserData(userId) {
+    $.ajax({
+        url: 'ajax_helpers/ajax_add_user.php',
+        type: 'POST',
+        dataType: 'json',
+        data: {
+            action: 'get_user',
+            user_id: userId
+        },
+        success: function(response) {
+            if (response.success && response.data) {
+                const user = response.data;
+                $('#editUserId').val(user.user_id);
+                $('#editFirstName').val(user.first_name);
+                $('#editLastName').val(user.last_name);
+                $('#editEmail').val(user.email);
+                $('#editUsername').val(user.user_name);
+                $('#editPhone').val(user.phone || ''); // Handle null phone numbers
+                
+                // Set the role dropdown
+                if (user.role_id) {
+                    $('#editRole').val(user.role_id);
                 }
-            },
-            error: function(xhr, status, error) {
-                alert('Error loading user data: ' + error);
+
+                // Set the status dropdown
+                if (user.status) {
+                    $('#editStatus').val(user.status.toLowerCase());
+                }
+            } else {
+                alert(response.message || 'Error loading user data');
             }
-        });
-    }
+        },
+        error: function(xhr, status, error) {
+            alert('Error loading user data: ' + error);
+        }
+    });
+}
 
     function updateUser() {
         const formData = $('#editUserForm').serializeArray();

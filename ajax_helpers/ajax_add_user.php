@@ -8,7 +8,7 @@ try {
 
     switch ($action) {
         case 'add_user':
-            $required = ['first_name', 'last_name', 'email', 'user_name', 'phone' ,'password', 'role_id'];
+            $required = ['first_name', 'last_name', 'email', 'user_name', 'phone', 'password', 'role_id'];
             foreach ($required as $field) {
                 if (empty($_POST[$field])) {
                     throw new Exception("Field $field is required");
@@ -16,12 +16,12 @@ try {
             }
 
             $existing = DB::queryFirstRow(
-                "SELECT user_id FROM users WHERE email = %s OR name = %s",
+                "SELECT user_id FROM users WHERE email = %s OR user_name = %s",
                 $_POST['email'],
                 $_POST['user_name']
             );
             if ($existing) {
-                throw new Exception("Email or name already exists");
+                throw new Exception("Email or username already exists");
             }
 
             $data = [
@@ -29,11 +29,11 @@ try {
                 'last_name' => $_POST['last_name'],
                 'email' => $_POST['email'],
                 'user_name' => $_POST['user_name'],
-                'phone' => $_POST['phone'] ?? null, // Added phone field
-                'password' => $_POST['password'],
+                'phone' => $_POST['phone'] ?? null,
+                'password' => $_POST['password'], // Removed password_hash()
                 'role_id' => $_POST['role_id'],
                 'status' => $_POST['status'] ?? 'active',
-                'picture' => $_POST['avatar'] ?? null, // Changed from 'avatar' to 'picture'
+                'picture' => $_POST['avatar'] ?? null,
                 'created_at' => date('Y-m-d H:i:s'),
                 'last_active' => date('Y-m-d H:i:s')
             ];
@@ -52,15 +52,15 @@ try {
                 'last_name' => $_POST['last_name'],
                 'email' => $_POST['email'],
                 'user_name' => $_POST['user_name'],
-                'phone' => $_POST['phone'] ?? null, // Added phone field
+                'phone' => $_POST['phone'] ?? null,
                 'role_id' => $_POST['role_id'],
                 'status' => $_POST['status'] ?? 'active',
-                'picture' => $_POST['avatar'] ?? null, // Changed from 'avatar' to 'picture'
+                'picture' => $_POST['avatar'] ?? null,
                 'updated_at' => date('Y-m-d H:i:s')
             ];
 
             if (!empty($_POST['password'])) {
-                $data['password'] = $_POST['password']; 
+                $data['password'] = $_POST['password']; // Removed password_hash()
             }
 
             DB::update('users', $data, 'user_id=%i', $_POST['user_id']);

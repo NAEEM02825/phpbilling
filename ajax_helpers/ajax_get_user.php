@@ -14,6 +14,7 @@ try {
             $status_filter = $_GET['status_filter'] ?? '';
             $role_filter = $_GET['role_filter'] ?? '';
             $id = $_GET['user_id'] ?? null;
+            $username = $_GET['user_name'] ?? null; // Added username filter
 
             $where = [];
             $params = [];
@@ -31,6 +32,11 @@ try {
             if (!empty($role_filter)) {
                 $where[] = 'r.id = %i';
                 $params[] = $role_filter;
+            }
+
+            if (!empty($username)) {
+                $where[] = 'u.user_name = %s';
+                $params[] = $username;
             }
 
             $query = "SELECT 
@@ -64,6 +70,32 @@ try {
                     'query' => $query,
                     'params' => $params
                 ]
+            ]);
+            break;
+
+        case 'check_username':
+            // New action to specifically check username availability
+            if (empty($_GET['user_name'])) {
+                throw new Exception("Username parameter is required");
+            }
+
+            $username = $_GET['user_name'];
+            $current_user_id = $_GET['current_user_id'] ?? null; // For edit scenarios
+
+            $query = "SELECT user_id FROM users WHERE user_name = %s";
+            $params = [$username];
+
+            if (!empty($current_user_id)) {
+                $query .= " AND user_id != %i";
+                $params[] = $current_user_id;
+            }
+
+            $existing = DB::queryFirstRow($query, ...$params);
+            
+            echo json_encode([
+                'success' => true,
+                'available' => empty($existing),
+                'message' => empty($existing) ? 'Username available' : 'Username already taken'
             ]);
             break;
 
