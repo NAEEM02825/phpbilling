@@ -1,6 +1,4 @@
 <?php
-require_once __DIR__ . '/../../includes/classes/db.class.php';
-
 $page_title = "Notification Center";
 $notifications = [];
 $totalNotifications = 0;

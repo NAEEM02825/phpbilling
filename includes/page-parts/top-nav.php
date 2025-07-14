@@ -26,7 +26,7 @@ if (isset($_SESSION['user_id'])) {
   position: absolute;
   top: 5px;
   right: 0;
-  background: red;
+  background: #04665F;
   color: white;
   border-radius: 50%;
   font-size: 12px;
@@ -384,7 +384,7 @@ function loadNotifications() {
 
 // Function to redirect to notifications page
 function viewAllNotifications() {
-  window.location.href = 'modules/notifications/notifications.php'; // Change this to your actual notifications page URL
+  window.location.href = 'index.php?route=modules/notifications/notifications'; // Change this to your actual notifications page URL
 }
 
 
