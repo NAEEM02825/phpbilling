@@ -1,27 +1,35 @@
 <?php
-require('../functions.php');
+require_once('../functions.php');
 header('Content-Type: application/json');
 
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
-session_start();
+$response = ['success' => false];
 
-// Check if user is logged in
-if (!isset($_SESSION['user_id'])) {
-    echo json_encode(['error' => 'Unauthorized']);
+if (!isset($_SESSION['user_id']) || !isset($_SESSION['role_id']) || $_SESSION['role_id'] != 1) {
+    $response['error'] = 'Unauthorized access';
+    echo json_encode($response);
     exit;
 }
 
-$userId = $_SESSION['user_id'];
+$notificationId = $_GET['id'] ?? 0;
 
-try {
-    // Mark all notifications as read
-    DB::update('notifications', [
-        'is_read' => 1
-    ], "user_id = %i AND is_read = 0", $userId);
-
-    echo json_encode(['success' => true]);
-
-} catch (MeekroDBException $e) {
-    echo json_encode(['error' => 'Database error: ' . $e->getMessage()]);
+if ($notificationId > 0) {
+    try {
+        DB::update('admin_notifications', [
+            'is_read' => 1,
+            'read_at' => date('Y-m-d H:i:s')
+        ], 'id = %i AND user_id = %i', $notificationId, $_SESSION['user_id']);
+        
+        $response['success'] = true;
+    } catch (Exception $e) {
+        $response['error'] = 'Database error: ' . $e->getMessage();
+    }
+} else {
+    $response['error'] = 'Invalid notification ID';
 }
+
+echo json_encode($response);
 ?>
