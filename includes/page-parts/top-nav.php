@@ -22,17 +22,17 @@ if (isset($_SESSION['user_id'])) {
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 <style>
-.notification-badge {
-    position: absolute;
-    top: 5px;
-    right: 0;
-    background: #04665F; /* Changed from red to #04665F */
-    color: white;
-    border-radius: 50%;
-    font-size: 12px;
-    padding: 2px 6px;
-    display: none; /* default hidden */
-  }
+  .notification-badge {
+  position: absolute;
+  top: 5px;
+  right: 0;
+  background: red;
+  color: white;
+  border-radius: 50%;
+  font-size: 12px;
+  padding: 2px 6px;
+  display: none; /* default hidden */
+}
 
   .dropdown-notifications .dropdown-item {
     background-color: white !important;
@@ -367,40 +367,26 @@ function loadNotifications() {
 
       // Footer: Mark all as read (only show if there are unread)
       if (unread.length > 0) {
-        container.innerHTML += `
-          <div class="dropdown-footer text-center p-2 border-top">
-            <button onclick="markAllAsRead()" class="btn btn-sm btn-primary w-100">
-              Mark all as read
-            </button>
-          </div>`;
-      }
-    })
-    .catch(error => {
-      console.error('Error fetching notifications:', error);
-      document.getElementById('notification-list').innerHTML = `
-        <p class="text-muted px-3">Unable to load notifications.</p>`;
-    });
+  container.innerHTML += `
+    <div class="dropdown-footer text-center p-2 border-top">
+      <button onclick="viewAllNotifications()" class="btn btn-sm btn-primary w-100">
+        View All
+      </button>
+    </div>`;
 }
-
-// Add click handler for individual notifications
-document.addEventListener('click', function(e) {
-  if (e.target.closest('.dropdown-item[data-id]')) {
-    const notificationId = e.target.closest('.dropdown-item').dataset.id;
-    markAsRead(notificationId);
-  }
+})
+.catch(error => {
+  console.error('Error fetching notifications:', error);
+  document.getElementById('notification-list').innerHTML = `
+    <p class="text-muted px-3">Unable to load notifications.</p>`;
 });
-
-function markAsRead(id) {
-  fetch('ajax_helpers/mark_notification_read.php', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ notification_id: id })
-  }).then(() => {
-    loadNotifications(); // Reload updated notifications
-  });
 }
+
+// Function to redirect to notifications page
+function viewAllNotifications() {
+  window.location.href = 'modules/notifications/notifications.php'; // Change this to your actual notifications page URL
+}
+
 
 document.addEventListener('DOMContentLoaded', loadNotifications);
 setInterval(loadNotifications, 60000); // Auto-refresh every 60s
