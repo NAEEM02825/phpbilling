@@ -22,17 +22,17 @@ if (isset($_SESSION['user_id'])) {
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 <style>
-  .notification-badge {
-  position: absolute;
-  top: 5px;
-  right: 0;
-  background: red;
-  color: white;
-  border-radius: 50%;
-  font-size: 12px;
-  padding: 2px 6px;
-  display: none; /* default hidden */
-}
+.notification-badge {
+    position: absolute;
+    top: 5px;
+    right: 0;
+    background: #04665F; /* Changed from red to #04665F */
+    color: white;
+    border-radius: 50%;
+    font-size: 12px;
+    padding: 2px 6px;
+    display: none; /* default hidden */
+  }
 
   .dropdown-notifications .dropdown-item {
     background-color: white !important;
