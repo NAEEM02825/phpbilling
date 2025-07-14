@@ -374,7 +374,7 @@ function loadNotifications() {
         status: statusFilter
     });
     
-    fetch(`ajax_helpers/Ajax_get_notifications?${params.toString()}`)
+    fetch(`ajax_helpers/Ajax_get_notifications.php?${params.toString()}`)
         .then(response => {
             if (!response.ok) {
                 throw new Error('Network response was not ok');
@@ -507,7 +507,7 @@ function showNotificationDetails(e) {
     markAsReadModalBtn.setAttribute('data-id', notificationId);
     
     // Fetch details
-    fetch(`ajax_helpers/Ajax_get_notifications/${notificationId}`)
+    fetch(`ajax_helpers/Ajax_get_notifications.php?id=${notificationId}`)
         .then(response => response.json())
         .then(data => {
             if (data.success) {
@@ -593,10 +593,15 @@ function showNotificationDetails(e) {
 
 // Mark notification as read
 function markAsRead(notificationId, rowElement = null) {
-    fetch(`ajax_helpers/Ajax_get_notifications/${notificationId}/read`, {
-        method: 'PATCH',
+    const formData = new FormData();
+    formData.append('id', notificationId);
+    
+    fetch('ajax_helpers/Ajax_get_notifications.php', {
+        method: 'POST',
+        body: formData,
         headers: {
-            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-Action': 'mark-read'
         }
     })
     .then(response => response.json())
@@ -632,10 +637,11 @@ function markAsRead(notificationId, rowElement = null) {
 function markAllAsRead() {
     if (!confirm('Mark all notifications as read?')) return;
     
-    fetch('ajax_helpers/Ajax_get_notifications/mark-all-read', {
-        method: 'PATCH',
+    fetch('ajax_helpers/Ajax_get_notifications.php', {
+        method: 'POST',
         headers: {
-            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-Action': 'mark-all-read'
         }
     })
     .then(response => response.json())
@@ -670,8 +676,16 @@ function deleteNotification(e) {
     
     if (!confirm('Are you sure you want to delete this notification?')) return;
     
-    fetch(`ajax_helpers/Ajax_get_notifications/${notificationId}`, {
-        method: 'DELETE'
+    const formData = new FormData();
+    formData.append('id', notificationId);
+    
+    fetch('ajax_helpers/ajax_get_notification.php', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-Action': 'delete'
+        }
     })
     .then(response => response.json())
     .then(data => {
@@ -705,8 +719,12 @@ function deleteNotification(e) {
 function clearAllNotifications() {
     if (!confirm('Are you sure you want to delete ALL notifications? This cannot be undone.')) return;
     
-    fetch('ajax_helpers/Ajax_get_notifications/clear-all', {
-        method: 'DELETE'
+    fetch('ajax_helpers/ajax_get_notification.php', {
+        method: 'POST',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-Action': 'clear-all'
+        }
     })
     .then(response => response.json())
     .then(data => {
