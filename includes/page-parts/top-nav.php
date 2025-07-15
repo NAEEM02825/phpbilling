@@ -23,25 +23,28 @@ if (isset($_SESSION['user_id'])) {
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 <style>
   .notification-badge {
-  position: absolute;
-  top: 5px;
-  right: 0;
-  background: #04665F;
-  color: white;
-  border-radius: 50%;
-  font-size: 12px;
-  padding: 2px 6px;
-  display: none; /* default hidden */
-}
+    position: absolute;
+    top: 5px;
+    right: 0;
+    background: #04665F;
+    color: white;
+    border-radius: 50%;
+    font-size: 12px;
+    padding: 2px 6px;
+    display: none;
+    /* default hidden */
+  }
 
   .dropdown-notifications .dropdown-item {
     background-color: white !important;
   }
 
   .dropdown-notifications .dropdown-item.bg-light {
-    background-color: #f8f9fa !important; /* Slightly off-white for unread items if you want distinction */
+    background-color: #f8f9fa !important;
+    /* Slightly off-white for unread items if you want distinction */
   }
- @media (max-width: 575.98px) {
+
+  @media (max-width: 575.98px) {
     .dropdown-notifications {
       width: 280px;
       position: fixed !important;
@@ -49,6 +52,7 @@ if (isset($_SESSION['user_id'])) {
       transform: translateX(-50%) !important;
       top: 60px !important;
     }
+
     .dropdown-notifications .dropdown-item {
       white-space: normal !important;
       padding: 10px 15px !important;
@@ -64,7 +68,6 @@ if (isset($_SESSION['user_id'])) {
       right: -5px;
     }
   }
-
 </style>
 <!--start header-->
 <header class="top-header">
@@ -74,35 +77,35 @@ if (isset($_SESSION['user_id'])) {
     </div>
 
 
-    
+
 
 
 
     <ul class="navbar-nav gap-1 nav-right-links align-items-center ms-auto">
 
-    <?php if (isset($_SESSION['role_id']) && $_SESSION['role_id'] == 1): ?>
+      <?php if (isset($_SESSION['role_id']) && $_SESSION['role_id'] == 1): ?>
 
-          <!-- Notifications Dropdown -->
-      <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle dropdown-toggle-nocaret position-relative" href="javascript:;" data-bs-toggle="dropdown">
-          <i class="material-icons-outlined">notifications</i>
-          <span class="notification-badge"></span>
-        </a>
-        <div class="dropdown-menu dropdown-menu-end dropdown-notifications shadow">
-          <div class="dropdown-header">
-            <h6 class="mb-0">Notifications</h6>
+        <!-- Notifications Dropdown -->
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle dropdown-toggle-nocaret position-relative" href="javascript:;" data-bs-toggle="dropdown">
+            <i class="material-icons-outlined">notifications</i>
+            <span class="notification-badge"></span>
+          </a>
+          <div class="dropdown-menu dropdown-menu-end dropdown-notifications shadow">
+            <div class="dropdown-header">
+              <h6 class="mb-0">Notifications</h6>
+            </div>
+            <div id="notification-list-wrapper" style="max-height: 400px; overflow-y: auto;">
+
+              <div class="dropdown-body" id="notification-list">
+                <!-- Notifications will be loaded here via JavaScript -->
+              </div>
+            </div>
+
+
           </div>
-          <div id="notification-list-wrapper" style="max-height: 400px; overflow-y: auto;">
-
-          <div class="dropdown-body" id="notification-list">
-  <!-- Notifications will be loaded here via JavaScript -->
-</div>
-</div>
-
-          
-        </div>
-      </li>
-<?php endif; ?>
+        </li>
+      <?php endif; ?>
 
       <li class="nav-item dropdown ns-auto">
         <a class="nav-link dropdown-toggle dropdown-toggle-nocaret" href="javascript:;" data-bs-toggle="dropdown">
@@ -132,103 +135,126 @@ if (isset($_SESSION['user_id'])) {
       </div>
 
       <li class="nav-item dropdown">
-  <a href="javascript:;" class="dropdown-toggle dropdown-toggle-nocaret" data-bs-toggle="dropdown">
-    <?php
-    // Start the session at the very beginning
-    if (session_status() === PHP_SESSION_NONE) {
-      session_start();
-    }
+        <a href="javascript:;" class="dropdown-toggle dropdown-toggle-nocaret" data-bs-toggle="dropdown">
+          <?php
+          // Start the session at the very beginning
+          if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+          }
 
-    $defaultImage = 'https://placehold.co/110x110/png';
-    $userImage = $defaultImage;
+          $defaultImage = 'https://placehold.co/110x110/png';
+          $userImage = $defaultImage;
 
-    if (isset($_SESSION['user_id'])) {
-      try {
-        // Get user data from database using MeekroDB
-        $user = DB::queryFirstRow(
-          "SELECT picture FROM users WHERE user_id = %i",
-          $_SESSION['user_id']
-        );
+          if (isset($_SESSION['user_id'])) {
+            try {
+              // Get user data from database using MeekroDB
+              $user = DB::queryFirstRow(
+                "SELECT picture FROM users WHERE user_id = %i",
+                $_SESSION['user_id']
+              );
 
-        if ($user && !empty($user['picture'])) {
-          // Assuming the path in the database is relative to your web root
-          $userImage = $user['picture'];
-        }
-      } catch (Exception $e) {
-        error_log("Profile image error: " . $e->getMessage());
-      }
-    }
-    ?>
-    <div class="position-relative">
-      <img src="<?= htmlspecialchars($userImage) ?>"
-        class="rounded-circle border-2 border-white"
-        width="40"
-        height="40"
-        alt="Profile Picture"
-        onerror="this.onerror=null;this.src='<?= htmlspecialchars($defaultImage) ?>'">
-      <span class="position-absolute bottom-0 end-0 bg-success rounded-circle border border-2 border-white" style="width: 10px; height: 10px;"></span>
-    </div>
-  </a>
-  <div class="dropdown-menu dropdown-menu-end p-0 shadow-lg" style="min-width: 250px; border: none;">
-    <div class="bg-primary text-white p-3 rounded-top">
-      <div class="d-flex align-items-center gap-3">
-        <img src="<?= htmlspecialchars($userImage) ?>"
-          class="rounded-circle border border-2 border-white"
-          width="60"
-          height="60"
-          alt="Profile Picture"
-          onerror="this.onerror=null;this.src='<?= htmlspecialchars($defaultImage) ?>'">
-        <div>
-          <h6 class="mb-0 fw-semibold text-truncate" style="max-width: 160px;"><?= ucfirst($_SESSION['user_name']) ?></h6>
-          <small class="opacity-75"><?= $_SESSION['user_email'] ?? '' ?></small>
+              if ($user && !empty($user['picture'])) {
+                // Assuming the path in the database is relative to your web root
+                $userImage = $user['picture'];
+              }
+            } catch (Exception $e) {
+              error_log("Profile image error: " . $e->getMessage());
+            }
+          }
+          ?>
+          <div class="position-relative">
+            <img src="<?= htmlspecialchars($userImage) ?>"
+              class="rounded-circle border-2 border-white"
+              width="40"
+              height="40"
+              alt="Profile Picture"
+              onerror="this.onerror=null;this.src='<?= htmlspecialchars($defaultImage) ?>'">
+            <span class="position-absolute bottom-0 end-0 bg-success rounded-circle border border-2 border-white" style="width: 10px; height: 10px;"></span>
+          </div>
+        </a>
+        <div class="dropdown-menu dropdown-menu-end p-0 shadow-lg" style="min-width: 250px; border: none;">
+          <div class="bg-primary text-white p-3 rounded-top">
+            <div class="d-flex align-items-center gap-3">
+              <img src="<?= htmlspecialchars($userImage) ?>"
+                class="rounded-circle border border-2 border-white"
+                width="60"
+                height="60"
+                alt="Profile Picture"
+                onerror="this.onerror=null;this.src='<?= htmlspecialchars($defaultImage) ?>'">
+              <div>
+                <h6 class="mb-0 fw-semibold text-truncate" style="max-width: 160px;"><?= ucfirst($_SESSION['user_name']) ?></h6>
+                <small class="opacity-75"><?= $_SESSION['user_email'] ?? '' ?></small>
+              </div>
+            </div>
+          </div>
+
+          <div class="p-2">
+            <a class="dropdown-item d-flex align-items-center gap-3 px-3 py-2 rounded-2"
+              href="index.php?route=modules/profile/profile">
+              <div class="icon-box bg-light-primary rounded-circle p-2">
+                <i class="material-icons-outlined text-primary">person_outline</i>
+              </div>
+              <div>
+                <h6 class="mb-0">Profile</h6>
+                <small class="text-muted">View your profile</small>
+              </div>
+            </a>
+
+            <a class="dropdown-item d-flex align-items-center gap-3 px-3 py-2 rounded-2"
+              href="index.php?route=modules/settings">
+              <div class="icon-box bg-light-warning rounded-circle p-2">
+                <i class="material-icons-outlined text-warning">settings</i>
+              </div>
+              <div>
+                <h6 class="mb-0">Settings</h6>
+                <small class="text-muted">Account settings</small>
+              </div>
+            </a>
+          </div>
+
+          <div class="dropdown-divider m-0"></div>
+
+          <div class="p-2">
+            <a class="dropdown-item d-flex align-items-center gap-3 px-3 py-2 rounded-2 text-danger"
+              href="index.php?logout=1">
+              <div class="icon-box bg-light-danger rounded-circle p-2">
+                <i class="material-icons-outlined text-danger">power_settings_new</i>
+              </div>
+              <div>
+                <h6 class="mb-0">Logout</h6>
+                <small class="text-muted">Sign out from system</small>
+              </div>
+            </a>
+          </div>
         </div>
-      </div>
-    </div>
-    
-    <div class="p-2">
-      <a class="dropdown-item d-flex align-items-center gap-3 px-3 py-2 rounded-2"
-        href="index.php?route=modules/profile/profile">
-        <div class="icon-box bg-light-primary rounded-circle p-2">
-          <i class="material-icons-outlined text-primary">person_outline</i>
-        </div>
-        <div>
-          <h6 class="mb-0">Profile</h6>
-          <small class="text-muted">View your profile</small>
-        </div>
-      </a>
-      
-      <a class="dropdown-item d-flex align-items-center gap-3 px-3 py-2 rounded-2"
-        href="index.php?route=modules/settings">
-        <div class="icon-box bg-light-warning rounded-circle p-2">
-          <i class="material-icons-outlined text-warning">settings</i>
-        </div>
-        <div>
-          <h6 class="mb-0">Settings</h6>
-          <small class="text-muted">Account settings</small>
-        </div>
-      </a>
-    </div>
-    
-    <div class="dropdown-divider m-0"></div>
-    
-    <div class="p-2">
-      <a class="dropdown-item d-flex align-items-center gap-3 px-3 py-2 rounded-2 text-danger"
-        href="index.php?logout=1">
-        <div class="icon-box bg-light-danger rounded-circle p-2">
-          <i class="material-icons-outlined text-danger">power_settings_new</i>
-        </div>
-        <div>
-          <h6 class="mb-0">Logout</h6>
-          <small class="text-muted">Sign out from system</small>
-        </div>
-      </a>
-    </div>
-  </div>
-</li>
+      </li>
     </ul>
 
   </nav>
 </header>
+
+
+<!-- Notification Details Modal -->
+<div class="modal fade" id="notificationModal" tabindex="-1" aria-labelledby="notificationModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="notificationModalLabel">Notification Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="notificationModalBody">
+        Loading notification details...
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="viewTaskBtn" style="display:none;">View Task</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
 <!--end top header-->
 <script>
   function setActive(selectedItem) {
@@ -293,6 +319,7 @@ if (isset($_SESSION['user_id'])) {
   });
 </script>
 <script>
+  // Move these functions to global scope
 function loadNotifications() {
   fetch('ajax_helpers/get_notifications.php')
     .then(response => response.json())
@@ -367,28 +394,113 @@ function loadNotifications() {
 
       // Footer: Mark all as read (only show if there are unread)
       if (unread.length > 0) {
-  container.innerHTML += `
-    <div class="dropdown-footer text-center p-2 border-top">
-      <button onclick="viewAllNotifications()" class="btn btn-sm btn-primary w-100">
-        View All
-      </button>
-    </div>`;
-}
-})
-.catch(error => {
-  console.error('Error fetching notifications:', error);
-  document.getElementById('notification-list').innerHTML = `
-    <p class="text-muted px-3">Unable to load notifications.</p>`;
-});
+        container.innerHTML += `
+          <div class="dropdown-footer text-center p-2 border-top">
+            <button onclick="viewAllNotifications()" class="btn btn-sm btn-primary w-100">
+              View All
+            </button>
+          </div>`;
+      }
+    })
+    .catch(error => {
+      console.error('Error fetching notifications:', error);
+      document.getElementById('notification-list').innerHTML = `
+        <p class="text-muted px-3">Unable to load notifications.</p>`;
+    });
 }
 
-// Function to redirect to notifications page
 function viewAllNotifications() {
-  window.location.href = 'index.php?route=modules/notifications/notifications'; // Change this to your actual notifications page URL
+  window.location.href = 'index.php?route=modules/notifications/notifications';
 }
 
+function setupNotificationClickHandlers() {
+  document.getElementById('notification-list').addEventListener('click', function(e) {
+    const notificationItem = e.target.closest('.dropdown-item[data-id]');
+    if (notificationItem) {
+      e.preventDefault();
+      const notificationId = notificationItem.getAttribute('data-id');
 
-document.addEventListener('DOMContentLoaded', loadNotifications);
-setInterval(loadNotifications, 60000); // Auto-refresh every 60s
+      // Show loading state
+      document.getElementById('notificationModalBody').innerHTML = `
+        <div class="text-center py-3">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <p class="mt-2">Loading notification details...</p>
+        </div>`;
+
+      // Initialize modal
+      const modal = new bootstrap.Modal(document.getElementById('notificationModal'));
+      modal.show();
+
+      // Fetch notification details
+      fetch(`ajax_helpers/get_notification_details.php?id=${notificationId}`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            // Update modal content
+            document.getElementById('notificationModalBody').innerHTML = `
+              <div class="d-flex gap-3 mb-3">
+                <div class="icon-box bg-light-${data.is_read ? 'secondary' : 'info'} rounded-circle p-2">
+                  <i class="material-icons-outlined text-${data.is_read ? 'secondary' : 'info'}">notifications</i>
+                </div>
+                <div>
+                  <h6 class="mb-1">${data.message}</h6>
+                  <small class="text-muted">${data.created_at}</small>
+                </div>
+              </div>
+              ${data.details ? `<p class="mb-0">${data.details}</p>` : ''}`;
+
+            // Show view task button if there's a related task
+            const viewTaskBtn = document.getElementById('viewTaskBtn');
+            if (data.related_task_id) {
+              viewTaskBtn.style.display = 'block';
+              viewTaskBtn.onclick = function() {
+                window.location.href = `index.php?route=modules/tasks/view_task&task_id=${data.related_task_id}`;
+              };
+            } else {
+              viewTaskBtn.style.display = 'none';
+            }
+
+            // Mark as read if it was unread
+            if (!data.is_read) {
+              markNotificationAsRead(notificationId);
+            }
+          } else {
+            document.getElementById('notificationModalBody').innerHTML = `
+              <div class="alert alert-danger">${data.message || 'Failed to load notification details.'}</div>`;
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          document.getElementById('notificationModalBody').innerHTML = `
+            <div class="alert alert-danger">Error loading notification details.</div>`;
+        });
+    }
+  });
+}
+
+function markNotificationAsRead(notificationId) {
+  fetch('ajax_helpers/mark_notification_read.php', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: `id=${notificationId}`
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      loadNotifications();
+    }
+  })
+  .catch(error => console.error('Error:', error));
+}
+
+// Single DOMContentLoaded listener
+document.addEventListener('DOMContentLoaded', function() {
+  loadNotifications();
+  setupNotificationClickHandlers();
+  setInterval(loadNotifications, 60000); // Auto-refresh every 60s
+});
 </script>
-
