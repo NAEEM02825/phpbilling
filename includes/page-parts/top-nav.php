@@ -247,7 +247,6 @@ if (isset($_SESSION['user_id'])) {
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary" id="viewTaskBtn" style="display:none;">View Task</button>
       </div>
     </div>
   </div>
@@ -458,16 +457,6 @@ function setupNotificationClickHandlers() {
           </div>
           ${singleData.details ? `<p class="mb-0">${singleData.details}</p>` : ''}`;
 
-        // Handle view task button
-        const viewTaskBtn = document.getElementById('viewTaskBtn');
-        if (singleData.related_task_id) {
-          viewTaskBtn.style.display = 'block';
-          viewTaskBtn.onclick = function() {
-            window.location.href = `index.php?route=modules/user_task/my_task&task_id=${singleData.related_task_id}`;
-          };
-        } else {
-          viewTaskBtn.style.display = 'none';
-        }
 
         // 3. If unread, mark as read (don't wait for this to complete)
         if (!singleData.is_read) {
