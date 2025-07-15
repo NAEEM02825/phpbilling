@@ -28,12 +28,13 @@ try {
             $assigneeId = $_POST['assignee_id'] ?? null;
             $projectId = $_POST['project_id'] ?? null; // <-- Add this line
             $query = "
-                SELECT t.*, p.name as project_name, u.name as assignee_name, 
-                       CONCAT(LEFT(u.name, 1), LEFT(u.last_name, 1)) as assignee_initials
-                FROM tasks t
-                LEFT JOIN projects p ON p.id = t.project_id
-                LEFT JOIN users u ON u.user_id = t.assignee_id
-            ";
+    SELECT t.*, p.name as project_name, 
+           CONCAT(u.first_name, ' ', u.last_name) as assignee_name, 
+           CONCAT(LEFT(u.first_name, 1), LEFT(u.last_name, 1)) as assignee_initials
+    FROM tasks t
+    LEFT JOIN projects p ON p.id = t.project_id
+    LEFT JOIN users u ON u.user_id = t.assignee_id
+";
 
             $where = [];
             $params = [];
@@ -81,9 +82,9 @@ try {
             ];
             break;
         case 'get_users':
-            $users = DB::query("SELECT user_id, CONCAT(name, ' ', last_name) as name 
-                       FROM users 
-                       WHERE role_id = 3");
+            $users = DB::query("SELECT user_id, CONCAT(first_name, ' ', last_name) as name 
+               FROM users 
+               WHERE role_id = 3");
             $response = [
                 'success' => true,
                 'users' => $users
@@ -93,13 +94,14 @@ try {
         case 'get_task_details':
             $taskId = $_POST['task_id'];
             $task = DB::queryFirstRow("
-                SELECT t.*, p.name as project_name, u.name as assignee_name, 
-                       CONCAT(LEFT(u.name, 1), LEFT(u.last_name, 1)) as assignee_initials
-                FROM tasks t
-                LEFT JOIN projects p ON p.id = t.project_id
-                LEFT JOIN users u ON u.user_id = t.assignee_id
-                WHERE t.id = %i
-            ", $taskId);
+    SELECT t.*, p.name as project_name, 
+           CONCAT(u.first_name, ' ', u.last_name) as assignee_name, 
+           CONCAT(LEFT(u.first_name, 1), LEFT(u.last_name, 1)) as assignee_initials
+    FROM tasks t
+    LEFT JOIN projects p ON p.id = t.project_id
+    LEFT JOIN users u ON u.user_id = t.assignee_id
+    WHERE t.id = %i
+", $taskId);
 
             // Initialize time_logs as empty array
             $timeLogs = [];
