@@ -392,7 +392,7 @@ function loadNotifications() {
         });
       }
 
-      // Footer: Mark all as read (only show if there are unread)
+      // Footer: view all as read (only show if there are unread)
       if (unread.length > 0) {
         container.innerHTML += `
           <div class="dropdown-footer text-center p-2 border-top">
@@ -414,11 +414,16 @@ function viewAllNotifications() {
 }
 
 function setupNotificationClickHandlers() {
-  document.getElementById('notification-list').addEventListener('click', function(e) {
+  document.getElementById('notification-list').addEventListener('click', async function(e) {
     const notificationItem = e.target.closest('.dropdown-item[data-id]');
     if (notificationItem) {
       e.preventDefault();
       const notificationId = notificationItem.getAttribute('data-id');
+      
+      if (!notificationId || notificationId === 'undefined') {
+        console.error('Notification ID is undefined');
+        return;
+      }
 
       // Show loading state
       document.getElementById('notificationModalBody').innerHTML = `
@@ -429,59 +434,61 @@ function setupNotificationClickHandlers() {
           <p class="mt-2">Loading notification details...</p>
         </div>`;
 
-      // Initialize modal
       const modal = new bootstrap.Modal(document.getElementById('notificationModal'));
       modal.show();
 
-      // Fetch notification details
-      fetch(`ajax_helpers/get_notification_details.php?id=${notificationId}`)
-        .then(response => response.json())
-        .then(data => {
-          if (data.success) {
-            // Update modal content
-            document.getElementById('notificationModalBody').innerHTML = `
-              <div class="d-flex gap-3 mb-3">
-                <div class="icon-box bg-light-${data.is_read ? 'secondary' : 'info'} rounded-circle p-2">
-                  <i class="material-icons-outlined text-${data.is_read ? 'secondary' : 'info'}">notifications</i>
-                </div>
-                <div>
-                  <h6 class="mb-1">${data.message}</h6>
-                  <small class="text-muted">${data.created_at}</small>
-                </div>
-              </div>
-              ${data.details ? `<p class="mb-0">${data.details}</p>` : ''}`;
+      try {
+        // 1. First fetch the single notification details
+        const singleResponse = await fetch(`ajax_helpers/single_notification.php?id=${encodeURIComponent(notificationId)}`);
+        if (!singleResponse.ok) throw new Error('Network response was not ok');
+        const singleData = await singleResponse.json();
 
-            // Show view task button if there's a related task
-            const viewTaskBtn = document.getElementById('viewTaskBtn');
-            if (data.related_task_id) {
-              viewTaskBtn.style.display = 'block';
-              viewTaskBtn.onclick = function() {
-                window.location.href = `index.php?route=modules/tasks/view_task&task_id=${data.related_task_id}`;
-              };
-            } else {
-              viewTaskBtn.style.display = 'none';
-            }
+        if (!singleData.success) throw new Error(singleData.message || 'Failed to load notification');
 
-            // Mark as read if it was unread
-            if (!data.is_read) {
-              markNotificationAsRead(notificationId);
-            }
-          } else {
-            document.getElementById('notificationModalBody').innerHTML = `
-              <div class="alert alert-danger">${data.message || 'Failed to load notification details.'}</div>`;
-          }
-        })
-        .catch(error => {
-          console.error('Error:', error);
-          document.getElementById('notificationModalBody').innerHTML = `
-            <div class="alert alert-danger">Error loading notification details.</div>`;
-        });
+        // 2. Update modal content immediately
+        document.getElementById('notificationModalBody').innerHTML = `
+          <div class="d-flex gap-3 mb-3">
+            <div class="icon-box bg-light-${singleData.is_read ? 'secondary' : 'info'} rounded-circle p-2">
+              <i class="material-icons-outlined text-${singleData.is_read ? 'secondary' : 'info'}">notifications</i>
+            </div>
+            <div>
+              <h6 class="mb-1">${singleData.message}</h6>
+              <small class="text-muted">${singleData.created_at}</small>
+            </div>
+          </div>
+          ${singleData.details ? `<p class="mb-0">${singleData.details}</p>` : ''}`;
+
+        // Handle view task button
+        const viewTaskBtn = document.getElementById('viewTaskBtn');
+        if (singleData.related_task_id) {
+          viewTaskBtn.style.display = 'block';
+          viewTaskBtn.onclick = function() {
+            window.location.href = `index.php?route=modules/user_task/my_task&task_id=${singleData.related_task_id}`;
+          };
+        } else {
+          viewTaskBtn.style.display = 'none';
+        }
+
+        // 3. If unread, mark as read (don't wait for this to complete)
+        if (!singleData.is_read) {
+          markNotificationAsRead(notificationId).then(() => {
+            // 4. Only refresh notifications after marking as read completes
+            loadNotifications();
+          });
+        }
+
+      } catch (error) {
+        console.error('Error:', error);
+        document.getElementById('notificationModalBody').innerHTML = `
+          <div class="alert alert-danger">${error.message || 'Error loading notification details.'}</div>`;
+      }
     }
   });
 }
 
+// Updated markNotificationAsRead to return a Promise
 function markNotificationAsRead(notificationId) {
-  fetch('ajax_helpers/mark_notification_read.php', {
+  return fetch('ajax_helpers/mark_notifications_read.php', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
@@ -489,14 +496,11 @@ function markNotificationAsRead(notificationId) {
     body: `id=${notificationId}`
   })
   .then(response => response.json())
-  .then(data => {
-    if (data.success) {
-      loadNotifications();
-    }
-  })
-  .catch(error => console.error('Error:', error));
+  .catch(error => {
+    console.error('Error:', error);
+    return {success: false};
+  });
 }
-
 // Single DOMContentLoaded listener
 document.addEventListener('DOMContentLoaded', function() {
   loadNotifications();
