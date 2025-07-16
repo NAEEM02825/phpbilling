@@ -6,8 +6,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         DB::startTransaction();
         
         // First validate all required fields
-        if (empty($_POST['client_id']) || empty($_POST['project_id']) || empty($_POST['task_ids'])) {
-            throw new Exception("Missing required fields");
+        $requiredFields = ['client_id', 'project_id', 'task_ids'];
+        foreach ($requiredFields as $field) {
+            if (empty($_POST[$field])) {
+                throw new Exception("Missing required field: $field");
+            }
         }
 
         // Get project details to check if it has a rate
@@ -39,20 +42,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             'client_id' => $_POST['client_id'],
             'project_id' => $_POST['project_id'],
             'invoice_number' => generateInvoiceNumber(),
-            'issue_date' => $_POST['issue_date'],
-            'due_date' => $_POST['due_date'],
+            'issue_date' => date('Y-m-d'), // Current date as issue date
+            'due_date' => date('Y-m-d', strtotime('+30 days')), // 30 days from now as due date
             'status' => 'pending',
             'total_amount' => $totalAmount,
             'notes' => $_POST['notes'] ?? '',
             'created_at' => DB::sqleval('NOW()')
         ]);
-        $invoiceId = DB::insertId(); // <-- Use insertId() to get the correct invoice ID
+        $invoiceId = DB::insertId();
         
         if (!$invoiceId) {
             throw new Exception("Failed to create invoice record");
         }
 
-        // Second pass to insert invoice items with the correct invoice_id
+        // Second pass to insert invoice items
         foreach ($taskIds as $taskId) {
             $task = DB::queryFirstRow("SELECT * FROM tasks WHERE id = %i", $taskId);
             
@@ -62,7 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             $amount = $quantity * $unitPrice;
             
             $itemId = DB::insert('invoice_items', [
-                'invoice_id' => $invoiceId, // <-- Use the correct invoice ID here
+                'invoice_id' => $invoiceId,
                 'task_id' => $taskId,
                 'description' => $task['title'],
                 'quantity' => $quantity,
@@ -91,4 +94,3 @@ function generateInvoiceNumber() {
     $lastNumber = $lastInvoice ? intval(preg_replace('/[^0-9]/', '', $lastInvoice['invoice_number'])) : 0;
     return 'INV-' . date('Y') . '-' . str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT);
 }
-?>

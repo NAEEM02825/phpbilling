@@ -31,17 +31,18 @@ try {
 
     // Only fetch completed tasks and get updated_at/created_at/hours
     $items = DB::query("
-        SELECT it.*, 
-               t.title AS task_title,
-               t.hours,
-               t.status,
-               t.updated_at,
-               t.created_at
-        FROM invoice_items it
-        LEFT JOIN tasks t ON it.task_id = t.id
-        WHERE it.invoice_id = %d
-          AND t.status = 'Completed'
-    ", $invoiceId);
+    SELECT it.*, 
+           t.title AS task_title,
+           t.details AS task_description, 
+           t.hours,
+           t.status,
+           t.updated_at,
+           t.created_at
+    FROM invoice_items it
+    LEFT JOIN tasks t ON it.task_id = t.id
+    WHERE it.invoice_id = %d
+      AND t.status = 'Completed'
+", $invoiceId);
 
     // Calculate total hours and total project rate
     $totalHours = 0;
@@ -75,12 +76,13 @@ try {
             'items' => array_map(function($item) {
                 // Prefer updated_at, fallback to created_at
                 $date = $item['updated_at'] ?: $item['created_at'];
-                return [
-                    'id' => $item['id'],
-                    'task_title' => $item['task_title'],
-                    'date' => $date,
-                    'hours' => $item['hours'],
-                ];
+               return [
+    'id' => $item['id'],
+    'task_title' => $item['task_title'],
+    'details' => $item['task_description'],
+    'date' => $date,
+    'hours' => $item['hours'],
+];
             }, $items),
         ]
     ]);
