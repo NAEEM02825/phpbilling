@@ -220,7 +220,6 @@ $page_title = "Notification Center";
                         <th class="px-6 py-3 text-left">Time</th>
                         <th class="px-6 py-3 text-left">Notification</th>
                         <th class="px-6 py-3 text-center">Status</th>
-                        <th class="px-6 py-3 text-center">Actions</th>
                     </tr>
                 </thead>
                 <tbody id="notifications-body">
@@ -449,19 +448,6 @@ function renderNotifications(notifications) {
                 <td class="px-6 py-4 whitespace-nowrap text-center" data-label="Status">
                     <span class="status-badge ${statusClass}">${statusText}</span>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-center action-buttons" data-label="Actions">
-                    <div class="flex justify-center gap-2">
-                        <button class="view-details action-btn text-blue-500 hover:text-blue-700" 
-                                data-id="${notification.id}" 
-                                title="View details">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                        <button class="delete-notification action-btn text-red-500 hover:text-red-700" 
-                                data-id="${notification.id}" 
-                                title="Delete">
-                            <i class="fas fa-trash-alt"></i>
-                        </button>
-                    </div>
                 </td>
             </tr>
         `;
