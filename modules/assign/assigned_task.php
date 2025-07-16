@@ -782,26 +782,27 @@ const invoiceManager = {
         </select>
     </td>
                     <td>
-                        <div class="d-flex gap-2">
-                            <a href="#" 
-                               class="btn btn-outline-secondary p-0 d-flex align-items-center justify-content-center action-view" 
-                               style="width:32px;height:32px;border-radius:6px;border:1px solid #dee2e6;" 
-                               title="View" onclick="viewTask(${task.id})">
-                                <i class="fas fa-eye"></i>
-                            </a>
-                            <a href="#" 
-                               class="btn btn-outline-primary p-0 d-flex align-items-center justify-content-center action-edit" 
-                               style="width:32px;height:32px;border-radius:6px;border:1px solid #3a4f8a;" 
-                               title="Edit" onclick="editTask(${task.id})">
-                                <i class="fas fa-edit"></i>
-                            </a>
-                            <a href="#" 
-                               class="btn btn-outline-danger p-0 d-flex align-items-center justify-content-center action-delete" 
-                               style="width:32px;height:32px;border-radius:6px;border:1px solid #dc3545;" 
-                               title="Delete" onclick="deleteTask(${task.id})">
-                                <i class="fas fa-trash"></i>
-                            </a>
-                        </div>
+                       <div class="d-flex gap-2">
+    <a href="modules/assign/view_task.php?task_id=${task.id}" 
+       class="btn btn-outline-secondary p-0 d-flex align-items-center justify-content-center action-view" 
+       style="width:32px;height:32px;border-radius:6px;border:1px solid #dee2e6;" 
+       title="View" onclick="viewTask(${task.id}); return false;"> <!-- return false prevents default link behavior -->
+        <i class="fas fa-eye"></i>
+    </a>
+    <!-- Edit & Delete buttons remain the same -->
+    <a href="#" 
+       class="btn btn-outline-primary p-0 d-flex align-items-center justify-content-center action-edit" 
+       style="width:32px;height:32px;border-radius:6px;border:1px solid #3a4f8a;" 
+       title="Edit" onclick="editTask(${task.id})">
+        <i class="fas fa-edit"></i>
+    </a>
+    <a href="#" 
+       class="btn btn-outline-danger p-0 d-flex align-items-center justify-content-center action-delete" 
+       style="width:32px;height:32px;border-radius:6px;border:1px solid #dc3545;" 
+       title="Delete" onclick="deleteTask(${task.id})">
+        <i class="fas fa-trash"></i>
+    </a>
+</div>
                     </td>
                 `;
                 tbody.appendChild(row);
@@ -1304,16 +1305,6 @@ async function saveTask() {
         Swal.fire({
             title: 'View Project',
             text: 'Project details would be shown here',
-            icon: 'info',
-            confirmButtonColor: '#3a4f8a'
-        });
-    }
-
-    function viewTask(id) {
-        // Implement view task modal or redirect
-        Swal.fire({
-            title: 'View Task',
-            text: 'Task details would be shown here',
             icon: 'info',
             confirmButtonColor: '#3a4f8a'
         });
