@@ -170,116 +170,35 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Cancel button functionality
-        document.getElementById('cancelButton').addEventListener('click', function() {
-            Swal.fire({
-                title: 'Are you sure?',
-                text: 'You will lose any unsaved changes.',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Yes, cancel it!'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    window.location.href = 'tasks.php'; // Redirect to tasks page
-                }
-            });
-        });
-
-        // --- Populate Project Dropdown ---
+        // Fetch projects and users when page loads
         fetchProjects();
-        
-        // --- Populate Assignee Dropdown ---
         fetchUsers();
-
-        // Form submission handler
-        const form = document.getElementById('taskForm');
-        form.addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            // Validate required fields
-            if (!form.taskTitle.value.trim()) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'Task Title is required',
-                    confirmButtonColor: '#3a4f8a'
-                });
-                return;
-            }
-            
-            if (!form.projectSelect.value) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'Project is required',
-                    confirmButtonColor: '#3a4f8a'
-                });
-                return;
-            }
-
-            // Show loading indicator
-            Swal.fire({
-                title: 'Creating Task...',
-                html: 'Please wait while we save your task.',
-                allowOutsideClick: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                }
-            });
-
-            try {
-                const formData = new FormData(form);
-                formData.append('action', 'create_task');
-                
-                const response = await fetch('ajax_helpers/task_handler.php', {
-                    method: 'POST',
-                    body: formData
-                });
-                
-                const data = await response.json();
-                
-                if (!data.success) {
-                    throw new Error(data.error || 'Failed to create task');
-                }
-                
-                // Show success message
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Success!',
-                    text: 'Task created successfully!',
-                    confirmButtonColor: '#3a4f8a',
-                    willClose: () => {
-                        form.reset();
-                        // Optionally redirect or refresh the page
-                        // window.location.href = 'tasks.php';
-                    }
-                });
-                
-            } catch (error) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'Error creating task: ' + error.message,
-                    confirmButtonColor: '#3a4f8a'
-                });
-            }
-        });
 
         // Function to fetch projects
         async function fetchProjects() {
             try {
+                console.log("Fetching projects...");
                 const response = await fetch('ajax_helpers/task_handler.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                     body: 'action=get_projects'
                 });
                 
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
                 const data = await response.json();
+                console.log("Projects data:", data);
+                
+                const projectSelect = document.getElementById('projectSelect');
                 
                 if (data.success && Array.isArray(data.data)) {
-                    const projectSelect = document.getElementById('projectSelect');
+                    // Clear existing options except the first one
+                    while (projectSelect.options.length > 1) {
+                        projectSelect.remove(1);
+                    }
+                    
                     data.data.forEach(project => {
                         const opt = document.createElement('option');
                         opt.value = project.id;
@@ -287,9 +206,10 @@
                         projectSelect.appendChild(opt);
                     });
                 } else {
-                    throw new Error(data.error || 'Failed to load projects');
+                    throw new Error(data.error || 'Invalid projects data format');
                 }
             } catch (error) {
+                console.error("Error fetching projects:", error);
                 Swal.fire({
                     icon: 'error',
                     title: 'Error',
@@ -302,16 +222,28 @@
         // Function to fetch users
         async function fetchUsers() {
             try {
+                console.log("Fetching users...");
                 const response = await fetch('ajax_helpers/task_handler.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                     body: 'action=get_users'
                 });
                 
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
                 const data = await response.json();
+                console.log("Users data:", data);
+                
+                const assigneeSelect = document.getElementById('assigneeSelect');
                 
                 if (data.success && Array.isArray(data.users)) {
-                    const assigneeSelect = document.getElementById('assigneeSelect');
+                    // Clear existing options except the first one
+                    while (assigneeSelect.options.length > 1) {
+                        assigneeSelect.remove(1);
+                    }
+                    
                     data.users.forEach(user => {
                         const opt = document.createElement('option');
                         opt.value = user.user_id;
@@ -319,9 +251,10 @@
                         assigneeSelect.appendChild(opt);
                     });
                 } else {
-                    throw new Error(data.error || 'Failed to load users');
+                    throw new Error(data.error || 'Invalid users data format');
                 }
             } catch (error) {
+                console.error("Error fetching users:", error);
                 Swal.fire({
                     icon: 'error',
                     title: 'Error',
