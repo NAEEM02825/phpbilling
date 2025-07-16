@@ -1,6 +1,5 @@
 <?php
 $page_title = "Notification Center";
-// Initial empty state - we'll load data via AJAX
 ?>
 
 <!-- Modern CSS Framework (Tailwind CDN for demo purposes) -->
@@ -448,38 +447,26 @@ function renderNotifications(notifications) {
                 <td class="px-6 py-4 whitespace-nowrap text-center" data-label="Status">
                     <span class="status-badge ${statusClass}">${statusText}</span>
                 </td>
-                </td>
             </tr>
         `;
     });
     
     notificationsBody.innerHTML = html;
     
-    // Add event listeners to new elements
-    document.querySelectorAll('.view-details').forEach(btn => {
-        btn.addEventListener('click', showNotificationDetails);
-    });
-    
-    document.querySelectorAll('.delete-notification').forEach(btn => {
-        btn.addEventListener('click', deleteNotification);
-    });
-    
+    // Add click event to rows to view details
     document.querySelectorAll('tbody tr').forEach(row => {
         row.addEventListener('click', function(e) {
             // Don't trigger if clicking on action buttons
             if (e.target.closest('button')) return;
             
             const notificationId = this.getAttribute('data-id');
-            markAsRead(notificationId, this);
+            showNotificationDetailsModal(notificationId);
         });
     });
 }
 
 // Show notification details in modal
-function showNotificationDetails(e) {
-    e.stopPropagation();
-    const notificationId = this.getAttribute('data-id');
-    
+function showNotificationDetailsModal(notificationId) {
     // Show loading state
     document.getElementById('notificationDetails').innerHTML = `
         <div class="flex justify-center items-center py-8">
@@ -543,6 +530,11 @@ function showNotificationDetails(e) {
                     </div>
                 `;
                 document.getElementById('notificationDetails').innerHTML = detailsHtml;
+                
+                // Mark as read when viewing if unread
+                if (!notification.is_read) {
+                    markAsRead(notificationId);
+                }
             } else {
                 document.getElementById('notificationDetails').innerHTML = `
                     <div class="bg-red-50 border-l-4 border-red-400 p-4">
@@ -603,12 +595,22 @@ function markAsRead(notificationId, rowElement = null) {
                     badge.classList.add('status-read');
                     badge.textContent = 'Read';
                 }
+            } else {
+                // Find the row by ID and update it
+                const row = document.querySelector(`tr[data-id="${notificationId}"]`);
+                if (row) {
+                    row.classList.remove('unread-row');
+                    const badge = row.querySelector('.status-badge');
+                    if (badge) {
+                        badge.classList.remove('status-unread');
+                        badge.classList.add('status-read');
+                        badge.textContent = 'Read';
+                    }
+                }
             }
             
-            // Update summary if we're not in a modal
-            if (!modalInstance._isShown) {
-                updateSummary(data.total_count, data.unread_count);
-            }
+            // Update summary
+            updateSummary(data.total_count, data.unread_count);
             
             showToast('Notification marked as read');
         } else {
@@ -656,57 +658,11 @@ function markAllAsRead() {
     });
 }
 
-// Delete a notification
-function deleteNotification(e) {
-    e.stopPropagation();
-    const notificationId = this.getAttribute('data-id');
-    
-    if (!confirm('Are you sure you want to delete this notification?')) return;
-    
-    const formData = new FormData();
-    formData.append('id', notificationId);
-    
-    fetch('ajax_helpers/ajax_get_notification.php', {
-        method: 'POST',
-        body: formData,
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest',
-            'X-Action': 'delete'
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            // Remove the row with animation
-            const row = document.querySelector(`tr[data-id="${notificationId}"]`);
-            if (row) {
-                row.classList.add('animate__animated', 'animate__fadeOut');
-                row.addEventListener('animationend', () => {
-                    row.remove();
-                    
-                    // Check if table is now empty
-                    if (document.querySelectorAll('#notifications-body tr').length === 0) {
-                        renderNotifications([]);
-                    }
-                });
-            }
-            
-            updateSummary(data.total_count, data.unread_count);
-            showToast('Notification deleted');
-        } else {
-            showError(data.message || 'Failed to delete notification');
-        }
-    })
-    .catch(error => {
-        showError('Error deleting notification: ' + error.message);
-    });
-}
-
 // Clear all notifications
 function clearAllNotifications() {
     if (!confirm('Are you sure you want to delete ALL notifications? This cannot be undone.')) return;
     
-    fetch('ajax_helpers/ajax_get_notification.php', {
+    fetch('ajax_helpers/Ajax_get_notifications.php', {
         method: 'POST',
         headers: {
             'X-Requested-With': 'XMLHttpRequest',
@@ -909,12 +865,6 @@ function createSkeletonLoader(rows = 5) {
                     <div class="skeleton-loader h-3 w-1/2 mt-2"></div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-center"><div class="skeleton-loader h-4 w-16 mx-auto"></div></td>
-                <td class="px-6 py-4 whitespace-nowrap text-center">
-                    <div class="flex justify-center gap-2">
-                        <div class="skeleton-loader h-6 w-6 rounded-full"></div>
-                        <div class="skeleton-loader h-6 w-6 rounded-full"></div>
-                    </div>
-                </td>
             </tr>
         `;
     }
