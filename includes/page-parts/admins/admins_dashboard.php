@@ -206,53 +206,6 @@
             <h5 class="mb-0">Financial Overview</h5>
         </div>
         <div class="card-body">
-            <div class="row mb-4">
-                <div class="col-md-3 col-6 mb-3">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-shrink-0 bg-primary bg-opacity-10 p-3 rounded">
-                            <i class="fas fa-file-invoice text-primary"></i>
-                        </div>
-                        <div class="flex-grow-1 ms-3">
-                            <h6 class="text-muted mb-1">Total Invoices</h6>
-                            <h4 class="mb-0" id="totalInvoices">0</h4>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3 col-6 mb-3">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-shrink-0 bg-success bg-opacity-10 p-3 rounded">
-                            <i class="fas fa-check-circle text-success"></i>
-                        </div>
-                        <div class="flex-grow-1 ms-3">
-                            <h6 class="text-muted mb-1">Paid</h6>
-                            <h4 class="mb-0" id="paidInvoices">0</h4>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3 col-6 mb-3">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-shrink-0 bg-warning bg-opacity-10 p-3 rounded">
-                            <i class="fas fa-exclamation-triangle text-warning"></i>
-                        </div>
-                        <div class="flex-grow-1 ms-3">
-                            <h6 class="text-muted mb-1">Pending</h6>
-                            <h4 class="mb-0" id="pendingInvoices">0</h4>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3 col-6 mb-3">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-shrink-0 bg-danger bg-opacity-10 p-3 rounded">
-                            <i class="fas fa-times-circle text-danger"></i>
-                        </div>
-                        <div class="flex-grow-1 ms-3">
-                            <h6 class="text-muted mb-1">Overdue</h6>
-                            <h4 class="mb-0" id="overdueInvoices">0</h4>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <div class="table-responsive">
                 <table class="table table-hover">
                     <thead class="table-light">
@@ -298,7 +251,10 @@
         border-bottom: none;
         padding-bottom: 1rem;
     }
-
+th{
+    background-color: #04665f !important;
+    color: white !important;
+}
     /* Card Styling */
     .card {
         border: none;
