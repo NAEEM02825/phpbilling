@@ -10,7 +10,7 @@
     <div class="btn-toolbar mb-2 mb-md-0">
         <!-- New Task Button -->
         <div class="btn-group me-2">
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newTaskModal">
+            <button type="button" class="btn btn-custom" data-bs-toggle="modal" data-bs-target="#newTaskModal">
                 <i class="fas fa-plus me-1"></i> New Task
             </button>
         </div>
@@ -231,7 +231,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" id="saveTask">Create Task</button>
+                <button type="button" class="btn btn-custom" id="saveTask">Create Task</button>
             </div>
         </div>
     </div>
@@ -357,10 +357,22 @@
         padding: 0.25rem 0.5rem;
         font-size: 0.75rem;
     }
-th{
-    background-color: #04665f !important;
-    color: white !important;
-}
+  th {
+        background-color: #04665f !important;
+        color: white !important;
+    }
+
+    .btn-custom {
+        background-color: #04665f;
+        color: white;
+        border: none;
+    }
+
+    .btn-custom:hover {
+        background-color: #034b45;
+        color: white;
+        /* darker shade for hover effect */
+    }
     .task-status-select option {
         padding: 0.5rem;
     }

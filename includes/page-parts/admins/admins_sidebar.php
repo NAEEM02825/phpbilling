@@ -142,9 +142,7 @@
                                 <div class="menu-title">Task Management</div>
                             </a>
                             <ul>
-                                <li><a href="index.php?route=modules/assign/assigned_task"><i class="material-icons-outlined icon">list_alt</i> My Tasks</a></li>
-                                <li><a href="index.php?route=modules/assign/add_task"><i class="material-icons-outlined icon">add_task</i> New Task</a></li>
-                            </ul>
+                                <li><a href="index.php?route=modules/assign/assigned_task"><i class="material-icons-outlined icon">list_alt</i> My Tasks</a></li>                            </ul>
                         </li>
 
                         <!-- Financial Section -->
