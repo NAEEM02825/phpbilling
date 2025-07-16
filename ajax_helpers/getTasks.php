@@ -20,7 +20,7 @@ try {
     $whereSql = implode(' AND ', $where);
 
     $query = "
-        SELECT t.*, p.name as project_name, u.name as assignee_name
+        SELECT t.*, p.name as project_name, u.user_name as assignee_name
         FROM tasks t
         LEFT JOIN projects p ON t.project_id = p.id
         LEFT JOIN users u ON t.assignee_id = u.user_id

@@ -87,7 +87,7 @@ $projects = DB::query("SELECT * FROM projects");
                             </tr>
                         </thead>
                         <tbody id="invoicesTableBody">
-                            <!-- Will be populated dynamically -->
+                            <!-- Will be populated dynaically -->
                         </tbody>
                     </table>
                 </div>
@@ -255,14 +255,14 @@ $projects = DB::query("SELECT * FROM projects");
 </div>
 <style>
     /* Ensure dropdown works in table cells */
-.table-responsive {
-    position: relative;
-}
+    .table-responsive {
+        position: relative;
+    }
 
-.dropdown-menu {
-    position: absolute;
-    z-index: 1000;
-}
+    .dropdown-menu {
+        position: absolute;
+        z-index: 1000;
+    }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 
@@ -558,7 +558,7 @@ $projects = DB::query("SELECT * FROM projects");
                     </div>
                 `;
 
-                   row.innerHTML = `
+                    row.innerHTML = `
     <td><div class="form-check"><input class="form-check-input" type="checkbox" value="${invoice.id}"></div></td>
     <td>${invoice.invoice_number}</td>
     <td>${invoice.client_name}</td>
@@ -681,8 +681,15 @@ $projects = DB::query("SELECT * FROM projects");
 
                 const submitBtn = form.querySelector('button[type="submit"]');
                 const originalBtnText = submitBtn.innerHTML;
-                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating...';
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
                 submitBtn.disabled = true;
+
+                // Clear any previous error messages
+                const errorElements = form.querySelectorAll('.is-invalid, .invalid-feedback');
+                errorElements.forEach(el => {
+                    el.classList.remove('is-invalid');
+                    el.nextElementSibling?.classList.remove('invalid-feedback');
+                });
 
                 fetch('ajax_helpers/create_New_Invoice.php', {
                         method: 'POST',
@@ -691,26 +698,58 @@ $projects = DB::query("SELECT * FROM projects");
                         },
                         body: new URLSearchParams(formData)
                     })
-                    .then(response => response.json())
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
                     .then(data => {
-                        if (data.success) {
-                            bootstrap.Modal.getInstance(document.getElementById('newInvoiceModal')).hide();
-                            this.loadInvoices();
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Success!',
-                                text: 'Invoice created successfully!',
-                                confirmButtonColor: '#3085d6',
-                            });
-                        } else {
+                        if (!data.success) {
+                            // Handle form validation errors
+                            if (data.errors) {
+                                Object.entries(data.errors).forEach(([field, message]) => {
+                                    const input = form.querySelector(`#${field}`);
+                                    if (input) {
+                                        input.classList.add('is-invalid');
+                                        const errorDiv = document.createElement('div');
+                                        errorDiv.classList.add('invalid-feedback');
+                                        errorDiv.textContent = message;
+                                        input.parentNode.appendChild(errorDiv);
+                                    }
+                                });
+                                throw new Error('Form validation failed');
+                            }
                             throw new Error(data.error || 'Failed to create invoice');
                         }
+
+                        // Success case
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('newInvoiceModal'));
+                        modal.hide();
+
+                        // Reset form
+                        form.reset();
+                        document.getElementById('tasksTableBody').innerHTML = '';
+                        document.getElementById('invoiceProject').disabled = true;
+
+                        // Show success message
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success!',
+                            text: 'Invoice created successfully!',
+                            confirmButtonColor: '#3085d6',
+                        });
+
+                        // Refresh invoices list
+                        this.currentPage = 1;
+                        this.loadInvoices();
                     })
                     .catch(error => {
+                        console.error('Error creating invoice:', error);
                         Swal.fire({
                             icon: 'error',
                             title: 'Error',
-                            text: 'Error creating invoice: ' + error.message,
+                            text: 'Error creating invoice: ' + (error.message || 'Please check your inputs and try again'),
                             confirmButtonColor: '#3085d6',
                         });
                     })
@@ -723,8 +762,9 @@ $projects = DB::query("SELECT * FROM projects");
             viewInvoice: function(invoiceId) {
                 fetch(`ajax_helpers/getInvoiceDetails.php?id=${invoiceId}`)
                     .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Network response was not ok');
+                        if (response.status === 401) {
+                            window.location.reload(); // Redirect to login if session expired
+                            return;
                         }
                         return response.json();
                     })
@@ -1045,64 +1085,64 @@ $projects = DB::query("SELECT * FROM projects");
                 });
             },
 
-           updateStatus: function(invoiceId, newStatus) {
-    console.log(`Attempting to update invoice ${invoiceId} to status ${newStatus}`); // Debug log
-    
-    Swal.fire({
-        title: 'Are you sure?',
-        text: `You are about to change this invoice's status to ${newStatus}`,
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Yes, update it!'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            console.log('User confirmed status change'); // Debug log
-            
-            fetch('ajax_helpers/updateInvoiceStatus.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: new URLSearchParams({
-                    invoice_id: invoiceId,
-                    new_status: newStatus
-                })
-            })
-            .then(response => {
-                console.log('Received response from server'); // Debug log
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log('Response data:', data); // Debug log
-                if (data.success) {
-                    this.loadInvoices();
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Updated!',
-                        text: 'Invoice status updated successfully',
-                        confirmButtonColor: '#3085d6',
-                    });
-                } else {
-                    throw new Error(data.error || 'Failed to update status');
-                }
-            })
-            .catch(error => {
-                console.error('Error updating status:', error); // Debug log
+            updateStatus: function(invoiceId, newStatus) {
+                console.log(`Attempting to update invoice ${invoiceId} to status ${newStatus}`); // Debug log
+
                 Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'Error updating status: ' + error.message,
+                    title: 'Are you sure?',
+                    text: `You are about to change this invoice's status to ${newStatus}`,
+                    icon: 'question',
+                    showCancelButton: true,
                     confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, update it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        console.log('User confirmed status change'); // Debug log
+
+                        fetch('ajax_helpers/updateInvoiceStatus.php', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/x-www-form-urlencoded',
+                                },
+                                body: new URLSearchParams({
+                                    invoice_id: invoiceId,
+                                    new_status: newStatus
+                                })
+                            })
+                            .then(response => {
+                                console.log('Received response from server'); // Debug log
+                                if (!response.ok) {
+                                    throw new Error(`HTTP error! status: ${response.status}`);
+                                }
+                                return response.json();
+                            })
+                            .then(data => {
+                                console.log('Response data:', data); // Debug log
+                                if (data.success) {
+                                    this.loadInvoices();
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Updated!',
+                                        text: 'Invoice status updated successfully',
+                                        confirmButtonColor: '#3085d6',
+                                    });
+                                } else {
+                                    throw new Error(data.error || 'Failed to update status');
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error updating status:', error); // Debug log
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error',
+                                    text: 'Error updating status: ' + error.message,
+                                    confirmButtonColor: '#3085d6',
+                                });
+                            });
+                    }
                 });
-            });
-        }
-    });
-},
+            },
 
             deleteInvoice: function(invoiceId) {
                 Swal.fire({
