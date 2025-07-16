@@ -357,7 +357,10 @@
         padding: 0.25rem 0.5rem;
         font-size: 0.75rem;
     }
-
+th{
+    background-color: #04665f !important;
+    color: white !important;
+}
     .task-status-select option {
         padding: 0.5rem;
     }

@@ -1,13 +1,17 @@
 <style>
     /* Modern sidebar styling with unique color palette */
     :root {
-        --primary-color: #04665f; /* Deep teal */
-        --secondary-color: #1a3a3a; /* Dark forest green */
-        --accent-color: #4ECDC4; /* Light teal */
+        --primary-color: #04665f;
+        /* Deep teal */
+        --secondary-color: #1a3a3a;
+        /* Dark forest green */
+        --accent-color: #4ECDC4;
+        /* Light teal */
         --text-color: #ffffff;
         --hover-gradient: linear-gradient(135deg, #1a3a3a, #04665f);
         --icon-color: #ffffff;
-        --submenu-indent: #0a5550; /* Slightly darker teal for hierarchy */
+        --submenu-indent: #0a5550;
+        /* Slightly darker teal for hierarchy */
     }
 
     /* Sidebar container styling */
@@ -24,7 +28,8 @@
     .logo-img {
         width: 140px !important;
         padding: 10px 0;
-        filter: brightness(0) invert(1); /* Makes logo white */
+        filter: brightness(0) invert(1);
+        /* Makes logo white */
     }
 
     /* Menu items */
@@ -71,13 +76,16 @@
     }
 
     /* Active menu indicator */
-    .metismenu .mm-active > a {
+    .metismenu .mm-active>a {
         background: var(--hover-gradient) !important;
         box-shadow: inset 3px 0 0 var(--accent-color);
     }
 
     /* Smooth transitions */
-    .metismenu, .metismenu ul, .metismenu li, .metismenu a {
+    .metismenu,
+    .metismenu ul,
+    .metismenu li,
+    .metismenu a {
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 

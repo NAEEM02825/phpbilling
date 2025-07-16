@@ -176,7 +176,9 @@
                             </tr>
                         </thead>
                         <tbody id="recentTasksTable">
-                            <tr><td colspan="4" class="text-muted">Loading tasks...</td></tr>
+                            <tr>
+                                <td colspan="4" class="text-muted">Loading tasks...</td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -220,7 +222,9 @@
                         </tr>
                     </thead>
                     <tbody id="invoicesTable">
-                        <tr><td colspan="7" class="text-muted">Loading invoices...</td></tr>
+                        <tr>
+                            <td colspan="7" class="text-muted">Loading invoices...</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -251,10 +255,12 @@
         border-bottom: none;
         padding-bottom: 1rem;
     }
-th{
-    background-color: #04665f !important;
-    color: white !important;
-}
+
+    th {
+        background-color: #04665f !important;
+        color: white !important;
+    }
+
     /* Card Styling */
     .card {
         border: none;
@@ -378,135 +384,150 @@ th{
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <script>
-// Global variables
-let taskActivityChart;
-let taskDistributionChart;
-let currentTimePeriod = 'week';
+    // Global variables
+    let taskActivityChart;
+    let taskDistributionChart;
+    let currentTimePeriod = 'week';
 
-// Document ready function
-$(document).ready(function() {
-    // Initialize charts with empty data
-    initializeCharts();
+    // Document ready function
+    $(document).ready(function() {
+        // Initialize charts with empty data
+        initializeCharts();
 
-    // Fetch all data for dashboard
-    fetchDashboardData();
-});
+        // Fetch all data for dashboard
+        fetchDashboardData();
+    });
 
-// Initialize charts
-function initializeCharts() {
-    // Task Activity Chart (Line Chart)
-    const taskActivityCtx = document.getElementById('taskActivityChart').getContext('2d');
-    taskActivityChart = new Chart(taskActivityCtx, {
-        type: 'line',
-        data: {
-            labels: [],
-            datasets: [{
-                label: 'Tasks Completed',
-                data: [],
-                borderColor: 'rgba(75, 192, 192, 1)',
-                backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                tension: 0.3,
-                fill: true
+    // Initialize charts
+    function initializeCharts() {
+        // Task Activity Chart (Line Chart)
+        const taskActivityCtx = document.getElementById('taskActivityChart').getContext('2d');
+        taskActivityChart = new Chart(taskActivityCtx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                        label: 'Tasks Completed',
+                        data: [],
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        tension: 0.3,
+                        fill: true
+                    },
+                    {
+                        label: 'Tasks Created',
+                        data: [],
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        tension: 0.3,
+                        fill: true
+                    }
+                ]
             },
-            {
-                label: 'Tasks Created',
-                data: [],
-                borderColor: 'rgba(54, 162, 235, 1)',
-                backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                tension: 0.3,
-                fill: true
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { position: 'top' },
-                tooltip: { mode: 'index', intersect: false }
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top'
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 5
+                        }
+                    }
+                }
+            }
+        });
+
+        // Task Distribution Chart (Doughnut Chart)
+        const taskDistributionCtx = document.getElementById('taskDistributionChart').getContext('2d');
+        taskDistributionChart = new Chart(taskDistributionCtx, {
+            type: 'doughnut',
+            data: {
+                labels: [],
+                datasets: [{
+                    data: [],
+                    backgroundColor: [],
+                    borderColor: '#fff',
+                    borderWidth: 1
+                }]
             },
-            scales: {
-                y: { beginAtZero: true, ticks: { stepSize: 5 } }
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                cutout: '70%'
             }
-        }
-    });
+        });
+    }
 
-    // Task Distribution Chart (Doughnut Chart)
-    const taskDistributionCtx = document.getElementById('taskDistributionChart').getContext('2d');
-    taskDistributionChart = new Chart(taskDistributionCtx, {
-        type: 'doughnut',
-        data: {
-            labels: [],
-            datasets: [{
-                data: [],
-                backgroundColor: [],
-                borderColor: '#fff',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            cutout: '70%'
-        }
-    });
-}
+    // Fetch all dashboard data
+    function fetchDashboardData() {
+        fetchTaskStats();
+        fetchRecentTasks();
+        fetchActiveProjects();
+        fetchInvoiceStats();
+        fetchRecentInvoices();
+        updateTaskActivityChart(currentTimePeriod);
+        updateTaskDistributionChart();
+    }
 
-// Fetch all dashboard data
-function fetchDashboardData() {
-    fetchTaskStats();
-    fetchRecentTasks();
-    fetchActiveProjects();
-    fetchInvoiceStats();
-    fetchRecentInvoices();
-    updateTaskActivityChart(currentTimePeriod);
-    updateTaskDistributionChart();
-}
+    // Fetch task statistics
+    function fetchTaskStats() {
+        $.ajax({
+            url: 'ajax_helpers/dashboard_task_status.php',
+            method: 'GET',
+            dataType: 'json',
+            success: function(data) {
+                if (data && data.success) {
+                    $('#totalTasks').text(data.total_tasks || 0);
+                    $('#completedTasks').text(data.completed_tasks || 0);
+                    $('#pendingTasks').text(data.pending_tasks || 0);
+                    $('#inProgressTasks').text(data.in_progress_tasks || 0);
 
-// Fetch task statistics
-function fetchTaskStats() {
-    $.ajax({
-        url: 'ajax_helpers/dashboard_task_status.php',
-        method: 'GET',
-        dataType: 'json',
-        success: function(data) {
-            if (data && data.success) {
-                $('#totalTasks').text(data.total_tasks || 0);
-                $('#completedTasks').text(data.completed_tasks || 0);
-                $('#pendingTasks').text(data.pending_tasks || 0);
-                $('#inProgressTasks').text(data.in_progress_tasks || 0);
-
-                // Update progress bars
-                const total = data.total_tasks > 0 ? data.total_tasks : 1;
-                $('#totalTasksProgress').css('width', '100%').attr('aria-valuenow', 100);
-                $('#completedTasksProgress').css('width', (data.completed_tasks / total * 100) + '%').attr('aria-valuenow', data.completed_tasks);
-                $('#pendingTasksProgress').css('width', (data.pending_tasks / total * 100) + '%').attr('aria-valuenow', data.pending_tasks);
-                $('#inProgressTasksProgress').css('width', (data.in_progress_tasks / total * 100) + '%').attr('aria-valuenow', data.in_progress_tasks);
-            } else {
-                console.error('Invalid task stats data format');
+                    // Update progress bars
+                    const total = data.total_tasks > 0 ? data.total_tasks : 1;
+                    $('#totalTasksProgress').css('width', '100%').attr('aria-valuenow', 100);
+                    $('#completedTasksProgress').css('width', (data.completed_tasks / total * 100) + '%').attr('aria-valuenow', data.completed_tasks);
+                    $('#pendingTasksProgress').css('width', (data.pending_tasks / total * 100) + '%').attr('aria-valuenow', data.pending_tasks);
+                    $('#inProgressTasksProgress').css('width', (data.in_progress_tasks / total * 100) + '%').attr('aria-valuenow', data.in_progress_tasks);
+                } else {
+                    console.error('Invalid task stats data format');
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error fetching task statistics:', error);
             }
-        },
-        error: function(xhr, status, error) {
-            console.error('Error fetching task statistics:', error);
-        }
-    });
-}
+        });
+    }
 
-// Fetch recent tasks
-function fetchRecentTasks() {
-    $.ajax({
-        url: 'ajax_helpers/dashboard_recent_tasks.php',
-        method: 'GET',
-        dataType: 'json',
-        success: function(data) {
-            let html = '';
-            if (data && data.success && data.tasks && data.tasks.length > 0) {
-                data.tasks.forEach(task => {
-                    const checked = task.status === 'completed' ? 'checked' : '';
-                    const statusClass = getStatusClass(task.status);
-                    const statusText = getStatusText(task.status);
+    // Fetch recent tasks
+    function fetchRecentTasks() {
+        $.ajax({
+            url: 'ajax_helpers/dashboard_recent_tasks.php',
+            method: 'GET',
+            dataType: 'json',
+            success: function(data) {
+                let html = '';
+                if (data && data.success && data.tasks && data.tasks.length > 0) {
+                    data.tasks.forEach(task => {
+                        const checked = task.status === 'completed' ? 'checked' : '';
+                        const statusClass = getStatusClass(task.status);
+                        const statusText = getStatusText(task.status);
 
-                    html += `
+                        html += `
                         <tr>
                             <td>
                                 <div class="d-flex align-items-center">
@@ -521,68 +542,68 @@ function fetchRecentTasks() {
                             <td><span class="badge ${statusClass}">${statusText}</span></td>
                         </tr>
                     `;
+                    });
+                } else {
+                    html = '<tr><td colspan="4" class="text-muted">No tasks found</td></tr>';
+                }
+                $('#recentTasksTable').html(html);
+
+                // Add event listeners to checkboxes
+                $('.task-checkbox').change(function() {
+                    const taskId = $(this).data('task-id');
+                    const isCompleted = $(this).is(':checked');
+                    updateTaskStatus(taskId, isCompleted);
                 });
-            } else {
-                html = '<tr><td colspan="4" class="text-muted">No tasks found</td></tr>';
+            },
+            error: function(xhr, status, error) {
+                console.error('Error fetching recent tasks:', error);
+                $('#recentTasksTable').html('<tr><td colspan="4" class="text-danger">Error loading tasks</td></tr>');
             }
-            $('#recentTasksTable').html(html);
+        });
+    }
 
-            // Add event listeners to checkboxes
-            $('.task-checkbox').change(function() {
-                const taskId = $(this).data('task-id');
-                const isCompleted = $(this).is(':checked');
-                updateTaskStatus(taskId, isCompleted);
-            });
-        },
-        error: function(xhr, status, error) {
-            console.error('Error fetching recent tasks:', error);
-            $('#recentTasksTable').html('<tr><td colspan="4" class="text-danger">Error loading tasks</td></tr>');
-        }
-    });
-}
+    // Update task status
+    function updateTaskStatus(taskId, isCompleted) {
+        $.ajax({
+            url: 'ajax_helpers/update_task_status.php',
+            method: 'POST',
+            data: {
+                task_id: taskId,
+                status: isCompleted ? 'completed' : 'pending'
+            },
+            success: function() {
+                fetchTaskStats(); // Refresh stats
+                fetchRecentTasks(); // Refresh task list
+            },
+            error: function(xhr, status, error) {
+                console.error('Error updating task status:', error);
+            }
+        });
+    }
 
-// Update task status
-function updateTaskStatus(taskId, isCompleted) {
-    $.ajax({
-        url: 'ajax_helpers/update_task_status.php',
-        method: 'POST',
-        data: {
-            task_id: taskId,
-            status: isCompleted ? 'completed' : 'pending'
-        },
-        success: function() {
-            fetchTaskStats(); // Refresh stats
-            fetchRecentTasks(); // Refresh task list
-        },
-        error: function(xhr, status, error) {
-            console.error('Error updating task status:', error);
-        }
-    });
-}
+    // Fetch active projects
+    function fetchActiveProjects() {
+        $.ajax({
+            url: 'ajax_helpers/dashboard_active_projects.php',
+            method: 'GET',
+            dataType: 'json',
+            success: function(data) {
+                let html = '';
+                if (data && data.success && data.data && data.data.length > 0) {
+                    // Limit to 5 projects for the dashboard
+                    const projectsToShow = data.data.slice(0, 5);
 
-// Fetch active projects
-function fetchActiveProjects() {
-    $.ajax({
-        url: 'ajax_helpers/dashboard_active_projects.php',
-        method: 'GET',
-        dataType: 'json',
-        success: function(data) {
-            let html = '';
-            if (data && data.success && data.data && data.data.length > 0) {
-                // Limit to 5 projects for the dashboard
-                const projectsToShow = data.data.slice(0, 5);
+                    projectsToShow.forEach(project => {
+                        const createdDate = new Date(project.created_at);
+                        const now = new Date();
+                        const diffDays = Math.floor((now - createdDate) / (1000 * 60 * 60 * 24));
+                        const lastUpdated = diffDays === 0 ? 'today' : `${diffDays} days ago`;
 
-                projectsToShow.forEach(project => {
-                    const createdDate = new Date(project.created_at);
-                    const now = new Date();
-                    const diffDays = Math.floor((now - createdDate) / (1000 * 60 * 60 * 24));
-                    const lastUpdated = diffDays === 0 ? 'today' : `${diffDays} days ago`;
+                        const category = project.category || 'web';
+                        const iconClass = getProjectIcon(category);
+                        const iconColor = getProjectColor(category);
 
-                    const category = project.category || 'web';
-                    const iconClass = getProjectIcon(category);
-                    const iconColor = getProjectColor(category);
-
-                    html += `
+                        html += `
                     <div class="list-group-item">
                         <div class="d-flex align-items-center">
                             <div class="flex-shrink-0">
@@ -608,54 +629,56 @@ function fetchActiveProjects() {
                         </div>
                     </div>
                     `;
-                });
-            } else {
-                html = '<div class="list-group-item text-muted">No active projects found</div>';
+                    });
+                } else {
+                    html = '<div class="list-group-item text-muted">No active projects found</div>';
+                }
+                $('#activeProjectsList').html(html);
+            },
+            error: function(xhr, status, error) {
+                console.error('Error fetching active projects:', error);
+                $('#activeProjectsList').html('<div class="list-group-item text-danger">Error loading projects</div>');
             }
-            $('#activeProjectsList').html(html);
-        },
-        error: function(xhr, status, error) {
-            console.error('Error fetching active projects:', error);
-            $('#activeProjectsList').html('<div class="list-group-item text-danger">Error loading projects</div>');
-        }
-    });
-}
+        });
+    }
 
-// Fetch invoice statistics
-function fetchInvoiceStats() {
-    $.ajax({
-        url: 'ajax_helpers/dashboard_invoice_stats.php',
-        method: 'GET',
-        dataType: 'json',
-        success: function(data) {
-            if (data && data.success) {
-                $('#totalInvoices').text(data.total_invoices || 0);
-                $('#paidInvoices').text(data.paid_invoices || 0);
-                $('#pendingInvoices').text(data.pending_invoices || 0);
-                $('#overdueInvoices').text(data.overdue_invoices || 0);
+    // Fetch invoice statistics
+    function fetchInvoiceStats() {
+        $.ajax({
+            url: 'ajax_helpers/dashboard_invoice_stats.php',
+            method: 'GET',
+            dataType: 'json',
+            success: function(data) {
+                if (data && data.success) {
+                    $('#totalInvoices').text(data.total_invoices || 0);
+                    $('#paidInvoices').text(data.paid_invoices || 0);
+                    $('#pendingInvoices').text(data.pending_invoices || 0);
+                    $('#overdueInvoices').text(data.overdue_invoices || 0);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error fetching invoice stats:', error);
             }
-        },
-        error: function(xhr, status, error) {
-            console.error('Error fetching invoice stats:', error);
-        }
-    });
-}
+        });
+    }
 
-// Fetch recent invoices
-function fetchRecentInvoices(limit = 5) {
-    $.ajax({
-        url: 'ajax_helpers/dashboard_recent_invoices.php',
-        method: 'GET',
-        dataType: 'json',
-        data: { limit: limit },
-        success: function(response) {
-            let html = '';
-            if (response && response.success && response.invoices && response.invoices.length > 0) {
-                response.invoices.forEach(invoice => {
-                    const statusClass = getInvoiceStatusClass(invoice.status);
-                    const statusText = getInvoiceStatusText(invoice.status);
+    // Fetch recent invoices
+    function fetchRecentInvoices(limit = 5) {
+        $.ajax({
+            url: 'ajax_helpers/dashboard_recent_invoices.php',
+            method: 'GET',
+            dataType: 'json',
+            data: {
+                limit: limit
+            },
+            success: function(response) {
+                let html = '';
+                if (response && response.success && response.invoices && response.invoices.length > 0) {
+                    response.invoices.forEach(invoice => {
+                        const statusClass = getInvoiceStatusClass(invoice.status);
+                        const statusText = getInvoiceStatusText(invoice.status);
 
-                    html += `
+                        html += `
                     <tr>
                         <td>${invoice.invoice_number || 'N/A'}</td>
                         <td>${invoice.client_name || 'N/A'}</td>
@@ -670,205 +693,237 @@ function fetchRecentInvoices(limit = 5) {
                         </td>
                     </tr>
                     `;
-                });
-            } else {
-                html = '<tr><td colspan="7" class="text-muted">No invoices found</td></tr>';
+                    });
+                } else {
+                    html = '<tr><td colspan="7" class="text-muted">No invoices found</td></tr>';
+                }
+                $('#invoicesTable').html(html);
+            },
+            error: function(xhr, status, error) {
+                console.error('Error fetching recent invoices:', error);
+                $('#invoicesTable').html('<tr><td colspan="7" class="text-danger">Error loading invoices</td></tr>');
             }
-            $('#invoicesTable').html(html);
-        },
-        error: function(xhr, status, error) {
-            console.error('Error fetching recent invoices:', error);
-            $('#invoicesTable').html('<tr><td colspan="7" class="text-danger">Error loading invoices</td></tr>');
-        }
-    });
-}
+        });
+    }
 
-// View invoice details
-function viewInvoice(invoiceId) {
-    window.location.href = `index.php?route=modules/invoices/view&id=${invoiceId}`;
-}
+    // View invoice details
+    function viewInvoice(invoiceId) {
+        window.location.href = `index.php?route=modules/invoices/view&id=${invoiceId}`;
+    }
 
-// Update task activity chart based on time period
-function updateTaskActivityChart(period) {
-    currentTimePeriod = period;
+    // Update task activity chart based on time period
+    function updateTaskActivityChart(period) {
+        currentTimePeriod = period;
 
-    $.ajax({
-        url: 'ajax_helpers/dashboard_task_activity.php',
-        method: 'GET',
-        data: { period: period },
-        dataType: 'json',
-        success: function(data) {
-            if (data && data.success) {
-                taskActivityChart.data.labels = data.labels || [];
-                taskActivityChart.data.datasets[0].data = data.completed || [];
-                taskActivityChart.data.datasets[1].data = data.created || [];
-                taskActivityChart.update();
+        $.ajax({
+            url: 'ajax_helpers/dashboard_task_activity.php',
+            method: 'GET',
+            data: {
+                period: period
+            },
+            dataType: 'json',
+            success: function(data) {
+                if (data && data.success) {
+                    taskActivityChart.data.labels = data.labels || [];
+                    taskActivityChart.data.datasets[0].data = data.completed || [];
+                    taskActivityChart.data.datasets[1].data = data.created || [];
+                    taskActivityChart.update();
 
-                // Update dropdown button text
-                let periodText = 'This Week';
-                if (period === 'today') periodText = 'Today';
-                else if (period === 'month') periodText = 'This Month';
-                else if (period === 'year') periodText = 'This Year';
+                    // Update dropdown button text
+                    let periodText = 'This Week';
+                    if (period === 'today') periodText = 'Today';
+                    else if (period === 'month') periodText = 'This Month';
+                    else if (period === 'year') periodText = 'This Year';
 
-                $('#chartFilterDropdown').html(periodText);
+                    $('#chartFilterDropdown').html(periodText);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error fetching task activity data:', error);
             }
-        },
-        error: function(xhr, status, error) {
-            console.error('Error fetching task activity data:', error);
-        }
-    });
-}
+        });
+    }
 
-// Update task distribution chart
-function updateTaskDistributionChart() {
-    $.ajax({
-        url: 'ajax_helpers/dashboard_task_distribution.php',
-        method: 'GET',
-        dataType: 'json',
-        success: function(response) {
-            if (response && response.success) {
-                taskDistributionChart.data.labels = response.labels || [];
-                taskDistributionChart.data.datasets[0].data = response.data || [];
-                taskDistributionChart.data.datasets[0].backgroundColor = response.backgroundColors || [];
-                taskDistributionChart.update();
+    // Update task distribution chart
+    function updateTaskDistributionChart() {
+        $.ajax({
+            url: 'ajax_helpers/dashboard_task_distribution.php',
+            method: 'GET',
+            dataType: 'json',
+            success: function(response) {
+                if (response && response.success) {
+                    taskDistributionChart.data.labels = response.labels || [];
+                    taskDistributionChart.data.datasets[0].data = response.data || [];
+                    taskDistributionChart.data.datasets[0].backgroundColor = response.backgroundColors || [];
+                    taskDistributionChart.update();
 
-                // Update legend
-                updateTaskDistributionLegend(response);
+                    // Update legend
+                    updateTaskDistributionLegend(response);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error fetching task distribution data:', error);
             }
-        },
-        error: function(xhr, status, error) {
-            console.error('Error fetching task distribution data:', error);
-        }
-    });
-}
+        });
+    }
 
-// Update task distribution legend
-function updateTaskDistributionLegend(data) {
-    let html = '';
-    const total = data.data ? data.data.reduce((a, b) => a + b, 0) : 0;
+    // Update task distribution legend
+    function updateTaskDistributionLegend(data) {
+        let html = '';
+        const total = data.data ? data.data.reduce((a, b) => a + b, 0) : 0;
 
-    if (data.labels && data.labels.length > 0) {
-        data.labels.forEach((label, index) => {
-            const value = data.data ? data.data[index] || 0 : 0;
-            const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
-            const color = data.backgroundColors ? data.backgroundColors[index] || '#ccc' : '#ccc';
+        if (data.labels && data.labels.length > 0) {
+            data.labels.forEach((label, index) => {
+                const value = data.data ? data.data[index] || 0 : 0;
+                const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+                const color = data.backgroundColors ? data.backgroundColors[index] || '#ccc' : '#ccc';
 
-            html += `
+                html += `
                 <div class="d-flex align-items-center mb-2">
                     <span class="legend-color me-2" style="background-color:${color}; width:12px; height:12px; border-radius:50%;"></span>
                     <span class="small">${label}</span>
                     <span class="ms-auto fw-bold">${value} (${percentage}%)</span>
                 </div>
             `;
-        });
+            });
 
-        html += `
+            html += `
             <div class="d-flex align-items-center mt-2 pt-2 border-top">
                 <span class="small fw-bold">Total Tasks</span>
                 <span class="ms-auto fw-bold">${total}</span>
             </div>
         `;
-    } else {
-        html = '<div class="text-muted">No task distribution data available</div>';
+        } else {
+            html = '<div class="text-muted">No task distribution data available</div>';
+        }
+
+        $('#taskDistributionLegend').html(html);
     }
 
-    $('#taskDistributionLegend').html(html);
-}
-
-// Helper function to format dates
-function formatDate(dateString) {
-    if (!dateString) return 'N/A';
-    try {
-        const date = new Date(dateString);
-        return date.toLocaleDateString();
-    } catch (e) {
-        return 'N/A';
+    // Helper function to format dates
+    function formatDate(dateString) {
+        if (!dateString) return 'N/A';
+        try {
+            const date = new Date(dateString);
+            return date.toLocaleDateString();
+        } catch (e) {
+            return 'N/A';
+        }
     }
-}
 
-// Helper functions for status display
-function getStatusClass(status) {
-    switch (status) {
-        case 'completed': return 'bg-success';
-        case 'in_progress': return 'bg-primary';
-        case 'pending': return 'bg-warning';
-        case 'overdue': return 'bg-danger';
-        default: return 'bg-secondary';
+    // Helper functions for status display
+    function getStatusClass(status) {
+        switch (status) {
+            case 'completed':
+                return 'bg-success';
+            case 'in_progress':
+                return 'bg-primary';
+            case 'pending':
+                return 'bg-warning';
+            case 'overdue':
+                return 'bg-danger';
+            default:
+                return 'bg-secondary';
+        }
     }
-}
 
-function getStatusText(status) {
-    switch (status) {
-        case 'completed': return 'Completed';
-        case 'in_progress': return 'In Progress';
-        case 'pending': return 'Pending';
-        case 'overdue': return 'Overdue';
-        default: return status;
+    function getStatusText(status) {
+        switch (status) {
+            case 'completed':
+                return 'Completed';
+            case 'in_progress':
+                return 'In Progress';
+            case 'pending':
+                return 'Pending';
+            case 'overdue':
+                return 'Overdue';
+            default:
+                return status;
+        }
     }
-}
 
-function getInvoiceStatusClass(status) {
-    switch (status) {
-        case 'paid': return 'bg-success';
-        case 'sent': return 'bg-primary';
-        case 'pending': return 'bg-warning';
-        case 'overdue': return 'bg-danger';
-        default: return 'bg-secondary';
+    function getInvoiceStatusClass(status) {
+        switch (status) {
+            case 'paid':
+                return 'bg-success';
+            case 'sent':
+                return 'bg-primary';
+            case 'pending':
+                return 'bg-warning';
+            case 'overdue':
+                return 'bg-danger';
+            default:
+                return 'bg-secondary';
+        }
     }
-}
 
-function getInvoiceStatusText(status) {
-    switch (status) {
-        case 'paid': return 'Paid';
-        case 'sent': return 'Sent';
-        case 'pending': return 'Pending';
-        case 'overdue': return 'Overdue';
-        default: return status;
+    function getInvoiceStatusText(status) {
+        switch (status) {
+            case 'paid':
+                return 'Paid';
+            case 'sent':
+                return 'Sent';
+            case 'pending':
+                return 'Pending';
+            case 'overdue':
+                return 'Overdue';
+            default:
+                return status;
+        }
     }
-}
 
-function getProjectIcon(category) {
-    switch (category) {
-        case 'ecommerce': return 'fa-shopping-cart';
-        case 'mobile': return 'fa-mobile-alt';
-        case 'web': return 'fa-globe';
-        case 'dashboard': return 'fa-desktop';
-        default: return 'fa-project-diagram';
+    function getProjectIcon(category) {
+        switch (category) {
+            case 'ecommerce':
+                return 'fa-shopping-cart';
+            case 'mobile':
+                return 'fa-mobile-alt';
+            case 'web':
+                return 'fa-globe';
+            case 'dashboard':
+                return 'fa-desktop';
+            default:
+                return 'fa-project-diagram';
+        }
     }
-}
 
-function getProjectColor(category) {
-    switch (category) {
-        case 'ecommerce': return 'bg-primary bg-opacity-10 text-primary';
-        case 'mobile': return 'bg-info bg-opacity-10 text-info';
-        case 'web': return 'bg-success bg-opacity-10 text-success';
-        case 'dashboard': return 'bg-warning bg-opacity-10 text-warning';
-        default: return 'bg-secondary bg-opacity-10 text-secondary';
+    function getProjectColor(category) {
+        switch (category) {
+            case 'ecommerce':
+                return 'bg-primary bg-opacity-10 text-primary';
+            case 'mobile':
+                return 'bg-info bg-opacity-10 text-info';
+            case 'web':
+                return 'bg-success bg-opacity-10 text-success';
+            case 'dashboard':
+                return 'bg-warning bg-opacity-10 text-warning';
+            default:
+                return 'bg-secondary bg-opacity-10 text-secondary';
+        }
     }
-}
 
-function getProgressBarClass(percentage) {
-    if (percentage >= 80) return 'bg-success';
-    if (percentage >= 50) return 'bg-primary';
-    if (percentage >= 30) return 'bg-warning';
-    return 'bg-danger';
-}
+    function getProgressBarClass(percentage) {
+        if (percentage >= 80) return 'bg-success';
+        if (percentage >= 50) return 'bg-primary';
+        if (percentage >= 30) return 'bg-warning';
+        return 'bg-danger';
+    }
 
-// Change time period
-function changeTimePeriod(period) {
-    currentTimePeriod = period;
-    updateTaskActivityChart(period);
+    // Change time period
+    function changeTimePeriod(period) {
+        currentTimePeriod = period;
+        updateTaskActivityChart(period);
 
-    // Update dropdown button text
-    let periodText = 'This Week';
-    if (period === 'today') periodText = 'Today';
-    else if (period === 'month') periodText = 'This Month';
+        // Update dropdown button text
+        let periodText = 'This Week';
+        if (period === 'today') periodText = 'Today';
+        else if (period === 'month') periodText = 'This Month';
 
-    $('#timePeriodDropdown').html(`<i class="fas fa-calendar-alt me-1"></i> ${periodText}`);
-}
+        $('#timePeriodDropdown').html(`<i class="fas fa-calendar-alt me-1"></i> ${periodText}`);
+    }
 
-// Show custom range picker (placeholder)
-function showCustomRangePicker() {
-    alert('Custom range picker would be implemented here');
-}
+    // Show custom range picker (placeholder)
+    function showCustomRangePicker() {
+        alert('Custom range picker would be implemented here');
+    }
 </script>
