@@ -782,14 +782,13 @@ const invoiceManager = {
         </select>
     </td>
                     <td>
-                       <div class="d-flex gap-2">
-    <a href="modules/assign/view_task.php?task_id=${task.id}" 
-       class="btn btn-outline-secondary p-0 d-flex align-items-center justify-content-center action-view" 
-       style="width:32px;height:32px;border-radius:6px;border:1px solid #dee2e6;" 
-       title="View" onclick="viewTask(${task.id}); return false;"> <!-- return false prevents default link behavior -->
-        <i class="fas fa-eye"></i>
-    </a>
-    <!-- Edit & Delete buttons remain the same -->
+<div class="d-flex gap-2">
+   <a href="modules/assign/view_task.php?task_id=${task.id}" 
+   class="btn btn-outline-secondary p-0 d-flex align-items-center justify-content-center action-view" 
+   style="width:32px;height:32px;border-radius:6px;border:1px solid #dee2e6;" 
+   title="View">
+    <i class="fas fa-eye"></i>
+</a>
     <a href="#" 
        class="btn btn-outline-primary p-0 d-flex align-items-center justify-content-center action-edit" 
        style="width:32px;height:32px;border-radius:6px;border:1px solid #3a4f8a;" 
@@ -1308,5 +1307,10 @@ async function saveTask() {
             icon: 'info',
             confirmButtonColor: '#3a4f8a'
         });
+        function viewTask(taskId) {
+    // Open task in new tab or redirect
+    window.location.href = `index.php?module=assign&page=view_task&task_id=${taskId}`;
+    return false;
+}
     }
 </script>
