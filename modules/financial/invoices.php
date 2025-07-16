@@ -15,6 +15,7 @@ $projects = DB::query("SELECT * FROM projects");
 
     .btn-custom:hover {
         background-color: #034b45;
+        color: white;
         /* darker shade for hover effect */
     }
 </style>
@@ -74,7 +75,7 @@ $projects = DB::query("SELECT * FROM projects");
                 <input type="date" class="form-control" id="dateTo">
             </div>
             <div class="col-md-2 d-flex align-items-end">
-                <button type="submit" class="btn btn-primary w-100">Apply</button>
+                <button type="submit" class="btn btn-custom w-100">Apply</button>
             </div>
         </form>
     </div>
@@ -195,7 +196,7 @@ $projects = DB::query("SELECT * FROM projects");
                     </div>
 
                     <div class="d-flex justify-content-end mt-3">
-                        <button type="submit" class="btn btn-primary">Create Invoice</button>
+                        <button type="submit" class="btn btn-custom">Create Invoice</button>
                     </div>
                 </form>
             </div>

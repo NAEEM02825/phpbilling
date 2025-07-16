@@ -132,6 +132,19 @@ try {
     $error = $e->getMessage();
 }
 ?>
+<style>
+    .btn-custom {
+        background-color: #04665f;
+        color: white;
+        border: none;
+    }
+
+    .btn-custom:hover {
+        background-color: #034b45;
+        color: white;
+        /* darker shade for hover effect */
+    }
+</style>
 
 <!-- Main Content -->
 <div class="main-content app-content">
@@ -179,7 +192,7 @@ try {
                             class="img-thumbnail rounded-circle w-100 h-100"
                             onerror="this.src='https://placehold.co/150x150.png?text=<?= substr($formattedName, 0, 1) ?>'">
                         <input type="file" id="profilePicInput" name="profilePicInput" accept="image/*" style="display: none;">
-                        <label for="profilePicInput" class="position-absolute bottom-0 end-0 bg-primary text-white rounded-circle p-2" style="width: 40px; height: 40px; cursor: pointer;">
+                        <label for="profilePicInput" class="position-absolute bottom-0 end-0 btn-custom text-white rounded-circle p-2" style="width: 40px; height: 40px; cursor: pointer;">
                             <i class="fas fa-camera"></i>
                         </label>
                     </div>
@@ -187,10 +200,10 @@ try {
                     <!-- User Info -->
                     <h4 class="mb-1" id="displayName"><?= htmlspecialchars($formattedName) ?></h4>
                     <p class="text-muted mb-2" id="displayUsername">@<?= htmlspecialchars(isset($user['user_name']) ? $user['user_name'] : ($user['role'] ?? 'user')) ?></p>
-                    <span class="badge bg-primary mb-3"><?= htmlspecialchars($roleText) ?></span>
+                    <span class="badge btn-custom mb-3"><?= htmlspecialchars($roleText) ?></span>
                     <!-- Quick Actions -->
                     <div class="d-grid gap-2">
-                        <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                        <button type="button" class="btn btn-custom" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
                             <i class="fas fa-key me-2"></i> Change Password
                         </button>
                         <a href="#" class="btn btn-outline-secondary">
@@ -255,7 +268,7 @@ try {
                             <div class="col-12">
                                 <hr class="my-4">
                                 <div class="d-flex justify-content-end">
-                                    <button type="submit" class="btn btn-primary px-4">
+                                    <button type="submit" class="btn btn-custom px-4">
                                         <i class="fas fa-save me-2"></i> Save Changes
                                     </button>
                                 </div>

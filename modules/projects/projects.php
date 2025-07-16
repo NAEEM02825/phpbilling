@@ -6,7 +6,7 @@
     </div>
     <div class="btn-toolbar mb-2 mb-md-0">
         <div class="btn-group me-2">
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newProjectModal">
+            <button type="button" class="btn btn-custom" data-bs-toggle="modal" data-bs-target="#newProjectModal">
                 <i class="fas fa-plus me-1"></i> New Project
             </button>
         </div>
@@ -63,11 +63,6 @@
         </button>
     </li>
 </ul>
-
-<!-- Project Content -->
-<!-- Projects Page Header (same as before) -->
-<!-- Week Information (same as before) -->
-<!-- Project Tabs (same as before) -->
 
 <!-- Project Content -->
 <div class="tab-content" id="projectTabsContent">
@@ -226,7 +221,7 @@
                         </div>
 
                         <div class="col-12">
-                            <button type="submit" class="btn btn-primary">Create Project</button>
+                            <button type="submit" class="btn btn-custom">Create Project</button>
                         </div>
                     </div>
                 </form>
@@ -541,7 +536,7 @@ $('#projectForm').submit(function(e) {
                             <td>${rate}</td>
                             <td>${project.payment_cycle}</td>
                             <td>
-                                <button class="btn btn-sm btn-outline-primary view-tasks" 
+                                <button class="btn btn-sm btn-custom view-tasks" 
                                     data-bs-toggle="modal" data-bs-target="#taskModal"
                                     data-project-id="${project.id}"
                                     data-project-name="${project.name}">
@@ -949,7 +944,22 @@ $('#projectForm').submit(function(e) {
         background-color: transparent;
         border-bottom-color: #3a4f8a;
     }
+  th {
+        background-color: #04665f !important;
+        color: white !important;
+    }
 
+    .btn-custom {
+        background-color: #04665f;
+        color: white;
+        border: none;
+    }
+
+    .btn-custom:hover {
+        background-color: #034b45;
+        color: white;
+        /* darker shade for hover effect */
+    }
     /* Badge Styles */
     .badge {
         font-weight: 500;

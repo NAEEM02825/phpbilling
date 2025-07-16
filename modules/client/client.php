@@ -12,7 +12,7 @@
     </div>
     <div class="btn-toolbar mb-2 mb-md-0">
         <div class="btn-group me-2">
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addClientModal">
+            <button type="button" class="btn btn-custom" data-bs-toggle="modal" data-bs-target="#addClientModal">
                 <i class="fas fa-plus me-1"></i> New Client
             </button>
         </div>
@@ -76,7 +76,7 @@
                         </select>
                     </div>
                     <div class="col-md-3 d-flex align-items-end">
-                        <button type="submit" class="btn btn-primary w-100">Apply Filters</button>
+                        <button type="submit" class="btn btn-custom w-100">Apply Filters</button>
                     </div>
                 </form>
             </div>
@@ -169,7 +169,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" id="saveClientBtn">Save Client</button>
+                <button type="button" class="btn btn-custom" id="saveClientBtn">Save Client</button>
             </div>
         </div>
     </div>
@@ -241,7 +241,22 @@
         padding: 0.35em 0.65em;
         font-size: 0.75em;
     }
+  th {
+        background-color: #04665f !important;
+        color: white !important;
+    }
 
+    .btn-custom {
+        background-color: #04665f;
+        color: white;
+        border: none;
+    }
+
+    .btn-custom:hover {
+        background-color: #034b45;
+        color: white;
+        /* darker shade for hover effect */
+    }
     .badge.bg-primary {
         background-color: #3a4f8a !important;
     }

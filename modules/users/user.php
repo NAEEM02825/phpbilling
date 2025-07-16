@@ -9,7 +9,7 @@
     </div>
     <div class="btn-toolbar mb-2 mb-md-0">
         <div class="btn-group me-2">
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUserModal">
+            <button type="button" class="btn btn-custom" data-bs-toggle="modal" data-bs-target="#addUserModal">
                 <i class="fas fa-user-plus me-1"></i> Add User
             </button>
         </div>
@@ -75,7 +75,7 @@
                         </select>
                     </div>
                     <div class="col-md-4 d-flex align-items-end gap-2">
-                        <button type="submit" class="btn btn-primary">Apply Filters</button>
+                        <button type="submit" class="btn btn-custom">Apply Filters</button>
                         <button type="button" id="resetFilters" class="btn btn-outline-secondary">Reset</button>
                     </div>
                 </form>
@@ -196,7 +196,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" id="submitAddUser">Add User</button>
+                <button type="button" class="btn btn-custom" id="submitAddUser">Add User</button>
             </div>
         </div>
     </div>
@@ -251,7 +251,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" id="submitEditUser">Update User</button>
+                <button type="button" class="btn btn-custom" id="submitEditUser">Update User</button>
             </div>
         </div>
     </div>
@@ -296,7 +296,22 @@
         color: #3a4f8a;
         border-bottom-color: #dee2e6;
     }
+  th {
+        background-color: #04665f !important;
+        color: white !important;
+    }
 
+    .btn-custom {
+        background-color: #04665f;
+        color: white;
+        border: none;
+    }
+
+    .btn-custom:hover {
+        background-color: #034b45;
+        color: white;
+        /* darker shade for hover effect */
+    }
     .nav-tabs .nav-link.active {
         color: #3a4f8a;
         background-color: transparent;
