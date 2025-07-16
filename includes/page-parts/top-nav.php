@@ -43,7 +43,17 @@ if (isset($_SESSION['user_id'])) {
     background-color: #f8f9fa !important;
     /* Slightly off-white for unread items if you want distinction */
   }
+.dropdown-footer .btn {
+  padding: 0.5rem;
+  font-size: 0.875rem;
+  background-color: #04665F;
+  color: white;
+  border: none;
+}
 
+.dropdown-footer .btn:hover {
+  background-color: #03524d;
+}
   @media (max-width: 575.98px) {
     .dropdown-notifications {
       width: 280px;
@@ -67,6 +77,15 @@ if (isset($_SESSION['user_id'])) {
       top: 0;
       right: -5px;
     }
+  }
+
+  .dropdown-footer {
+    background-color: #f8f9fa;
+  }
+
+  .dropdown-footer .btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
   }
 </style>
 <!--start header-->
@@ -319,45 +338,45 @@ if (isset($_SESSION['user_id'])) {
 </script>
 <script>
   // Move these functions to global scope
-function loadNotifications() {
-  fetch('ajax_helpers/get_notifications.php')
-    .then(response => response.json())
-    .then(data => {
-      const container = document.getElementById('notification-list');
-      const badge = document.querySelector('.notification-badge');
+  function loadNotifications() {
+    fetch('ajax_helpers/get_notifications.php')
+      .then(response => response.json())
+      .then(data => {
+        const container = document.getElementById('notification-list');
+        const badge = document.querySelector('.notification-badge');
 
-      container.innerHTML = ''; // Clear previous
+        container.innerHTML = ''; // Clear previous
 
-      // Handle badge display
-      if (data.unread_count > 0) {
-        badge.textContent = data.unread_count;
-        badge.style.display = 'inline-block';
-      } else {
-        badge.style.display = 'none';
-      }
+        // Handle badge display
+        if (data.unread_count > 0) {
+          badge.textContent = data.unread_count;
+          badge.style.display = 'inline-block';
+        } else {
+          badge.style.display = 'none';
+        }
 
-      // No notifications
-      if (!data.notifications || data.notifications.length === 0) {
-        container.innerHTML = `
+        // No notifications
+        if (!data.notifications || data.notifications.length === 0) {
+          container.innerHTML = `
           <div class="px-3 py-2 text-center text-muted small">
             No notifications yet.
           </div>`;
-        return;
-      }
+          return;
+        }
 
-      // Separate unread and read notifications
-      const unread = data.notifications.filter(item => item.is_read === "0");
-      const read = data.notifications.filter(item => item.is_read !== "0");
+        // Separate unread and read notifications
+        const unread = data.notifications.filter(item => item.is_read === "0");
+        const read = data.notifications.filter(item => item.is_read !== "0");
 
-      // Section: Unread
-      if (unread.length > 0) {
-        container.innerHTML += `
+        // Section: Unread
+        if (unread.length > 0) {
+          container.innerHTML += `
           <div class="dropdown-header text-dark fw-bold px-3 py-1 small">
             New
           </div>`;
 
-        unread.forEach(item => {
-          container.innerHTML += `
+          unread.forEach(item => {
+            container.innerHTML += `
             <a href="#" class="dropdown-item d-flex align-items-center gap-3 py-2 bg-light border-bottom" data-id="${item.id}">
               <div class="icon-box bg-light-info rounded-circle p-2">
                 <i class="material-icons-outlined text-info">notifications</i>
@@ -367,18 +386,18 @@ function loadNotifications() {
                 ${item.related_task_id ? `<p class="small text-muted mb-0">Task #${item.related_task_id}</p>` : ''}
               </div>
             </a>`;
-        });
-      }
+          });
+        }
 
-      // Section: Read
-      if (read.length > 0) {
-        container.innerHTML += `
+        // Section: Read
+        if (read.length > 0) {
+          container.innerHTML += `
           <div class="dropdown-header text-muted fw-bold px-3 py-1 small mt-2">
             Earlier
           </div>`;
 
-        read.forEach(item => {
-          container.innerHTML += `
+          read.forEach(item => {
+            container.innerHTML += `
             <a href="#" class="dropdown-item d-flex align-items-center gap-3 py-2 border-bottom" data-id="${item.id}">
               <div class="icon-box bg-light-secondary rounded-circle p-2">
                 <i class="material-icons-outlined text-secondary">notifications</i>
@@ -388,44 +407,51 @@ function loadNotifications() {
                 ${item.related_task_id ? `<p class="small text-muted mb-0">Task #${item.related_task_id}</p>` : ''}
               </div>
             </a>`;
-        });
-      }
-
-      // Footer: view all as read (only show if there are unread)
-      if (unread.length > 0) {
-        container.innerHTML += `
-          <div class="dropdown-footer text-center p-2 border-top">
-            <button onclick="viewAllNotifications()" class="btn btn-sm btn-primary w-100">
-              View All
-            </button>
-          </div>`;
-      }
-    })
-    .catch(error => {
-      console.error('Error fetching notifications:', error);
-      document.getElementById('notification-list').innerHTML = `
+          });
+        }
+if (unread.length > 0) {
+  const footer = document.createElement('div');
+  footer.className = 'dropdown-footer text-center p-2 border-top';
+  footer.innerHTML = `
+    <button onclick="viewAllNotifications()" class="btn btn-sm btn-primary w-100">
+    View All Notifications
+    </button>`;
+  container.appendChild(footer);
+}
+        // Footer: view all as read (only show if there are unread)
+   const footer = document.createElement('div');
+footer.className = 'dropdown-footer text-center p-2 border-top';
+footer.innerHTML = `
+  <button onclick="viewAllNotifications()" class="btn btn-sm btn-primary w-100">
+    View All Notifications
+  </button>`;
+container.appendChild(footer);
+      })
+      .catch(error => {
+        console.error('Error fetching notifications:', error);
+        document.getElementById('notification-list').innerHTML = `
         <p class="text-muted px-3">Unable to load notifications.</p>`;
-    });
-}
+      });
+  }
 
-function viewAllNotifications() {
-  window.location.href = 'index.php?route=modules/notifications/notifications';
-}
+  function viewAllNotifications() {
+    window.location.href = 'index.php?route=modules/notifications/notifications';
+  }
 
-function setupNotificationClickHandlers() {
-  document.getElementById('notification-list').addEventListener('click', async function(e) {
-    const notificationItem = e.target.closest('.dropdown-item[data-id]');
-    if (notificationItem) {
-      e.preventDefault();
-      const notificationId = notificationItem.getAttribute('data-id');
-      
-      if (!notificationId || notificationId === 'undefined') {
-        console.error('Notification ID is undefined');
-        return;
-      }
+  function setupNotificationClickHandlers() {
+    document.getElementById('notification-list').addEventListener('click', async function(e) {
+      const notificationItem = e.target.closest('.dropdown-item[data-id]');
+      if (notificationItem) {
+        e.preventDefault();
+        const notificationId = notificationItem.getAttribute('data-id');
 
-      // Show loading state
-      document.getElementById('notificationModalBody').innerHTML = `
+        if (!notificationId || notificationId === 'undefined') {
+          console.error('Notification ID is undefined');
+          return;
+        }
+
+        // Show loading state
+        document.getElementById('notificationModalBody').innerHTML = `
         <div class="text-center py-3">
           <div class="spinner-border text-primary" role="status">
             <span class="visually-hidden">Loading...</span>
@@ -433,19 +459,19 @@ function setupNotificationClickHandlers() {
           <p class="mt-2">Loading notification details...</p>
         </div>`;
 
-      const modal = new bootstrap.Modal(document.getElementById('notificationModal'));
-      modal.show();
+        const modal = new bootstrap.Modal(document.getElementById('notificationModal'));
+        modal.show();
 
-      try {
-        // 1. First fetch the single notification details
-        const singleResponse = await fetch(`ajax_helpers/single_notification.php?id=${encodeURIComponent(notificationId)}`);
-        if (!singleResponse.ok) throw new Error('Network response was not ok');
-        const singleData = await singleResponse.json();
+        try {
+          // 1. First fetch the single notification details
+          const singleResponse = await fetch(`ajax_helpers/single_notification.php?id=${encodeURIComponent(notificationId)}`);
+          if (!singleResponse.ok) throw new Error('Network response was not ok');
+          const singleData = await singleResponse.json();
 
-        if (!singleData.success) throw new Error(singleData.message || 'Failed to load notification');
+          if (!singleData.success) throw new Error(singleData.message || 'Failed to load notification');
 
-        // 2. Update modal content immediately
-        document.getElementById('notificationModalBody').innerHTML = `
+          // 2. Update modal content immediately
+          document.getElementById('notificationModalBody').innerHTML = `
           <div class="d-flex gap-3 mb-3">
             <div class="icon-box bg-light-${singleData.is_read ? 'secondary' : 'info'} rounded-circle p-2">
               <i class="material-icons-outlined text-${singleData.is_read ? 'secondary' : 'info'}">notifications</i>
@@ -458,42 +484,44 @@ function setupNotificationClickHandlers() {
           ${singleData.details ? `<p class="mb-0">${singleData.details}</p>` : ''}`;
 
 
-        // 3. If unread, mark as read (don't wait for this to complete)
-        if (!singleData.is_read) {
-          markNotificationAsRead(notificationId).then(() => {
-            // 4. Only refresh notifications after marking as read completes
-            loadNotifications();
-          });
-        }
+          // 3. If unread, mark as read (don't wait for this to complete)
+          if (!singleData.is_read) {
+            markNotificationAsRead(notificationId).then(() => {
+              // 4. Only refresh notifications after marking as read completes
+              loadNotifications();
+            });
+          }
 
-      } catch (error) {
-        console.error('Error:', error);
-        document.getElementById('notificationModalBody').innerHTML = `
+        } catch (error) {
+          console.error('Error:', error);
+          document.getElementById('notificationModalBody').innerHTML = `
           <div class="alert alert-danger">${error.message || 'Error loading notification details.'}</div>`;
+        }
       }
-    }
-  });
-}
+    });
+  }
 
-// Updated markNotificationAsRead to return a Promise
-function markNotificationAsRead(notificationId) {
-  return fetch('ajax_helpers/mark_notifications_read.php', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
-    body: `id=${notificationId}`
-  })
-  .then(response => response.json())
-  .catch(error => {
-    console.error('Error:', error);
-    return {success: false};
+  // Updated markNotificationAsRead to return a Promise
+  function markNotificationAsRead(notificationId) {
+    return fetch('ajax_helpers/mark_notifications_read.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `id=${notificationId}`
+      })
+      .then(response => response.json())
+      .catch(error => {
+        console.error('Error:', error);
+        return {
+          success: false
+        };
+      });
+  }
+  // Single DOMContentLoaded listener
+  document.addEventListener('DOMContentLoaded', function() {
+    loadNotifications();
+    setupNotificationClickHandlers();
+    setInterval(loadNotifications, 60000); // Auto-refresh every 60s
   });
-}
-// Single DOMContentLoaded listener
-document.addEventListener('DOMContentLoaded', function() {
-  loadNotifications();
-  setupNotificationClickHandlers();
-  setInterval(loadNotifications, 60000); // Auto-refresh every 60s
-});
 </script>

@@ -423,39 +423,47 @@
         $('input[name="type"]:checked').trigger('change');
 
         // Handle project form submission
-        $('#projectForm').submit(function(e) {
-            e.preventDefault();
+       // Handle project form submission
+$('#projectForm').submit(function(e) {
+    e.preventDefault();
 
-            const formData = $(this).serialize();
-            const editId = $(this).data('edit-id');
-            let url = 'ajax_helpers/ajax_add_projects.php?action=create';
+    const formData = $(this).serialize();
+    const editId = $(this).data('edit-id');
+    let url = 'ajax_helpers/ajax_add_projects.php?action=create';
 
-            if (editId) {
-                url = 'ajax_helpers/ajax_add_projects.php?action=update&project_id=' + editId;
+    if (editId) {
+        url = 'ajax_helpers/ajax_add_projects.php?action=update&project_id=' + editId;
+    }
+
+    $.ajax({
+        url: url,
+        type: 'POST',
+        data: formData,
+        dataType: 'json',
+        success: function(response) {
+            if (response.success) {
+                $('#newProjectModal').modal('hide');
+                $('#projectForm')[0].reset();
+                $('#projectForm').removeData('edit-id');
+                $('#newProjectModalLabel').text('Create New Project');
+                
+                // Instead of reloading individual tables, reload the entire page
+                window.location.reload();
+                
+                // Show success message (optional)
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: editId ? 'Project updated successfully!' : 'Project created successfully!',
+                    confirmButtonColor: '#3085d6',
+                });
             }
-
-            $.ajax({
-                url: url,
-                type: 'POST',
-                data: formData,
-                dataType: 'json',
-                success: function(response) {
-                    if (response.success) {
-                        $('#newProjectModal').modal('hide');
-                        $('#projectForm')[0].reset();
-                        $('#projectForm').removeData('edit-id');
-                        $('#newProjectModalLabel').text('Create New Project');
-                        loadProjects('all');
-                        loadProjects('SF');
-                        loadProjects('Other');
-                        alert(editId ? 'Project updated successfully!' : 'Project created successfully!');
-                    }
-                },
-                error: function(xhr) {
-                    alert('Error: ' + xhr.responseJSON.error);
-                }
-            });
-        });
+        },
+        error: function(xhr) {
+            alert('Error: ' + xhr.responseJSON.error);
+        }
+    });
+});
 
         // Handle task form submission
         $('#taskForm').submit(function(e) {

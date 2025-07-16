@@ -81,7 +81,7 @@
                 </form>
             </div>
         </div>
-        
+
         <!-- Client List -->
         <div class="card shadow-sm">
             <div class="card-body p-0">
@@ -356,9 +356,9 @@
             $.ajax({
                 url: 'ajax_helpers/client_handle.php',
                 type: 'GET',
-                data: { 
-                    action: 'get_client', 
-                    id: clientId 
+                data: {
+                    action: 'get_client',
+                    id: clientId
                 },
                 dataType: 'json',
                 beforeSend: function() {
@@ -572,54 +572,75 @@
         }
 
         // Main function to handle client save/update
-        function handleClientSave() {
-            // Show loading state
-            const $saveBtn = $('#saveClientBtn');
-            $saveBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...');
-            
-            const editId = $('#addClientForm').data('edit-id');
-            const formData = {
-                action: editId ? 'update_client' : 'add_client',
-                first_name: $('#clientFirstName').val().trim(),
-                last_name: $('#clientLastName').val().trim(),
-                email: $('#clientEmail').val().trim(),
-                phone: $('#clientPhone').val().trim(),
-                company: $('#clientCompany').val().trim(),
-                address: $('#clientAddress').val().trim()
-            };
-            
-            if (editId) formData.id = editId;
+        // Main function to handle client save/update
+function handleClientSave() {
+    // Show loading state
+    const $saveBtn = $('#saveClientBtn');
+    $saveBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...');
 
-            // Validate form
-            if (!validateClientForm(formData)) {
-                $saveBtn.prop('disabled', false).html(editId ? 'Update Client' : 'Save Client');
-                return;
-            }
+    const editId = $('#addClientForm').data('edit-id');
+    const formData = {
+        action: editId ? 'update_client' : 'add_client',
+        first_name: $('#clientFirstName').val().trim(),
+        last_name: $('#clientLastName').val().trim(),
+        email: $('#clientEmail').val().trim(),
+        phone: $('#clientPhone').val().trim(),
+        company: $('#clientCompany').val().trim(),
+        address: $('#clientAddress').val().trim()
+    };
 
-            // Submit the form
-            $.ajax({
-                url: 'ajax_helpers/client_handle.php',
-                type: 'POST',
-                data: formData,
-                dataType: 'json',
-                success: function(response) {
-                    $saveBtn.prop('disabled', false).html(editId ? 'Update Client' : 'Save Client');
-                    
-                    if (response.success) {
-                        $('#addClientModal').modal('hide');
-                        showSweetAlert('success', 'Success', response.message);
-                        loadClients();
-                    } else {
-                        showSweetAlert('error', 'Error', response.message);
+    if (editId) formData.id = editId;
+
+    // Validate form
+    if (!validateClientForm(formData)) {
+        $saveBtn.prop('disabled', false).html(editId ? 'Update Client' : 'Save Client');
+        return;
+    }
+
+    // Submit the form
+    $.ajax({
+        url: 'ajax_helpers/client_handle.php',
+        type: 'POST',
+        data: formData,
+        dataType: 'json',
+        success: function(response) {
+            $saveBtn.prop('disabled', false).html(editId ? 'Update Client' : 'Save Client');
+
+            if (response.success) {
+                $('#addClientModal').modal('hide');
+                
+                // Show success message and then reload
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: response.message,
+                    confirmButtonColor: '#3a4f8a',
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Full page reload after success message is closed
+                        window.location.reload();
                     }
-                },
-                error: function() {
-                    $saveBtn.prop('disabled', false).html(editId ? 'Update Client' : 'Save Client');
-                    showSweetAlert('error', 'Error', 'Failed to save client. Please try again.');
-                }
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: response.message,
+                    confirmButtonColor: '#3a4f8a',
+                });
+            }
+        },
+        error: function() {
+            $saveBtn.prop('disabled', false).html(editId ? 'Update Client' : 'Save Client');
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Failed to save client. Please try again.',
+                confirmButtonColor: '#3a4f8a',
             });
         }
-
+    });
+}
         // Form validation
         function validateClientForm(formData) {
             if (!formData.first_name || !formData.last_name) {

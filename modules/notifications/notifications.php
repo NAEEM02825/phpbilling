@@ -14,6 +14,7 @@ $page_title = "Notification Center";
     /* Custom enhancements */
     .notification-container {
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        margin
     }
     
     .notification-card {

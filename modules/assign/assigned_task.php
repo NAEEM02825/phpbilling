@@ -911,48 +911,51 @@ const invoiceManager = {
     }
 
     // Save New Task
-    async function saveTask() {
-        const form = document.getElementById('taskForm');
-        const formData = new FormData(form);
-        formData.append('action', 'create_task');
+   // Save New Task
+async function saveTask() {
+    const form = document.getElementById('taskForm');
+    const formData = new FormData(form);
+    formData.append('action', 'create_task');
 
-        // Validate required fields
-        if (!formData.get('title') || !formData.get('project_id') || !formData.get('task_date') ||
-            !formData.get('assignee_id') || !formData.get('status')) {
-            showError('Please fill all required fields');
-            return;
-        }
-
-        try {
-            const response = await fetch('ajax_helpers/task_handler.php', {
-                method: 'POST',
-                body: formData
-            });
-
-            const data = await response.json();
-
-            if (!data.success) {
-                throw new Error(data.error || 'Failed to create task');
-            }
-
-            const modal = bootstrap.Modal.getInstance(document.getElementById('newTaskModal'));
-            modal.hide();
-
-            Swal.fire({
-                title: 'Success!',
-                text: 'Task created successfully!',
-                icon: 'success',
-                confirmButtonColor: '#3a4f8a',
-                timer: 2000,
-                timerProgressBar: true
-            });
-
-            form.reset();
-            loadTasks();
-        } catch (error) {
-            showError('Error creating task: ' + error.message);
-        }
+    // Validate required fields
+    if (!formData.get('title') || !formData.get('project_id') || !formData.get('task_date') ||
+        !formData.get('assignee_id') || !formData.get('status')) {
+        showError('Please fill all required fields');
+        return;
     }
+
+    try {
+        const response = await fetch('ajax_helpers/task_handler.php', {
+            method: 'POST',
+            body: formData
+        });
+
+        const data = await response.json();
+
+        if (!data.success) {
+            throw new Error(data.error || 'Failed to create task');
+        }
+
+        const modal = bootstrap.Modal.getInstance(document.getElementById('newTaskModal'));
+        modal.hide();
+
+        Swal.fire({
+            title: 'Success!',
+            text: 'Task created successfully!',
+            icon: 'success',
+            confirmButtonColor: '#3a4f8a',
+            timer: 1000, // Reduced timer to 1 second
+            timerProgressBar: true,
+            didClose: () => {
+                location.reload(); // Reload the page after the alert closes
+            }
+        });
+
+        form.reset();
+    } catch (error) {
+        showError('Error creating task: ' + error.message);
+    }
+}
 
     
 
