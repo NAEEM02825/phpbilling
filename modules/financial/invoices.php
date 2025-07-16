@@ -654,110 +654,114 @@ $projects = DB::query("SELECT * FROM projects");
                     `Showing ${startItem} to ${endItem} of ${this.totalInvoices} invoices`;
             },
 
-            createNewInvoice: function() {
-                const form = document.getElementById('newInvoiceForm');
-                const selectedTasks = Array.from(document.querySelectorAll('.task-checkbox:checked'))
-                    .map(checkbox => checkbox.getAttribute('data-task_id'));
+createNewInvoice: function() {
+    const form = document.getElementById('newInvoiceForm');
+    const selectedTasks = Array.from(document.querySelectorAll('.task-checkbox:checked'))
+        .map(checkbox => checkbox.getAttribute('data-task_id'));
 
-                if (selectedTasks.length === 0) {
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'No Tasks Selected',
-                        text: 'Please select at least one task',
-                        confirmButtonColor: '#3085d6',
-                    });
-                    return;
-                }
+    if (selectedTasks.length === 0) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'No Tasks Selected',
+            text: 'Please select at least one task',
+            confirmButtonColor: '#3085d6',
+        });
+        return;
+    }
 
-                const formData = {
-                    action: 'create_invoice',
-                    client_id: form.querySelector('#invoiceClient').value,
-                    project_id: form.querySelector('#invoiceProject').value,
-                    issue_date: form.querySelector('#invoiceIssueDate').value,
-                    due_date: form.querySelector('#invoiceDueDate').value,
-                    notes: form.querySelector('#invoiceNotes').value,
-                    task_ids: JSON.stringify(selectedTasks)
-                };
+    const formData = {
+        action: 'create_invoice',
+        client_id: form.querySelector('#invoiceClient').value,
+        project_id: form.querySelector('#invoiceProject').value,
+        issue_date: form.querySelector('#invoiceIssueDate').value,
+        due_date: form.querySelector('#invoiceDueDate').value,
+        notes: form.querySelector('#invoiceNotes').value,
+        task_ids: JSON.stringify(selectedTasks)
+    };
 
-                const submitBtn = form.querySelector('button[type="submit"]');
-                const originalBtnText = submitBtn.innerHTML;
-                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
-                submitBtn.disabled = true;
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalBtnText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+    submitBtn.disabled = true;
 
-                // Clear any previous error messages
-                const errorElements = form.querySelectorAll('.is-invalid, .invalid-feedback');
-                errorElements.forEach(el => {
-                    el.classList.remove('is-invalid');
-                    el.nextElementSibling?.classList.remove('invalid-feedback');
-                });
+    // Clear any previous error messages
+    const errorElements = form.querySelectorAll('.is-invalid, .invalid-feedback');
+    errorElements.forEach(el => {
+        el.classList.remove('is-invalid');
+        const errorDiv = el.nextElementSibling;
+        if (errorDiv && errorDiv.classList.contains('invalid-feedback')) {
+            errorDiv.remove();
+        }
+    });
 
-                fetch('ajax_helpers/create_New_Invoice.php', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded',
-                        },
-                        body: new URLSearchParams(formData)
-                    })
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error(`HTTP error! status: ${response.status}`);
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        if (!data.success) {
-                            // Handle form validation errors
-                            if (data.errors) {
-                                Object.entries(data.errors).forEach(([field, message]) => {
-                                    const input = form.querySelector(`#${field}`);
-                                    if (input) {
-                                        input.classList.add('is-invalid');
-                                        const errorDiv = document.createElement('div');
-                                        errorDiv.classList.add('invalid-feedback');
-                                        errorDiv.textContent = message;
-                                        input.parentNode.appendChild(errorDiv);
-                                    }
-                                });
-                                throw new Error('Form validation failed');
-                            }
-                            throw new Error(data.error || 'Failed to create invoice');
-                        }
-
-                        // Success case
-                        const modal = bootstrap.Modal.getInstance(document.getElementById('newInvoiceModal'));
-                        modal.hide();
-
-                        // Reset form
-                        form.reset();
-                        document.getElementById('tasksTableBody').innerHTML = '';
-                        document.getElementById('invoiceProject').disabled = true;
-
-                        // Show success message
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Success!',
-                            text: 'Invoice created successfully!',
-                            confirmButtonColor: '#3085d6',
-                        });
-
-                        // Refresh invoices list
-                        this.currentPage = 1;
-                        this.loadInvoices();
-                    })
-                    .catch(error => {
-                        console.error('Error creating invoice:', error);
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: 'Error creating invoice: ' + (error.message || 'Please check your inputs and try again'),
-                            confirmButtonColor: '#3085d6',
-                        });
-                    })
-                    .finally(() => {
-                        submitBtn.innerHTML = originalBtnText;
-                        submitBtn.disabled = false;
-                    });
+    fetch('ajax_helpers/create_New_Invoice.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
             },
+            body: new URLSearchParams(formData)
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (!data.success) {
+                // Handle form validation errors
+                if (data.errors) {
+                    Object.entries(data.errors).forEach(([field, message]) => {
+                        const input = form.querySelector(`#${field}`);
+                        if (input) {
+                            input.classList.add('is-invalid');
+                            const errorDiv = document.createElement('div');
+                            errorDiv.classList.add('invalid-feedback');
+                            errorDiv.textContent = message;
+                            input.parentNode.appendChild(errorDiv);
+                        }
+                    });
+                    throw new Error('Form validation failed');
+                }
+                throw new Error(data.error || 'Failed to create invoice');
+            }
+
+            // Success case
+            const modal = bootstrap.Modal.getInstance(document.getElementById('newInvoiceModal'));
+            if (modal) {
+                modal.hide();
+            }
+
+            // Reset form
+            form.reset();
+            document.getElementById('tasksTableBody').innerHTML = '';
+            document.getElementById('invoiceProject').disabled = true;
+
+            // Show success message
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: 'Invoice created successfully!',
+                confirmButtonColor: '#3085d6',
+            }).then(() => {
+                // Force a full page reload after the success message is closed
+                window.location.reload();
+            });
+        })
+        .catch(error => {
+            console.error('Error creating invoice:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Error creating invoice: ' + (error.message || 'Please check your inputs and try again'),
+                confirmButtonColor: '#3085d6',
+            });
+        })
+        .finally(() => {
+            submitBtn.innerHTML = originalBtnText;
+            submitBtn.disabled = false;
+        });
+},
 
             viewInvoice: function(invoiceId) {
                 fetch(`ajax_helpers/getInvoiceDetails.php?id=${invoiceId}`)
