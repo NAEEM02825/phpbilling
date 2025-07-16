@@ -1,14 +1,6 @@
 <!-- New Task Page Header -->
-<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-4 pb-3 mb-4 border-bottom">
-    <div>
-        <h1 class="h2">Create New Task</h1>
-        <p class="mb-0 text-muted">Add a new task to your project</p>
-    </div>
-    <div class="btn-toolbar mb-2 mb-md-0">
-        <button type="button" class="btn btn-outline-secondary me-2" id="cancelButton">
-            <i class="fas fa-times me-1"></i> Cancel
-        </button>
-    </div>
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-4 pb-3 mb-4">
+    
 </div>
 
 <!-- New Task Form -->
@@ -16,6 +8,10 @@
     <div class="col-lg-8 mx-auto">
         <div class="card shadow-sm mb-4">
             <div class="card-body d-flex flex-column align-items-center justify-content-center">
+                 <div>
+        <h1 class="h2">Create New Task</h1>
+        <p class="mb-0 text-muted">Add a new task to your project</p>
+    </div>
                 <form id="taskForm" class="w-100">
                     <!-- Task Title -->
                     <div class="mb-4 w-100">
@@ -77,7 +73,7 @@
 
                     <!-- Submit Button -->
                     <div class="d-flex justify-content-end">
-                        <button type="submit" class="btn btn-primary" id="saveTask">
+                        <button type="submit" class="btn btn-custom" id="saveTask">
                             <i class="fas fa-save me-1"></i> Save Task
                         </button>
                     </div>
@@ -117,7 +113,17 @@
         padding: 0.375rem 0.75rem;
         min-height: 38px;
     }
-    
+        .btn-custom {
+        background-color: #04665f;
+        color: white;
+        border: none;
+    }
+
+    .btn-custom:hover {
+        background-color: #034b45;
+        color: white;
+        /* darker shade for hover effect */
+    }
     .select2-container--default .select2-selection--multiple .select2-selection__choice {
         background-color: #3a4f8a;
         border: none;
