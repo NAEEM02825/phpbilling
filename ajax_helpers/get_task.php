@@ -1,43 +1,42 @@
 <?php
-// Ensure no output before headers
-ob_start();
+require('../functions.php');
 
-require_once __DIR__ . '/../functions.php';
+header('Content-Type: application/json');
 
-// Set proper JSON header
-header('Content-Type: application/json; charset=UTF-8');
+// Check if task_id is provided
+if (!isset($_GET['task_id']) || !is_numeric($_GET['task_id'])) {
+    die(json_encode(['error' => 'Invalid task ID']));
+}
+
+$taskId = intval($_GET['task_id']);
 
 try {
-    // Get task ID from URL
-    $taskId = $_GET['task_id'] ?? null;
-    
-    if (!$taskId || !is_numeric($taskId)) {
-        throw new Exception('Invalid task ID');
-    }
+    // Fetch task details from database
+    $stmt = $pdo->prepare("
+        SELECT 
+            t.*, 
+            p.name AS project_name,
+            u.name AS assignee_name,
+            u.initials AS assignee_initials
+        FROM tasks t
+        LEFT JOIN projects p ON t.project_id = p.id
+        LEFT JOIN users u ON t.assignee_id = u.user_id
+        WHERE t.id = ?
+    ");
+    $stmt->execute([$taskId]);
+    $task = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    // Fetch task from database using MeekroDB
-    $task = DB::queryFirstRow("SELECT * FROM tasks WHERE id = %i", $taskId);
-    
     if (!$task) {
-        throw new Exception('Task not found');
+        die(json_encode(['error' => 'Task not found']));
     }
 
-    // Clear any accidental output
-    ob_end_clean();
-    
-    // Return JSON response
-    die(json_encode([
+    // Return task data as JSON
+    header('Content-Type: application/json');
+    echo json_encode([
         'success' => true,
         'task' => $task
-    ]));
-
-} catch (Exception $e) {
-    // Clear any output before error response
-    ob_end_clean();
+    ]);
     
-    http_response_code(400);
-    die(json_encode([
-        'success' => false,
-        'error' => $e->getMessage()
-    ]));
+} catch (PDOException $e) {
+    die(json_encode(['error' => 'Database error: ' . $e->getMessage()]));
 }

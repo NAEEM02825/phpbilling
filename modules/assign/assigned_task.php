@@ -32,7 +32,7 @@
 
 <!-- Project Tabs -->
 <ul class="nav nav-tabs mb-4" id="projectTabs" role="tablist">
-    
+
     <li class="nav-item" role="presentation">
         <button class="nav-link active" id="tasks-tab" data-bs-toggle="tab" data-bs-target="#tasks" type="button" role="tab">
             <i class="fas fa-tasks me-1"></i> All Tasks
@@ -226,7 +226,7 @@
                             <input type="url" class="form-control" id="clickupLink" name="clickup_link"
                                 placeholder="https://app.clickup.com/t/xxxxxx">
                         </div>
-                        
+
                         <div class="col-12">
                             <label for="taskFiles" class="form-label">Attachments</label>
                             <input type="file" class="form-control" id="taskFiles" name="files[]" multiple>
@@ -363,14 +363,17 @@
         padding: 0.25rem 0.5rem;
         font-size: 0.75rem;
     }
-  th {
+
+    th {
         background-color: #04665f !important;
         color: white !important;
     }
-.bg-custom{
-    background-color: #04665f !important;
+
+    .bg-custom {
+        background-color: #04665f !important;
         color: white !important;
-}
+    }
+
     .btn-custom {
         background-color: #04665f;
         color: white;
@@ -382,6 +385,7 @@
         color: white;
         /* darker shade for hover effect */
     }
+
     .task-status-select option {
         padding: 0.5rem;
     }
@@ -501,75 +505,75 @@
 </style>
 
 <script>
-// Make sure invoiceManager is properly defined as an object
-const invoiceManager = {
-    filters: {}, // Make sure this is defined with your actual filters
-    
-    handleExport: function(exportType) {
-        Swal.fire({
-            title: 'Preparing Export',
-            html: 'Please wait while we prepare your export...',
-            allowOutsideClick: false,
-            didOpen: () => {
-                Swal.showLoading();
-                
-                // Prepare the data to send
-                const exportData = {
-                    exportType: exportType,
-                    filters: this.filters
-                };
-                
-                fetch('ajax_helpers/export_tasks.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(exportData)
-                })
-                .then(response => {
-                    if (exportType === 'pdf') {
-                        // For PDF, we return HTML that will trigger print dialog
-                        return response.text().then(html => {
-                            // Open a new window with the HTML
-                            const printWindow = window.open('', '_blank');
-                            printWindow.document.write(html);
-                            printWindow.document.close();
-                            Swal.close();
+    // Make sure invoiceManager is properly defined as an object
+    const invoiceManager = {
+        filters: {}, // Make sure this is defined with your actual filters
+
+        handleExport: function(exportType) {
+            Swal.fire({
+                title: 'Preparing Export',
+                html: 'Please wait while we prepare your export...',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+
+                    // Prepare the data to send
+                    const exportData = {
+                        exportType: exportType,
+                        filters: this.filters
+                    };
+
+                    fetch('ajax_helpers/export_tasks.php', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify(exportData)
+                        })
+                        .then(response => {
+                            if (exportType === 'pdf') {
+                                // For PDF, we return HTML that will trigger print dialog
+                                return response.text().then(html => {
+                                    // Open a new window with the HTML
+                                    const printWindow = window.open('', '_blank');
+                                    printWindow.document.write(html);
+                                    printWindow.document.close();
+                                    Swal.close();
+                                });
+                            } else {
+                                // For CSV and Excel, handle as blob
+                                return response.blob().then(blob => {
+                                    // Create a download link
+                                    const url = window.URL.createObjectURL(blob);
+                                    const a = document.createElement('a');
+                                    a.href = url;
+
+                                    // Set appropriate file extension
+                                    const extension = exportType === 'excel' ? 'xls' : exportType;
+                                    a.download = `tasks_export.${extension}`;
+
+                                    document.body.appendChild(a);
+                                    a.click();
+
+                                    // Clean up
+                                    window.URL.revokeObjectURL(url);
+                                    a.remove();
+                                    Swal.close();
+                                });
+                            }
+                        })
+                        .catch(error => {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Export Failed',
+                                text: error.message || 'An error occurred during export',
+                                confirmButtonColor: '#3085d6',
+                            });
                         });
-                    } else {
-                        // For CSV and Excel, handle as blob
-                        return response.blob().then(blob => {
-                            // Create a download link
-                            const url = window.URL.createObjectURL(blob);
-                            const a = document.createElement('a');
-                            a.href = url;
-                            
-                            // Set appropriate file extension
-                            const extension = exportType === 'excel' ? 'xls' : exportType;
-                            a.download = `tasks_export.${extension}`;
-                            
-                            document.body.appendChild(a);
-                            a.click();
-                            
-                            // Clean up
-                            window.URL.revokeObjectURL(url);
-                            a.remove();
-                            Swal.close();
-                        });
-                    }
-                })
-                .catch(error => {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Export Failed',
-                        text: error.message || 'An error occurred during export',
-                        confirmButtonColor: '#3085d6',
-                    });
-                });
-            }
-        });
-    }
-};
+                }
+            });
+        }
+    };
 
     // Main Initialization Function
     document.addEventListener('DOMContentLoaded', function() {
@@ -790,28 +794,31 @@ const invoiceManager = {
             <option value="Completed" ${task.status === 'Completed' ? 'selected' : ''}>Completed</option>
         </select>
     </td>
-                    <td>
-                        <div class="d-flex gap-2">
-                            <a href="#" 
-                               class="btn btn-outline-secondary p-0 d-flex align-items-center justify-content-center action-view" 
-                               style="width:32px;height:32px;border-radius:6px;border:1px solid #dee2e6;" 
-                               title="View" onclick="viewTask(${task.id})">
-                                <i class="fas fa-eye"></i>
-                            </a>
-                            <a href="#" 
-                               class="btn btn-outline-primary p-0 d-flex align-items-center justify-content-center action-edit" 
-                               style="width:32px;height:32px;border-radius:6px;border:1px solid #3a4f8a;" 
-                               title="Edit" onclick="editTask(${task.id})">
-                                <i class="fas fa-edit"></i>
-                            </a>
-                            <a href="#" 
-                               class="btn btn-outline-danger p-0 d-flex align-items-center justify-content-center action-delete" 
-                               style="width:32px;height:32px;border-radius:6px;border:1px solid #dc3545;" 
-                               title="Delete" onclick="deleteTask(${task.id})">
-                                <i class="fas fa-trash"></i>
-                            </a>
-                        </div>
-                    </td>
+                  <td>
+    <div class="d-flex gap-2">
+        <!-- View Button -->
+        <a href="index.php?route=modules/assign/view_task&task_id=${task.id}" 
+           class="btn btn-outline-secondary p-0 d-flex align-items-center justify-content-center action-view" 
+           style="width:32px;height:32px;border-radius:6px;border:1px solid #dee2e6;" 
+           title="View Task">
+            <i class="fas fa-eye"></i>
+        </a>
+        
+        <!-- Edit Button -->
+        <button class="btn btn-outline-primary p-0 d-flex align-items-center justify-content-center action-edit" 
+                style="width:32px;height:32px;border-radius:6px;border:1px solid #04665f;" 
+                title="Edit Task" onclick="editTask(${task.id})">
+            <i class="fas fa-edit"></i>
+        </button>
+        
+        <!-- Delete Button -->
+        <button class="btn btn-outline-danger p-0 d-flex align-items-center justify-content-center action-delete" 
+                style="width:32px;height:32px;border-radius:6px;border:1px solid #dc3545;" 
+                title="Delete Task" onclick="deleteTask(${task.id})">
+            <i class="fas fa-trash"></i>
+        </button>
+    </div>
+</td>
                 `;
                 tbody.appendChild(row);
             });
@@ -1326,13 +1333,8 @@ const invoiceManager = {
         });
     }
 
-    function viewTask(id) {
-        // Implement view task modal or redirect
-        Swal.fire({
-            title: 'View Task',
-            text: 'Task details would be shown here',
-            icon: 'info',
-            confirmButtonColor: '#3a4f8a'
-        });
+    function viewTask(taskId) {
+        // Redirect to the view task page with the task ID
+        window.location.href = `index.php?route=modules/assign/view_task&task_id=${taskId}`;
     }
 </script>
