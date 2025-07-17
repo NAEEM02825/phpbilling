@@ -173,7 +173,7 @@
                     aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="taskForm">
+                <form id="taskForm" enctype="multipart/form-data">
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label for="taskTitle" class="form-label">Task Title</label>
@@ -226,6 +226,12 @@
                             <input type="url" class="form-control" id="clickupLink" name="clickup_link"
                                 placeholder="https://app.clickup.com/t/xxxxxx">
                         </div>
+                        
+                        <div class="col-12">
+                            <label for="taskFiles" class="form-label">Attachments</label>
+                            <input type="file" class="form-control" id="taskFiles" name="files[]" multiple>
+                            <small class="text-muted">You can upload multiple files (Max 10MB each)</small>
+                        </div>
                     </div>
                 </form>
             </div>
@@ -241,7 +247,7 @@
 <div class="modal fade" id="editTaskModal" tabindex="-1" aria-labelledby="editTaskModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
+            <div class="modal-header bg-custom text-white">
                 <h5 class="modal-title" id="editTaskModalLabel">Edit Task</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
                     aria-label="Close"></button>
@@ -361,7 +367,10 @@
         background-color: #04665f !important;
         color: white !important;
     }
-
+.bg-custom{
+    background-color: #04665f !important;
+        color: white !important;
+}
     .btn-custom {
         background-color: #04665f;
         color: white;
@@ -492,7 +501,6 @@
 </style>
 
 <script>
-
 // Make sure invoiceManager is properly defined as an object
 const invoiceManager = {
     filters: {}, // Make sure this is defined with your actual filters
@@ -537,7 +545,7 @@ const invoiceManager = {
                             a.href = url;
                             
                             // Set appropriate file extension
-                            const extension = exportType === 'excel' ? 'xls' : exportType; // Fixed typo from 'excel' to 'excel'
+                            const extension = exportType === 'excel' ? 'xls' : exportType;
                             a.download = `tasks_export.${extension}`;
                             
                             document.body.appendChild(a);
@@ -562,6 +570,7 @@ const invoiceManager = {
         });
     }
 };
+
     // Main Initialization Function
     document.addEventListener('DOMContentLoaded', function() {
         // Load initial data
@@ -782,26 +791,26 @@ const invoiceManager = {
         </select>
     </td>
                     <td>
-<div class="d-flex gap-2">
-   <a href="modules/assign/view_task.php?task_id=${task.id}" 
-   class="btn btn-outline-secondary p-0 d-flex align-items-center justify-content-center action-view" 
-   style="width:32px;height:32px;border-radius:6px;border:1px solid #dee2e6;" 
-   title="View">
-    <i class="fas fa-eye"></i>
-</a>
-    <a href="#" 
-       class="btn btn-outline-primary p-0 d-flex align-items-center justify-content-center action-edit" 
-       style="width:32px;height:32px;border-radius:6px;border:1px solid #3a4f8a;" 
-       title="Edit" onclick="editTask(${task.id})">
-        <i class="fas fa-edit"></i>
-    </a>
-    <a href="#" 
-       class="btn btn-outline-danger p-0 d-flex align-items-center justify-content-center action-delete" 
-       style="width:32px;height:32px;border-radius:6px;border:1px solid #dc3545;" 
-       title="Delete" onclick="deleteTask(${task.id})">
-        <i class="fas fa-trash"></i>
-    </a>
-</div>
+                        <div class="d-flex gap-2">
+                            <a href="#" 
+                               class="btn btn-outline-secondary p-0 d-flex align-items-center justify-content-center action-view" 
+                               style="width:32px;height:32px;border-radius:6px;border:1px solid #dee2e6;" 
+                               title="View" onclick="viewTask(${task.id})">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a href="#" 
+                               class="btn btn-outline-primary p-0 d-flex align-items-center justify-content-center action-edit" 
+                               style="width:32px;height:32px;border-radius:6px;border:1px solid #3a4f8a;" 
+                               title="Edit" onclick="editTask(${task.id})">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="#" 
+                               class="btn btn-outline-danger p-0 d-flex align-items-center justify-content-center action-delete" 
+                               style="width:32px;height:32px;border-radius:6px;border:1px solid #dc3545;" 
+                               title="Delete" onclick="deleteTask(${task.id})">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </div>
                     </td>
                 `;
                 tbody.appendChild(row);
@@ -926,53 +935,61 @@ const invoiceManager = {
     }
 
     // Save New Task
-   // Save New Task
-async function saveTask() {
-    const form = document.getElementById('taskForm');
-    const formData = new FormData(form);
-    formData.append('action', 'create_task');
+    async function saveTask() {
+        const form = document.getElementById('taskForm');
+        const formData = new FormData(form);
+        formData.append('action', 'create_task');
 
-    // Validate required fields
-    if (!formData.get('title') || !formData.get('project_id') || !formData.get('task_date') ||
-        !formData.get('assignee_id') || !formData.get('status')) {
-        showError('Please fill all required fields');
-        return;
-    }
-
-    try {
-        const response = await fetch('ajax_helpers/task_handler.php', {
-            method: 'POST',
-            body: formData
-        });
-
-        const data = await response.json();
-
-        if (!data.success) {
-            throw new Error(data.error || 'Failed to create task');
+        // Validate required fields
+        if (!formData.get('title') || !formData.get('project_id') || !formData.get('task_date') ||
+            !formData.get('assignee_id') || !formData.get('status')) {
+            showError('Please fill all required fields');
+            return;
         }
 
-        const modal = bootstrap.Modal.getInstance(document.getElementById('newTaskModal'));
-        modal.hide();
-
-        Swal.fire({
-            title: 'Success!',
-            text: 'Task created successfully!',
-            icon: 'success',
-            confirmButtonColor: '#3a4f8a',
-            timer: 1000, // Reduced timer to 1 second
-            timerProgressBar: true,
-            didClose: () => {
-                location.reload(); // Reload the page after the alert closes
+        // Validate file uploads
+        const files = document.getElementById('taskFiles').files;
+        if (files.length > 0) {
+            for (let i = 0; i < files.length; i++) {
+                if (files[i].size > 10 * 1024 * 1024) { // 10MB limit
+                    showError(`File ${files[i].name} is too large (max 10MB)`);
+                    return;
+                }
             }
-        });
+        }
 
-        form.reset();
-    } catch (error) {
-        showError('Error creating task: ' + error.message);
+        try {
+            const response = await fetch('ajax_helpers/task_handler.php', {
+                method: 'POST',
+                body: formData // Don't set Content-Type header for FormData
+            });
+
+            const data = await response.json();
+
+            if (!data.success) {
+                throw new Error(data.error || 'Failed to create task');
+            }
+
+            const modal = bootstrap.Modal.getInstance(document.getElementById('newTaskModal'));
+            modal.hide();
+
+            Swal.fire({
+                title: 'Success!',
+                text: 'Task created successfully!',
+                icon: 'success',
+                confirmButtonColor: '#3a4f8a',
+                timer: 1000,
+                timerProgressBar: true,
+                didClose: () => {
+                    location.reload();
+                }
+            });
+
+            form.reset();
+        } catch (error) {
+            showError('Error creating task: ' + error.message);
+        }
     }
-}
-
-    
 
     // Delete Task
     async function deleteTask(taskId) {
@@ -1207,7 +1224,7 @@ async function saveTask() {
                 timer: 1000,
                 timerProgressBar: true,
                 didClose: () => {
-                    location.reload(); // Reload the page after the alert closes
+                    location.reload();
                 }
             });
 
@@ -1307,10 +1324,15 @@ async function saveTask() {
             icon: 'info',
             confirmButtonColor: '#3a4f8a'
         });
-        function viewTask(taskId) {
-    // Open task in new tab or redirect
-    window.location.href = `index.php?module=assign&page=view_task&task_id=${taskId}`;
-    return false;
-}
+    }
+
+    function viewTask(id) {
+        // Implement view task modal or redirect
+        Swal.fire({
+            title: 'View Task',
+            text: 'Task details would be shown here',
+            icon: 'info',
+            confirmButtonColor: '#3a4f8a'
+        });
     }
 </script>
