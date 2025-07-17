@@ -173,7 +173,7 @@
                     aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="taskForm">
+                <form id="taskForm" enctype="multipart/form-data">
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label for="taskTitle" class="form-label">Task Title</label>
@@ -225,6 +225,12 @@
                             <label for="clickupLink" class="form-label">ClickUp Link</label>
                             <input type="url" class="form-control" id="clickupLink" name="clickup_link"
                                 placeholder="https://app.clickup.com/t/xxxxxx">
+                        </div>
+                        
+                        <div class="col-12">
+                            <label for="taskFiles" class="form-label">Attachments</label>
+                            <input type="file" class="form-control" id="taskFiles" name="files[]" multiple>
+                            <small class="text-muted">You can upload multiple files (Max 10MB each)</small>
                         </div>
                     </div>
                 </form>
@@ -495,7 +501,6 @@
 </style>
 
 <script>
-
 // Make sure invoiceManager is properly defined as an object
 const invoiceManager = {
     filters: {}, // Make sure this is defined with your actual filters
@@ -540,7 +545,7 @@ const invoiceManager = {
                             a.href = url;
                             
                             // Set appropriate file extension
-                            const extension = exportType === 'excel' ? 'xls' : exportType; // Fixed typo from 'excel' to 'excel'
+                            const extension = exportType === 'excel' ? 'xls' : exportType;
                             a.download = `tasks_export.${extension}`;
                             
                             document.body.appendChild(a);
@@ -565,6 +570,7 @@ const invoiceManager = {
         });
     }
 };
+
     // Main Initialization Function
     document.addEventListener('DOMContentLoaded', function() {
         // Load initial data
@@ -929,53 +935,61 @@ const invoiceManager = {
     }
 
     // Save New Task
-   // Save New Task
-async function saveTask() {
-    const form = document.getElementById('taskForm');
-    const formData = new FormData(form);
-    formData.append('action', 'create_task');
+    async function saveTask() {
+        const form = document.getElementById('taskForm');
+        const formData = new FormData(form);
+        formData.append('action', 'create_task');
 
-    // Validate required fields
-    if (!formData.get('title') || !formData.get('project_id') || !formData.get('task_date') ||
-        !formData.get('assignee_id') || !formData.get('status')) {
-        showError('Please fill all required fields');
-        return;
-    }
-
-    try {
-        const response = await fetch('ajax_helpers/task_handler.php', {
-            method: 'POST',
-            body: formData
-        });
-
-        const data = await response.json();
-
-        if (!data.success) {
-            throw new Error(data.error || 'Failed to create task');
+        // Validate required fields
+        if (!formData.get('title') || !formData.get('project_id') || !formData.get('task_date') ||
+            !formData.get('assignee_id') || !formData.get('status')) {
+            showError('Please fill all required fields');
+            return;
         }
 
-        const modal = bootstrap.Modal.getInstance(document.getElementById('newTaskModal'));
-        modal.hide();
-
-        Swal.fire({
-            title: 'Success!',
-            text: 'Task created successfully!',
-            icon: 'success',
-            confirmButtonColor: '#3a4f8a',
-            timer: 1000, // Reduced timer to 1 second
-            timerProgressBar: true,
-            didClose: () => {
-                location.reload(); // Reload the page after the alert closes
+        // Validate file uploads
+        const files = document.getElementById('taskFiles').files;
+        if (files.length > 0) {
+            for (let i = 0; i < files.length; i++) {
+                if (files[i].size > 10 * 1024 * 1024) { // 10MB limit
+                    showError(`File ${files[i].name} is too large (max 10MB)`);
+                    return;
+                }
             }
-        });
+        }
 
-        form.reset();
-    } catch (error) {
-        showError('Error creating task: ' + error.message);
+        try {
+            const response = await fetch('ajax_helpers/task_handler.php', {
+                method: 'POST',
+                body: formData // Don't set Content-Type header for FormData
+            });
+
+            const data = await response.json();
+
+            if (!data.success) {
+                throw new Error(data.error || 'Failed to create task');
+            }
+
+            const modal = bootstrap.Modal.getInstance(document.getElementById('newTaskModal'));
+            modal.hide();
+
+            Swal.fire({
+                title: 'Success!',
+                text: 'Task created successfully!',
+                icon: 'success',
+                confirmButtonColor: '#3a4f8a',
+                timer: 1000,
+                timerProgressBar: true,
+                didClose: () => {
+                    location.reload();
+                }
+            });
+
+            form.reset();
+        } catch (error) {
+            showError('Error creating task: ' + error.message);
+        }
     }
-}
-
-    
 
     // Delete Task
     async function deleteTask(taskId) {
@@ -1210,7 +1224,7 @@ async function saveTask() {
                 timer: 1000,
                 timerProgressBar: true,
                 didClose: () => {
-                    location.reload(); // Reload the page after the alert closes
+                    location.reload();
                 }
             });
 

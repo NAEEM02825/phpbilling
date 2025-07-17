@@ -26,15 +26,15 @@ try {
 
         case 'get_tasks':
             $assigneeId = $_POST['assignee_id'] ?? null;
-            $projectId = $_POST['project_id'] ?? null; // <-- Add this line
+            $projectId = $_POST['project_id'] ?? null;
             $query = "
-    SELECT t.*, p.name as project_name, 
-           CONCAT(u.first_name, ' ', u.last_name) as assignee_name, 
-           CONCAT(LEFT(u.first_name, 1), LEFT(u.last_name, 1)) as assignee_initials
-    FROM tasks t
-    LEFT JOIN projects p ON p.id = t.project_id
-    LEFT JOIN users u ON u.user_id = t.assignee_id
-";
+                SELECT t.*, p.name as project_name, 
+                       CONCAT(u.first_name, ' ', u.last_name) as assignee_name, 
+                       CONCAT(LEFT(u.first_name, 1), LEFT(u.last_name, 1)) as assignee_initials
+                FROM tasks t
+                LEFT JOIN projects p ON p.id = t.project_id
+                LEFT JOIN users u ON u.user_id = t.assignee_id
+            ";
 
             $where = [];
             $params = [];
@@ -59,18 +59,17 @@ try {
                 'data' => $tasks
             ];
             break;
+            
         case 'update_task_status':
             $taskId = $_POST['task_id'];
-            $newStatus = strtolower($_POST['status']); // Convert to lowercase to match your DB
+            $newStatus = strtolower($_POST['status']);
 
-            // Validate and sanitize inputs
             $validStatuses = ['pending', 'in progress', 'completed'];
             if (!in_array($newStatus, $validStatuses)) {
                 echo json_encode(['success' => false, 'error' => 'Invalid status']);
                 exit;
             }
 
-            // Update in database
             DB::update('tasks', [
                 'status' => $newStatus,
                 'updated_at' => date('Y-m-d H:i:s')
@@ -81,6 +80,7 @@ try {
                 'message' => 'Status updated successfully'
             ];
             break;
+            
         case 'get_users':
             $users = DB::query("SELECT user_id, CONCAT(first_name, ' ', last_name) as name 
                FROM users 
@@ -94,19 +94,17 @@ try {
         case 'get_task_details':
             $taskId = $_POST['task_id'];
             $task = DB::queryFirstRow("
-    SELECT t.*, p.name as project_name, 
-           CONCAT(u.first_name, ' ', u.last_name) as assignee_name, 
-           CONCAT(LEFT(u.first_name, 1), LEFT(u.last_name, 1)) as assignee_initials
-    FROM tasks t
-    LEFT JOIN projects p ON p.id = t.project_id
-    LEFT JOIN users u ON u.user_id = t.assignee_id
-    WHERE t.id = %i
-", $taskId);
+                SELECT t.*, p.name as project_name, 
+                       CONCAT(u.first_name, ' ', u.last_name) as assignee_name, 
+                       CONCAT(LEFT(u.first_name, 1), LEFT(u.last_name, 1)) as assignee_initials
+                FROM tasks t
+                LEFT JOIN projects p ON p.id = t.project_id
+                LEFT JOIN users u ON u.user_id = t.assignee_id
+                WHERE t.id = %i
+            ", $taskId);
 
-            // Initialize time_logs as empty array
             $timeLogs = [];
 
-            // Check if time_logs table exists before querying
             try {
                 $tableExists = DB::queryFirstField("
                     SELECT COUNT(*) 
@@ -125,7 +123,6 @@ try {
                     ", $taskId);
                 }
             } catch (Exception $e) {
-                // Silently ignore if time_logs table doesn't exist
                 $timeLogs = [];
             }
 
@@ -152,6 +149,39 @@ try {
             ];
 
             DB::insert('tasks', $taskData);
+            $taskId = DB::insertId();
+            
+            // Handle file uploads
+            if (!empty($_FILES['files'])) {
+                $uploadDir = '../uploads/tasks/';
+                if (!file_exists($uploadDir)) {
+                    mkdir($uploadDir, 0777, true);
+                }
+                
+                foreach ($_FILES['files']['tmp_name'] as $key => $tmpName) {
+                    $fileName = $_FILES['files']['name'][$key];
+                    $fileSize = $_FILES['files']['size'][$key];
+                    $fileType = $_FILES['files']['type'][$key];
+                    $fileError = $_FILES['files']['error'][$key];
+                    
+                    if ($fileError === UPLOAD_ERR_OK) {
+                        $uniqueName = uniqid() . '_' . $fileName;
+                        $destination = $uploadDir . $uniqueName;
+                        
+                        if (move_uploaded_file($tmpName, $destination)) {
+                            DB::insert('task_files', [
+                                'task_id' => $taskId,
+                                'file_name' => $fileName,
+                                'file_path' => $destination,
+                                'file_type' => $fileType,
+                                'file_size' => $fileSize,
+                                'uploaded_at' => date('Y-m-d H:i:s')
+                            ]);
+                        }
+                    }
+                }
+            }
+
             $response = [
                 'success' => true,
                 'message' => 'Task created successfully'
