@@ -131,11 +131,11 @@ if (!$userId) {
                         <label for="taskDetails" class="form-label">Details</label>
                         <textarea class="form-control" name="details" id="taskDetails" rows="3" maxlength="500"></textarea>
                     </div>
-                    <div class="mb-3">
-                        <label for="clickupLink" class="form-label">ClickUp Link</label>
-                        <input type="url" class="form-control" name="clickup_link" id="clickupLink" placeholder="https://app.clickup.com/t/xxxxxx">
-                    </div>
-                </div>
+                  <div class="col-12">
+                            <label for="taskFiles" class="form-label">Attachments</label>
+                            <input type="file" class="form-control" id="taskFiles" name="files[]" multiple>
+                            <small class="text-muted">You can upload multiple files (Max 10MB each)</small>
+                        </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-primary">Save Task</button>
@@ -187,7 +187,14 @@ if (!$userId) {
                 </div>
                 <div class="mb-2">${escapeHtml(task.details || '')}</div>
                 <div>
-                    ${task.clickup_link ? `<a href="${escapeHtml(task.clickup_link)}" target="_blank" class="btn btn-sm btn-outline-info me-2"><i class="fab fa-clickup"></i> ClickUp</a>` : ''}
+<a href="index.php?route=modules/assign/view_task&task_id=${task.id}" 
+   class="btn btn-sm btn-outline-secondary me-2" 
+   style="width:32px;height:32px;border-radius:6px;border:1px solid #dee2e6;" 
+   title="View Task"
+   aria-label="View Task">
+   <i class="fas fa-eye"></i>
+</a>
+
                     ${task.status === 'Pending' ? 
                         `<button class="btn btn-sm btn-outline-warning me-2" onclick="startTask(${task.id})"><i class="fas fa-play"></i> Start</button>` : 
                         ''}
@@ -402,7 +409,10 @@ if (!$userId) {
             showAlert(data.error || (isEdit ? 'Failed to update task' : 'Failed to create task'), 'danger');
         }
     };
-
+function viewTask(taskId) {
+        // Redirect to the view task page with the task ID
+        window.location.href = `index.php?route=modules/assign/view_task&task_id=${taskId}`;
+    }
     // Initial load
     loadTasks();
 </script>
