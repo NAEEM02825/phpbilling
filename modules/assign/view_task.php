@@ -4,151 +4,157 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Task Details</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         .task-header {
             background-color: #04665f;
             color: white;
-            padding: 1rem;
-            border-radius: 0.25rem 0.25rem 0 0;
+            padding: 1.5rem;
+            border-radius: 0.5rem 0.5rem 0 0;
         }
-        .task-detail-card {
+        .task-details-card {
+            border-radius: 0 0 0.5rem 0.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .file-card {
             border-left: 4px solid #04665f;
+            transition: all 0.3s ease;
         }
-        .attachment-item {
-            border: 1px solid #dee2e6;
-            border-radius: 0.25rem;
-            padding: 0.75rem;
-            margin-bottom: 0.75rem;
+        .file-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .badge-custom {
+            background-color: #04665f;
+            color: white;
+        }
+        .assignee-avatar {
+            width: 40px;
+            height: 40px;
+            background-color: #04665f;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
-    <div class="container mt-4">
-        <div class="card shadow-sm">
-            <div class="task-header d-flex justify-content-between align-items-center">
-                <h2 id="task-title">Task Details</h2>
-                <a href="javascript:history.back()" class="btn btn-light">
-                    <i class="fas fa-arrow-left"></i> Back
-                </a>
+    <div class="container py-4">
+        <!-- Back Button -->
+        <button class="btn btn-outline-secondary mb-3" onclick="window.history.back()">
+            <i class="fas fa-arrow-left me-2"></i>Back to Tasks
+        </button>
+        
+        <!-- Loading Spinner -->
+        <div id="loadingSpinner" class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2">Loading task details...</p>
+        </div>
+        
+        <!-- Task Details Container -->
+        <div id="taskContainer" style="display: none;">
+            <!-- Task Header -->
+            <div class="task-header mb-0">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h2 id="taskTitle" class="h4 mb-1"></h2>
+                        <p class="mb-0 small">Created: <span id="taskCreated"></span></p>
+                    </div>
+                    <span id="taskStatus" class="badge rounded-pill"></span>
+                </div>
             </div>
             
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-8">
-                        <!-- Task Details -->
-                        <div class="card mb-4 task-detail-card">
-                            <div class="card-body">
-                                <div id="task-loading" class="text-center py-4">
-                                    <div class="spinner-border text-primary" role="status">
-                                        <span class="visually-hidden">Loading...</span>
-                                    </div>
-                                    <p class="mt-2">Loading task details...</p>
-                                </div>
-                                
-                                <div id="task-content" style="display: none;">
-                                    <div class="d-flex justify-content-between align-items-start mb-3">
-                                        <div>
-                                            <span id="task-status" class="badge"></span>
-                                            <span id="task-priority" class="badge ms-2"></span>
-                                        </div>
-                                        <div id="task-date" class="text-muted"></div>
-                                    </div>
-                                    
-                                    <h4 id="task-name" class="mb-3"></h4>
-                                    
-                                    <div class="mb-4">
-                                        <h5>Description</h5>
-                                        <div id="task-description" class="p-3 bg-light rounded"></div>
-                                    </div>
-                                    
-                                    <div class="row mb-4">
-                                        <div class="col-md-6">
-                                            <h5>Project</h5>
-                                            <p id="task-project" class="text-muted"></p>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <h5>Assignee</h5>
-                                            <p id="task-assignee" class="text-muted"></p>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <h5>Estimated Hours</h5>
-                                            <p id="task-hours" class="text-muted"></p>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <h5>Created</h5>
-                                            <p id="task-created" class="text-muted"></p>
-                                        </div>
-                                    </div>
-                                </div>
+            <!-- Task Details Card -->
+            <div class="card task-details-card mb-4">
+                <div class="card-body">
+                    <div class="row">
+                        <!-- Left Column -->
+                        <div class="col-md-8">
+                            <h5 class="card-title mb-3">Task Details</h5>
+                            <div id="taskDetails" class="mb-4"></div>
+                            
+                            <div class="mb-3">
+                                <h6 class="mb-2">Estimated Hours</h6>
+                                <p id="taskHours" class="mb-0"></p>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <h6 class="mb-2">Due Date</h6>
+                                <p id="taskDate" class="mb-0"></p>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <h6 class="mb-2">ClickUp Link</h6>
+                                <a id="clickupLink" href="#" target="_blank" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-external-link-alt me-1"></i> View in ClickUp
+                                </a>
                             </div>
                         </div>
                         
-                        <!-- Comments Section -->
-                        <div class="card mb-4">
-                            <div class="card-header">
-                                <h5 class="mb-0">Comments</h5>
-                            </div>
-                            <div class="card-body">
-                                <div id="comments-container">
-                                    <p class="text-muted">No comments yet.</p>
-                                </div>
-                                <form id="comment-form" class="mt-3">
-                                    <div class="mb-3">
-                                        <textarea class="form-control" id="comment-text" rows="3" placeholder="Add a comment..."></textarea>
-                                    </div>
-                                    <button type="submit" class="btn btn-custom">Post Comment</button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="col-md-4">
-                        <!-- Task Meta -->
-                        <div class="card mb-4">
-                            <div class="card-header">
-                                <h5 class="mb-0">Details</h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="mb-3">
-                                    <h6>ClickUp Link</h6>
-                                    <p id="clickup-link" class="text-muted">Not provided</p>
-                                </div>
-                                <div class="mb-3">
-                                    <h6>Last Updated</h6>
-                                    <p id="task-updated" class="text-muted"></p>
+                        <!-- Right Column -->
+                        <div class="col-md-4">
+                            <div class="mb-4">
+                                <h5 class="card-title mb-3">Project Information</h5>
+                                <div class="d-flex align-items-center mb-3">
+                                    <i class="fas fa-project-diagram me-2 text-muted"></i>
+                                    <span id="projectName" class="fw-bold"></span>
                                 </div>
                             </div>
-                        </div>
-                        
-                        <!-- Attachments -->
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="mb-0">Attachments</h5>
-                            </div>
-                            <div class="card-body">
-                                <div id="attachments-container">
-                                    <p class="text-muted">No attachments.</p>
+                            
+                            <div class="mb-4">
+                                <h5 class="card-title mb-3">Assignee</h5>
+                                <div class="d-flex align-items-center">
+                                    <div class="assignee-avatar me-2" id="assigneeInitials"></div>
+                                    <span id="assigneeName" class="fw-bold"></span>
                                 </div>
-                                <button class="btn btn-sm btn-outline-secondary mt-2" id="upload-btn">
-                                    <i class="fas fa-plus"></i> Add Attachment
-                                </button>
-                                <input type="file" id="file-upload" style="display: none;">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <h5 class="card-title mb-3">Task ID</h5>
+                                <span id="taskId" class="badge bg-secondary"></span>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+            
+            <!-- Files Section -->
+            <div class="card mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Attachments</h5>
+                </div>
+                <div class="card-body">
+                    <div id="filesContainer" class="row">
+                        <!-- Files will be loaded here -->
+                    </div>
+                    <div id="noFilesMessage" class="text-center py-3" style="display: none;">
+                        <i class="fas fa-folder-open fa-2x text-muted mb-2"></i>
+                        <p class="text-muted">No files attached to this task</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Last Updated -->
+            <div class="text-end text-muted small">
+                Last updated: <span id="taskUpdated"></span>
+            </div>
         </div>
+        
+        <!-- Error Message -->
+        <div id="errorMessage" class="alert alert-danger text-center" style="display: none;"></div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
     <script>
-        document.addEventListener('DOMContentLoaded', async () => {
-            // Get task ID from URL
+        document.addEventListener('DOMContentLoaded', function() {
             const urlParams = new URLSearchParams(window.location.search);
             const taskId = urlParams.get('task_id');
             
@@ -157,116 +163,162 @@
                 return;
             }
             
-            try {
-                // Fetch task details
-                const response = await fetch(`ajax_helpers/get_task.php?task_id=${taskId}`);
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-                
-                const data = await response.json();
-                
-                if (data.error || !data.success) {
-                    throw new Error(data.error || 'Failed to load task');
-                }
-                
-                if (!data.task) {
-                    throw new Error('Task data not found');
-                }
-                
-                const task = data.task;
-                
-                // Update the page with task details
-                document.getElementById('task-title').textContent = task.title || 'Untitled Task';
-                
-                // Set status badge
-                const statusBadge = document.getElementById('task-status');
-                statusBadge.textContent = task.status || 'Unknown';
-                statusBadge.className = 'badge ' + getStatusClass(task.status);
-                
-                // Set other task details
-                document.getElementById('task-name').textContent = task.title || 'Untitled Task';
-                document.getElementById('task-description').innerHTML = task.details 
-                    ? formatTextWithLineBreaks(task.details) 
-                    : '<em>No description provided</em>';
-                
-                document.getElementById('task-project').textContent = task.project_name || 'No project';
-                document.getElementById('task-assignee').textContent = task.assignee_name 
-                    ? `${task.assignee_name} (${task.assignee_initials || ''})` 
-                    : 'Unassigned';
-                
-                document.getElementById('task-hours').textContent = task.hours ? `${task.hours} hours` : 'Not estimated';
-                document.getElementById('task-created').textContent = formatDate(task.created_at);
-                document.getElementById('task-updated').textContent = formatDate(task.updated_at);
-                
-                if (task.clickup_link) {
-                    const clickupLink = document.getElementById('clickup-link');
-                    clickupLink.innerHTML = `<a href="${task.clickup_link}" target="_blank">View in ClickUp <i class="fas fa-external-link-alt"></i></a>`;
-                }
-                
-                // Hide loading spinner and show content
-                document.getElementById('task-loading').style.display = 'none';
-                document.getElementById('task-content').style.display = 'block';
-                
-            } catch (error) {
-                console.error('Error:', error);
-                document.getElementById('task-loading').innerHTML = `
-                    <div class="alert alert-danger">
-                        Error loading task: ${escapeHtml(error.message)}
-                    </div>
-                `;
-            }
-            
-            // Helper functions
-            function escapeHtml(str) {
-                if (!str) return '';
-                const div = document.createElement('div');
-                div.textContent = str;
-                return div.innerHTML;
-            }
-            
-            function getStatusClass(status) {
-                if (!status) return 'bg-secondary';
-                status = status.toLowerCase();
-                if (status.includes('completed')) return 'bg-success';
-                if (status.includes('progress')) return 'bg-warning';
-                if (status.includes('pending')) return 'bg-info';
-                return 'bg-secondary';
-            }
-            
-            function formatDate(dateString) {
-                if (!dateString) return 'Not available';
-                const date = new Date(dateString);
-                if (isNaN(date)) return 'Invalid date';
-                
-                return date.toLocaleDateString('en-US', { 
-                    year: 'numeric', 
-                    month: 'short', 
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
+            loadTaskDetails(taskId);
+        });
+        
+        function loadTaskDetails(taskId) {
+            fetch(`ajax_helpers/get_task.php?task_id=${taskId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.success) {
+                        throw new Error(data.error || 'Failed to load task details');
+                    }
+                    
+                    displayTaskDetails(data.task, data.files);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showError(error.message);
                 });
+        }
+        
+        function displayTaskDetails(task, files) {
+            // Hide loading spinner and show container
+            document.getElementById('loadingSpinner').style.display = 'none';
+            document.getElementById('taskContainer').style.display = 'block';
+            
+            // Set basic task info
+            document.getElementById('taskTitle').textContent = task.title;
+            document.getElementById('taskId').textContent = task.id;
+            document.getElementById('taskDetails').textContent = task.details || 'No details provided';
+            document.getElementById('taskHours').textContent = task.hours + ' hours';
+            
+            // Format dates
+            document.getElementById('taskCreated').textContent = new Date(task.created_at).toLocaleString();
+            document.getElementById('taskUpdated').textContent = new Date(task.updated_at).toLocaleString();
+            document.getElementById('taskDate').textContent = new Date(task.task_date).toLocaleDateString();
+            
+            // Set status badge
+            const statusBadge = document.getElementById('taskStatus');
+            statusBadge.textContent = task.status;
+            statusBadge.className = 'badge rounded-pill ' + getStatusClass(task.status);
+            
+            // Set project info
+            document.getElementById('projectName').textContent = task.project_name || 'No project assigned';
+            
+            // Set assignee info
+            if (task.assignee_name) {
+                document.getElementById('assigneeName').textContent = task.assignee_name;
+                document.getElementById('assigneeInitials').textContent = 
+                    task.assignee_name.split(' ').map(n => n[0]).join('').toUpperCase();
+            } else {
+                document.getElementById('assigneeName').textContent = 'Unassigned';
+                document.getElementById('assigneeInitials').textContent = '?';
             }
             
-            function formatTextWithLineBreaks(text) {
-                if (!text) return '';
-                return escapeHtml(text).replace(/\n/g, '<br>');
+            // Set ClickUp link
+            const clickupLink = document.getElementById('clickupLink');
+            if (task.clickup_link) {
+                clickupLink.href = task.clickup_link;
+            } else {
+                clickupLink.style.display = 'none';
             }
             
-            function showError(message) {
-                const loadingDiv = document.getElementById('task-loading');
-                if (loadingDiv) {
-                    loadingDiv.innerHTML = `
-                        <div class="alert alert-danger">
-                            ${escapeHtml(message)}
+            // Display files
+            const filesContainer = document.getElementById('filesContainer');
+            const noFilesMessage = document.getElementById('noFilesMessage');
+            
+            if (files.length === 0) {
+                noFilesMessage.style.display = 'block';
+                filesContainer.style.display = 'none';
+            } else {
+                noFilesMessage.style.display = 'none';
+                filesContainer.style.display = 'flex';
+                filesContainer.innerHTML = '';
+                
+                files.forEach(file => {
+                    const fileCard = document.createElement('div');
+                    fileCard.className = 'col-md-4 mb-3';
+                    fileCard.innerHTML = `
+                        <div class="card file-card h-100">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="fas ${getFileIcon(file.file_type)} me-2 text-muted"></i>
+                                    <h6 class="mb-0">${file.file_name}</h6>
+                                </div>
+                                <p class="small text-muted mb-2">
+                                    ${formatFileSize(file.file_size)} • ${new Date(file.uploaded_at).toLocaleDateString()}
+                                </p>
+                                <div class="d-flex">
+                                    <a href="${file.file_path}" 
+                                       class="btn btn-sm btn-outline-primary me-2" 
+                                       download="${file.file_name}">
+                                        <i class="fas fa-download me-1"></i> Download
+                                    </a>
+                                    <a href="${file.file_path}" 
+                                       target="_blank" 
+                                       class="btn btn-sm btn-outline-secondary">
+                                        <i class="fas fa-eye me-1"></i> View
+                                    </a>
+                                </div>
+                            </div>
                         </div>
                     `;
-                } else {
-                    alert(message);
-                }
+                    filesContainer.appendChild(fileCard);
+                });
             }
-        });
+        }
+        
+        function getStatusClass(status) {
+            switch (status.toLowerCase()) {
+                case 'pending': return 'bg-warning';
+                case 'in progress': return 'bg-primary';
+                case 'completed': return 'bg-success';
+                default: return 'bg-secondary';
+            }
+        }
+        
+        function getFileIcon(fileType) {
+            if (!fileType) return 'fa-file';
+            
+            const type = fileType.split('/')[0];
+            switch (type) {
+                case 'image': return 'fa-file-image';
+                case 'video': return 'fa-file-video';
+                case 'audio': return 'fa-file-audio';
+                case 'application':
+                    if (fileType.includes('pdf')) return 'fa-file-pdf';
+                    if (fileType.includes('word')) return 'fa-file-word';
+                    if (fileType.includes('excel')) return 'fa-file-excel';
+                    if (fileType.includes('powerpoint')) return 'fa-file-powerpoint';
+                    if (fileType.includes('zip')) return 'fa-file-archive';
+                    return 'fa-file';
+                default: return 'fa-file';
+            }
+        }
+        
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2) )+ ' ' + sizes[i];
+        }
+        
+        function showError(message) {
+            document.getElementById('loadingSpinner').style.display = 'none';
+            const errorElement = document.getElementById('errorMessage');
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+            
+            // Also show a SweetAlert for better visibility
+            Swal.fire({
+                title: 'Error',
+                text: message,
+                icon: 'error',
+                confirmButtonColor: '#04665f'
+            });
+        }
     </script>
 </body>
 </html>

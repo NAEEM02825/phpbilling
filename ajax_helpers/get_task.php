@@ -1,42 +1,39 @@
 <?php
 require('../functions.php');
 
-header('Content-Type: application/json');
-
-// Check if task_id is provided
-if (!isset($_GET['task_id']) || !is_numeric($_GET['task_id'])) {
-    die(json_encode(['error' => 'Invalid task ID']));
-}
-
-$taskId = intval($_GET['task_id']);
-
-try {
-    // Fetch task details from database
-    $stmt = $pdo->prepare("
-        SELECT 
-            t.*, 
-            p.name AS project_name,
-            u.name AS assignee_name,
-            u.initials AS assignee_initials
-        FROM tasks t
-        LEFT JOIN projects p ON t.project_id = p.id
-        LEFT JOIN users u ON t.assignee_id = u.user_id
-        WHERE t.id = ?
-    ");
-    $stmt->execute([$taskId]);
-    $task = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    if (!$task) {
-        die(json_encode(['error' => 'Task not found']));
-    }
-
-    // Return task data as JSON
-    header('Content-Type: application/json');
-    echo json_encode([
-        'success' => true,
-        'task' => $task
-    ]);
+if (isset($_GET['task_id'])) {
+    $taskId = $_GET['task_id'];
     
-} catch (PDOException $e) {
-    die(json_encode(['error' => 'Database error: ' . $e->getMessage()]));
+    try {
+        // Get task details
+        $task = DB::queryFirstRow("
+            SELECT t.*, u.user_name as assignee_name, p.name as project_name 
+            FROM tasks t
+            LEFT JOIN users u ON t.assignee_id = u.user_id
+            LEFT JOIN projects p ON t.project_id = p.id
+            WHERE t.id = %i", $taskId);
+            
+        if (!$task) {
+            die(json_encode(['success' => false, 'error' => 'Task not found']));
+        }
+        
+        // Get task files
+        $files = DB::query("
+            SELECT * FROM task_files 
+            WHERE task_id = %i 
+            ORDER BY uploaded_at DESC", $taskId);
+            
+        $response = [
+            'success' => true,
+            'task' => $task,
+            'files' => $files
+        ];
+        
+        header('Content-Type: application/json');
+        echo json_encode($response);
+        
+    } catch (Exception $e) {
+        die(json_encode(['success' => false, 'error' => $e->getMessage()]));
+    }
 }
+?>
