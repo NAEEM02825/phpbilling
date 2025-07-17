@@ -172,40 +172,42 @@ if (!$userId) {
                 return;
             }
             container.innerHTML = '';
-            data.tasks.forEach(task => {
-                const card = document.createElement('div');
-                card.className = 'task-card';
-                card.innerHTML = `
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                    <span class="task-title">${escapeHtml(task.title)}</span>
-                    <span class="badge badge-status ${getStatusClass(task.status)}">${escapeHtml(task.status)}</span>
-                </div>
-                <div class="task-meta mb-2">
-                    <i class="fas fa-project-diagram me-1"></i> ${escapeHtml(task.project_name || 'No project')}
-                    &nbsp;|&nbsp; <i class="fas fa-calendar-alt me-1"></i> ${escapeHtml(task.task_date)}
-                    &nbsp;|&nbsp; <i class="fas fa-clock me-1"></i> ${task.hours || '0'}h
-                </div>
-                <div class="mb-2">${escapeHtml(task.details || '')}</div>
-                <div>
-<a href="index.php?route=modules/assign/view_task&task_id=${task.id}" 
-   class="btn btn-sm btn-outline-secondary me-2" 
-   style="width:32px;height:32px;border-radius:6px;border:1px solid #dee2e6;" 
-   title="View Task"
-   aria-label="View Task">
-   <i class="fas fa-eye"></i>
-</a>
-
-                    ${task.status === 'Pending' ? 
-                        `<button class="btn btn-sm btn-outline-warning me-2" onclick="startTask(${task.id})"><i class="fas fa-play"></i> Start</button>` : 
-                        ''}
-                    ${task.status !== 'Completed' ? 
-                        `<button class="btn btn-sm btn-outline-success me-2" onclick="completeTask(${task.id})" ${task.status === 'Pending' ? 'disabled' : ''}><i class="fas fa-check"></i> Complete</button>` : 
-                        ''}
-                    <button class="btn btn-sm btn-outline-primary me-2" onclick="editTask(${task.id})" ${task.status === 'Completed' ? 'disabled' : ''}><i class="fas fa-edit"></i> Edit</button>
-                    <button class="btn btn-sm btn-outline-danger" onclick="deleteTask(${task.id})" ${task.status === 'Completed' ? 'disabled' : ''}><i class="fas fa-trash"></i> Delete</button>
-                </div>`;
-                container.appendChild(card);
-            });
+data.tasks.forEach(task => {
+    const card = document.createElement('div');
+    card.className = 'task-card';
+    card.innerHTML = `
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <span class="task-title">${escapeHtml(task.title)}</span>
+        <span class="badge badge-status ${getStatusClass(task.status)}">${escapeHtml(task.status)}</span>
+    </div>
+    <div class="task-meta mb-2">
+        <i class="fas fa-project-diagram me-1"></i> ${escapeHtml(task.project_name || 'No project')}
+        &nbsp;|&nbsp; <i class="fas fa-calendar-alt me-1"></i> ${escapeHtml(task.task_date)}
+        &nbsp;|&nbsp; <i class="fas fa-clock me-1"></i> ${task.hours || '0'}h
+    </div>
+    <div class="mb-2">${escapeHtml(truncateWords(task.details, 10))}</div>
+    ${task.details && task.details.split(/\s+/).length > 10 ? 
+        '<div><a href="#" onclick="viewTask('+task.id+')" class="small">View more</a></div>' : 
+        ''}
+    <div>
+        <a href="index.php?route=modules/assign/view_task&task_id=${task.id}" 
+           class="btn btn-sm btn-outline-secondary me-2" 
+           style="width:32px;height:32px;border-radius:6px;border:1px solid #dee2e6;" 
+           title="View Task"
+           aria-label="View Task">
+           <i class="fas fa-eye"></i>
+        </a>
+        ${task.status === 'Pending' ? 
+            `<button class="btn btn-sm btn-outline-warning me-2" onclick="startTask(${task.id})"><i class="fas fa-play"></i> Start</button>` : 
+            ''}
+        ${task.status !== 'Completed' ? 
+            `<button class="btn btn-sm btn-outline-success me-2" onclick="completeTask(${task.id})" ${task.status === 'Pending' ? 'disabled' : ''}><i class="fas fa-check"></i> Complete</button>` : 
+            ''}
+        <button class="btn btn-sm btn-outline-primary me-2" onclick="editTask(${task.id})" ${task.status === 'Completed' ? 'disabled' : ''}><i class="fas fa-edit"></i> Edit</button>
+        <button class="btn btn-sm btn-outline-danger" onclick="deleteTask(${task.id})" ${task.status === 'Completed' ? 'disabled' : ''}><i class="fas fa-trash"></i> Delete</button>
+    </div>`;
+    container.appendChild(card);
+});
         }
 
         // Load project options for select
@@ -275,6 +277,13 @@ if (!$userId) {
                 showAlert('Error completing task: ' + error.message, 'danger');
             }
         }
+        // Helper function to truncate text to 10 words
+        function truncateWords(text, maxWords) {
+            if (!text) return '';
+            const words = text.trim().split(/\s+/);
+            if (words.length <= maxWords) return text;
+            return words.slice(0, maxWords).join(' ') + '...';
+        }
 
         // Edit task
         async function editTask(taskId) {
@@ -313,36 +322,36 @@ if (!$userId) {
 
             // Store task ID in form for update
             document.getElementById('taskForm').onsubmit = async function(e) {
-    e.preventDefault();
-    const formData = new FormData(this);
-    const isEdit = !!this.dataset.taskId;
+                e.preventDefault();
+                const formData = new FormData(this);
+                const isEdit = !!this.dataset.taskId;
 
-    if (isEdit) {
-        formData.append('action', 'update_task');
-        formData.append('task_id', this.dataset.taskId);
-    } else {
-        formData.append('action', 'create_task');
-        formData.append('assignee_id', userId);
-    }
-    formData.append('user_id', userId);
+                if (isEdit) {
+                    formData.append('action', 'update_task');
+                    formData.append('task_id', this.dataset.taskId);
+                } else {
+                    formData.append('action', 'create_task');
+                    formData.append('assignee_id', userId);
+                }
+                formData.append('user_id', userId);
 
-    try {
-        const res = await fetch('ajax_helpers/user_task_crud.php', {
-            method: 'POST',
-            body: formData  // No headers needed for FormData
-        });
-        const data = await res.json();
-        if (data.success) {
-            showAlert(isEdit ? 'Task updated!' : 'Task created!');
-            bootstrap.Modal.getInstance(document.getElementById('taskModal')).hide();
-            loadTasks();
-        } else {
-            showAlert(data.error || (isEdit ? 'Failed to update task' : 'Failed to create task'), 'danger');
-        }
-    } catch (error) {
-        showAlert('Error: ' + error.message, 'danger');
-    }
-};
+                try {
+                    const res = await fetch('ajax_helpers/user_task_crud.php', {
+                        method: 'POST',
+                        body: formData // No headers needed for FormData
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        showAlert(isEdit ? 'Task updated!' : 'Task created!');
+                        bootstrap.Modal.getInstance(document.getElementById('taskModal')).hide();
+                        loadTasks();
+                    } else {
+                        showAlert(data.error || (isEdit ? 'Failed to update task' : 'Failed to create task'), 'danger');
+                    }
+                } catch (error) {
+                    showAlert('Error: ' + error.message, 'danger');
+                }
+            };
             form.dataset.taskId = taskId;
 
             // Show modal
