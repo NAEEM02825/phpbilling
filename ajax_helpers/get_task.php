@@ -7,7 +7,7 @@ if (isset($_GET['task_id'])) {
     try {
         // Get task details
         $task = DB::queryFirstRow("
-            SELECT t.*, u.user_name as assignee_name, p.name as project_name 
+            SELECT t.*, u.first_name as assignee_name, p.name as project_name 
             FROM tasks t
             LEFT JOIN users u ON t.assignee_id = u.user_id
             LEFT JOIN projects p ON t.project_id = p.id

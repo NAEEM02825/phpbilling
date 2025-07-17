@@ -79,25 +79,8 @@
                         <div class="row">
                             <!-- Left Column -->
                             <div class="col-md-8">
-                                <h5 class="card-title mb-3">Task Details</h5>
+                                <h5 class="card-title mb-3">Task Description</h5>
                                 <div id="taskDetails" class="mb-4"></div>
-
-                                <div class="mb-3">
-                                    <h6 class="mb-2">Estimated Hours</h6>
-                                    <p id="taskHours" class="mb-0"></p>
-                                </div>
-
-                                <div class="mb-3">
-                                    <h6 class="mb-2">Due Date</h6>
-                                    <p id="taskDate" class="mb-0"></p>
-                                </div>
-
-                                <div class="mb-3">
-                                    <h6 class="mb-2">ClickUp Link</h6>
-                                    <a id="clickupLink" href="#" target="_blank" class="btn btn-sm btn-outline-primary">
-                                        <i class="fas fa-external-link-alt me-1"></i> View in ClickUp
-                                    </a>
-                                </div>
                             </div>
 
                             <!-- Right Column -->
@@ -117,10 +100,24 @@
                                         <span id="assigneeName" class="fw-bold"></span>
                                     </div>
                                 </div>
+                                <div class="mb-3">
+                                    <h6 class="mb-2">Estimated Hours</h6>
+                                    <p id="taskHours" class="mb-0"></p>
+                                </div>
 
+                                <div class="mb-3">
+                                    <h6 class="mb-2">Due Date</h6>
+                                    <p id="taskDate" class="mb-0"></p>
+                                </div>
                                 <div class="mb-3">
                                     <h5 class="card-title mb-3">Task ID</h5>
                                     <span id="taskId" class="badge bg-secondary"></span>
+                                </div>
+                                <div class="mb-3">
+                                    <h6 class="mb-2">ClickUp Link</h6>
+                                    <a id="clickupLink" href="#" target="_blank" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-external-link-alt me-1"></i> View in ClickUp
+                                    </a>
                                 </div>
                             </div>
                         </div>
