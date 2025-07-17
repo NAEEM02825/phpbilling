@@ -131,15 +131,15 @@ if (!$userId) {
                         <label for="taskDetails" class="form-label">Details</label>
                         <textarea class="form-control" name="details" id="taskDetails" rows="3" maxlength="500"></textarea>
                     </div>
-                  <div class="col-12">
-                            <label for="taskFiles" class="form-label">Attachments</label>
-                            <input type="file" class="form-control" id="taskFiles" name="files[]" multiple>
-                            <small class="text-muted">You can upload multiple files (Max 10MB each)</small>
-                        </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Save Task</button>
-                </div>
+                    <div class="mb-3">
+                        <label for="taskFiles" class="form-label">Attachments</label>
+                        <input type="file" class="form-control" id="taskFiles" name="files[]" multiple>
+                        <small class="text-muted">You can upload multiple files (Max 10MB each)</small>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Task</button>
+                    </div>
             </form>
         </div>
     </div>
@@ -149,33 +149,33 @@ if (!$userId) {
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-    const userId = <?= (int)$userId ?>;
+        const userId = <?= (int)$userId ?>;
 
-    // Load all tasks for this user
-    async function loadTasks() {
-        const container = document.getElementById('tasks-container');
-        container.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary"></div></div>';
-        const res = await fetch('ajax_helpers/user_task_crud.php', {
-            method: 'POST',
-            body: new URLSearchParams({
-                action: 'get_my_tasks',
-                user_id: userId
-            })
-        });
-        const data = await res.json();
-        if (!data.success) {
-            container.innerHTML = '<div class="alert alert-danger">Failed to load tasks.</div>';
-            return;
-        }
-        if (!data.tasks.length) {
-            container.innerHTML = `<div class="no-tasks"><i class="fas fa-check-circle fa-2x mb-2"></i><br>No tasks assigned yet.</div>`;
-            return;
-        }
-        container.innerHTML = '';
-        data.tasks.forEach(task => {
-            const card = document.createElement('div');
-            card.className = 'task-card';
-            card.innerHTML = `
+        // Load all tasks for this user
+        async function loadTasks() {
+            const container = document.getElementById('tasks-container');
+            container.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary"></div></div>';
+            const res = await fetch('ajax_helpers/user_task_crud.php', {
+                method: 'POST',
+                body: new URLSearchParams({
+                    action: 'get_my_tasks',
+                    user_id: userId
+                })
+            });
+            const data = await res.json();
+            if (!data.success) {
+                container.innerHTML = '<div class="alert alert-danger">Failed to load tasks.</div>';
+                return;
+            }
+            if (!data.tasks.length) {
+                container.innerHTML = `<div class="no-tasks"><i class="fas fa-check-circle fa-2x mb-2"></i><br>No tasks assigned yet.</div>`;
+                return;
+            }
+            container.innerHTML = '';
+            data.tasks.forEach(task => {
+                const card = document.createElement('div');
+                card.className = 'task-card';
+                card.innerHTML = `
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <span class="task-title">${escapeHtml(task.title)}</span>
                     <span class="badge badge-status ${getStatusClass(task.status)}">${escapeHtml(task.status)}</span>
@@ -204,201 +204,132 @@ if (!$userId) {
                     <button class="btn btn-sm btn-outline-primary me-2" onclick="editTask(${task.id})" ${task.status === 'Completed' ? 'disabled' : ''}><i class="fas fa-edit"></i> Edit</button>
                     <button class="btn btn-sm btn-outline-danger" onclick="deleteTask(${task.id})" ${task.status === 'Completed' ? 'disabled' : ''}><i class="fas fa-trash"></i> Delete</button>
                 </div>`;
-            container.appendChild(card);
-        });
-    }
-
-    // Load project options for select
-    async function loadProjectOptions() {
-        const select = document.getElementById('taskProject');
-        select.innerHTML = '<option value="">Loading...</option>';
-        const res = await fetch('ajax_helpers/user_task_crud.php', {
-            method: 'POST',
-            body: new URLSearchParams({
-                action: 'get_projects'
-            })
-        });
-        const data = await res.json();
-        select.innerHTML = '<option value="">Select project</option>';
-        if (data.success && Array.isArray(data.projects)) {
-            data.projects.forEach(p => {
-                const opt = document.createElement('option');
-                opt.value = p.id;
-                opt.textContent = p.name;
-                select.appendChild(opt);
+                container.appendChild(card);
             });
         }
-    }
 
-    // Start task (change status to In Progress)
-    async function startTask(taskId) {
-        try {
+        // Load project options for select
+        async function loadProjectOptions() {
+            const select = document.getElementById('taskProject');
+            select.innerHTML = '<option value="">Loading...</option>';
             const res = await fetch('ajax_helpers/user_task_crud.php', {
                 method: 'POST',
                 body: new URLSearchParams({
-                    action: 'start_task',
+                    action: 'get_projects'
+                })
+            });
+            const data = await res.json();
+            select.innerHTML = '<option value="">Select project</option>';
+            if (data.success && Array.isArray(data.projects)) {
+                data.projects.forEach(p => {
+                    const opt = document.createElement('option');
+                    opt.value = p.id;
+                    opt.textContent = p.name;
+                    select.appendChild(opt);
+                });
+            }
+        }
+
+        // Start task (change status to In Progress)
+        async function startTask(taskId) {
+            try {
+                const res = await fetch('ajax_helpers/user_task_crud.php', {
+                    method: 'POST',
+                    body: new URLSearchParams({
+                        action: 'start_task',
+                        task_id: taskId,
+                        user_id: userId
+                    })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showAlert('Task started! Status changed to In Progress.');
+                    loadTasks();
+                } else {
+                    showAlert(data.error || 'Failed to start task', 'danger');
+                }
+            } catch (error) {
+                showAlert('Error starting task: ' + error.message, 'danger');
+            }
+        }
+
+        // Complete task
+        async function completeTask(taskId) {
+            try {
+                const res = await fetch('ajax_helpers/user_task_crud.php', {
+                    method: 'POST',
+                    body: new URLSearchParams({
+                        action: 'complete_task',
+                        task_id: taskId,
+                        user_id: userId
+                    })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showAlert('Task marked as completed!');
+                    loadTasks();
+                } else {
+                    showAlert(data.error || 'Failed to complete task', 'danger');
+                }
+            } catch (error) {
+                showAlert('Error completing task: ' + error.message, 'danger');
+            }
+        }
+
+        // Edit task
+        async function editTask(taskId) {
+            // Load task data
+            const res = await fetch('ajax_helpers/user_task_crud.php', {
+                method: 'POST',
+                body: new URLSearchParams({
+                    action: 'get_task',
                     task_id: taskId,
                     user_id: userId
                 })
             });
             const data = await res.json();
-            if (data.success) {
-                showAlert('Task started! Status changed to In Progress.');
-                loadTasks();
-            } else {
-                showAlert(data.error || 'Failed to start task', 'danger');
+
+            if (!data.success) {
+                showAlert(data.error || 'Failed to load task', 'danger');
+                return;
             }
-        } catch (error) {
-            showAlert('Error starting task: ' + error.message, 'danger');
-        }
-    }
 
-    // Complete task
-    async function completeTask(taskId) {
-        try {
-            const res = await fetch('ajax_helpers/user_task_crud.php', {
-                method: 'POST',
-                body: new URLSearchParams({
-                    action: 'complete_task',
-                    task_id: taskId,
-                    user_id: userId
-                })
-            });
-            const data = await res.json();
-            if (data.success) {
-                showAlert('Task marked as completed!');
-                loadTasks();
-            } else {
-                showAlert(data.error || 'Failed to complete task', 'danger');
-            }
-        } catch (error) {
-            showAlert('Error completing task: ' + error.message, 'danger');
-        }
-    }
+            const task = data.task;
 
-    // Edit task
-    async function editTask(taskId) {
-        // Load task data
+            // Set modal title
+            document.getElementById('taskModalLabel').textContent = 'Edit Task';
+
+            // Load projects
+            await loadProjectOptions();
+
+            // Fill form with task data
+            document.getElementById('taskTitle').value = task.title;
+            document.getElementById('taskProject').value = task.project_id;
+            document.getElementById('taskDate').value = task.task_date;
+            document.getElementById('taskHours').value = task.hours;
+            document.getElementById('taskStatus').value = task.status;
+            document.getElementById('taskDetails').value = task.details || '';
+            document.getElementById('clickupLink').value = task.clickup_link || '';
+
+            // Store task ID in form for update
+            document.getElementById('taskForm').onsubmit = async function(e) {
+    e.preventDefault();
+    const formData = new FormData(this);
+    const isEdit = !!this.dataset.taskId;
+
+    if (isEdit) {
+        formData.append('action', 'update_task');
+        formData.append('task_id', this.dataset.taskId);
+    } else {
+        formData.append('action', 'create_task');
+        formData.append('assignee_id', userId);
+    }
+    formData.append('user_id', userId);
+
+    try {
         const res = await fetch('ajax_helpers/user_task_crud.php', {
             method: 'POST',
-            body: new URLSearchParams({
-                action: 'get_task',
-                task_id: taskId,
-                user_id: userId
-            })
-        });
-        const data = await res.json();
-
-        if (!data.success) {
-            showAlert(data.error || 'Failed to load task', 'danger');
-            return;
-        }
-
-        const task = data.task;
-
-        // Set modal title
-        document.getElementById('taskModalLabel').textContent = 'Edit Task';
-
-        // Load projects
-        await loadProjectOptions();
-
-        // Fill form with task data
-        document.getElementById('taskTitle').value = task.title;
-        document.getElementById('taskProject').value = task.project_id;
-        document.getElementById('taskDate').value = task.task_date;
-        document.getElementById('taskHours').value = task.hours;
-        document.getElementById('taskStatus').value = task.status;
-        document.getElementById('taskDetails').value = task.details || '';
-        document.getElementById('clickupLink').value = task.clickup_link || '';
-
-        // Store task ID in form for update
-        const form = document.getElementById('taskForm');
-        form.dataset.taskId = taskId;
-
-        // Show modal
-        const modal = new bootstrap.Modal(document.getElementById('taskModal'));
-        modal.show();
-    }
-
-    // Delete task
-    async function deleteTask(taskId) {
-        if (!confirm('Are you sure you want to delete this task?')) return;
-        const res = await fetch('ajax_helpers/user_task_crud.php', {
-            method: 'POST',
-            body: new URLSearchParams({
-                action: 'delete_task',
-                task_id: taskId,
-                user_id: userId
-            })
-        });
-        const data = await res.json();
-        if (data.success) {
-            showAlert('Task deleted!');
-            loadTasks();
-        } else {
-            showAlert(data.error || 'Failed to delete task', 'danger');
-        }
-    }
-
-    // Show alert
-    function showAlert(msg, type = 'success') {
-        const box = document.getElementById('alertBox');
-        box.className = `alert alert-${type} alert-fixed`;
-        box.textContent = msg;
-        box.classList.remove('d-none');
-        setTimeout(() => box.classList.add('d-none'), 3000);
-    }
-
-    // Escape HTML
-    function escapeHtml(str) {
-        return (str || '').replace(/[&<>"']/g, function(m) {
-            return ({
-                '&': '&amp;',
-                '<': '&lt;',
-                '>': '&gt;',
-                '"': '&quot;',
-                "'": '&#039;'
-            })[m];
-        });
-    }
-
-    // Status badge class
-    function getStatusClass(status) {
-        status = (status || '').toLowerCase();
-        if (status === 'completed') return 'bg-success';
-        if (status === 'in progress') return 'bg-primary';
-        return 'bg-warning';
-    }
-
-    // Open modal for new task
-    document.getElementById('btnNewTask').onclick = () => {
-        document.getElementById('taskModalLabel').textContent = 'Create Task';
-        document.getElementById('taskForm').reset();
-        delete document.getElementById('taskForm').dataset.taskId;
-        loadProjectOptions();
-        const modal = new bootstrap.Modal(document.getElementById('taskModal'));
-        modal.show();
-    };
-
-    // Handle form submit (create/update task)
-    document.getElementById('taskForm').onsubmit = async function(e) {
-        e.preventDefault();
-        const formData = new FormData(this);
-        const isEdit = !!this.dataset.taskId;
-
-        if (isEdit) {
-            formData.append('action', 'update_task');
-            formData.append('task_id', this.dataset.taskId);
-        } else {
-            formData.append('action', 'create_task');
-            formData.append('assignee_id', userId);
-            // Status will come from the form selection
-        }
-        formData.append('user_id', userId);
-
-        const res = await fetch('ajax_helpers/user_task_crud.php', {
-            method: 'POST',
-            body: formData
+            body: formData  // No headers needed for FormData
         });
         const data = await res.json();
         if (data.success) {
@@ -408,11 +339,111 @@ if (!$userId) {
         } else {
             showAlert(data.error || (isEdit ? 'Failed to update task' : 'Failed to create task'), 'danger');
         }
-    };
-function viewTask(taskId) {
-        // Redirect to the view task page with the task ID
-        window.location.href = `index.php?route=modules/assign/view_task&task_id=${taskId}`;
+    } catch (error) {
+        showAlert('Error: ' + error.message, 'danger');
     }
-    // Initial load
-    loadTasks();
-</script>
+};
+            form.dataset.taskId = taskId;
+
+            // Show modal
+            const modal = new bootstrap.Modal(document.getElementById('taskModal'));
+            modal.show();
+        }
+
+        // Delete task
+        async function deleteTask(taskId) {
+            if (!confirm('Are you sure you want to delete this task?')) return;
+            const res = await fetch('ajax_helpers/user_task_crud.php', {
+                method: 'POST',
+                body: new URLSearchParams({
+                    action: 'delete_task',
+                    task_id: taskId,
+                    user_id: userId
+                })
+            });
+            const data = await res.json();
+            if (data.success) {
+                showAlert('Task deleted!');
+                loadTasks();
+            } else {
+                showAlert(data.error || 'Failed to delete task', 'danger');
+            }
+        }
+
+        // Show alert
+        function showAlert(msg, type = 'success') {
+            const box = document.getElementById('alertBox');
+            box.className = `alert alert-${type} alert-fixed`;
+            box.textContent = msg;
+            box.classList.remove('d-none');
+            setTimeout(() => box.classList.add('d-none'), 3000);
+        }
+
+        // Escape HTML
+        function escapeHtml(str) {
+            return (str || '').replace(/[&<>"']/g, function(m) {
+                return ({
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#039;'
+                })[m];
+            });
+        }
+
+        // Status badge class
+        function getStatusClass(status) {
+            status = (status || '').toLowerCase();
+            if (status === 'completed') return 'bg-success';
+            if (status === 'in progress') return 'bg-primary';
+            return 'bg-warning';
+        }
+
+        // Open modal for new task
+        document.getElementById('btnNewTask').onclick = () => {
+            document.getElementById('taskModalLabel').textContent = 'Create Task';
+            document.getElementById('taskForm').reset();
+            delete document.getElementById('taskForm').dataset.taskId;
+            loadProjectOptions();
+            const modal = new bootstrap.Modal(document.getElementById('taskModal'));
+            modal.show();
+        };
+
+        // Handle form submit (create/update task)
+        document.getElementById('taskForm').onsubmit = async function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const isEdit = !!this.dataset.taskId;
+
+            if (isEdit) {
+                formData.append('action', 'update_task');
+                formData.append('task_id', this.dataset.taskId);
+            } else {
+                formData.append('action', 'create_task');
+                formData.append('assignee_id', userId);
+                // Status will come from the form selection
+            }
+            formData.append('user_id', userId);
+
+            const res = await fetch('ajax_helpers/user_task_crud.php', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await res.json();
+            if (data.success) {
+                showAlert(isEdit ? 'Task updated!' : 'Task created!');
+                bootstrap.Modal.getInstance(document.getElementById('taskModal')).hide();
+                loadTasks();
+            } else {
+                showAlert(data.error || (isEdit ? 'Failed to update task' : 'Failed to create task'), 'danger');
+            }
+        };
+
+        function viewTask(taskId) {
+            // Redirect to the view task page with the task ID
+            window.location.href = `index.php?route=modules/assign/view_task&task_id=${taskId}`;
+        }
+        // Initial load
+        loadTasks();
+    </script>
