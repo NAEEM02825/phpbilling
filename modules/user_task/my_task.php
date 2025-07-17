@@ -190,7 +190,7 @@ data.tasks.forEach(task => {
         '<div><a href="#" onclick="viewTask('+task.id+')" class="small">View more</a></div>' : 
         ''}
     <div>
-        <a href="index.php?route=modules/assign/view_task&task_id=${task.id}" 
+        <a href="index.php?route=modules/user_task/view_task&task_id=${task.id}" 
            class="btn btn-sm btn-outline-secondary me-2" 
            style="width:32px;height:32px;border-radius:6px;border:1px solid #dee2e6;" 
            title="View Task"
