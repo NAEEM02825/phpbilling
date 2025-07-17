@@ -19,7 +19,9 @@ if (isset($_GET['task_id'])) {
         
         // Get task files
         $files = DB::query("
-            SELECT * FROM task_files 
+            SELECT *, 
+                   CONCAT('uploads/tasks/', SUBSTRING_INDEX(file_path, '/', -1)) as display_path
+            FROM task_files 
             WHERE task_id = %i 
             ORDER BY uploaded_at DESC", $taskId);
             

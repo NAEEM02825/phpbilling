@@ -59,7 +59,7 @@ try {
                 'data' => $tasks
             ];
             break;
-            
+
         case 'update_task_status':
             $taskId = $_POST['task_id'];
             $newStatus = strtolower($_POST['status']);
@@ -80,7 +80,7 @@ try {
                 'message' => 'Status updated successfully'
             ];
             break;
-            
+
         case 'get_users':
             $users = DB::query("SELECT user_id, CONCAT(first_name, ' ', last_name) as name 
                FROM users 
@@ -150,34 +150,46 @@ try {
 
             DB::insert('tasks', $taskData);
             $taskId = DB::insertId();
-            
-            // Handle file uploads
-            if (!empty($_FILES['files'])) {
-                $uploadDir = '../uploads/tasks/';
-                if (!file_exists($uploadDir)) {
-                    mkdir($uploadDir, 0777, true);
-                }
-                
-                foreach ($_FILES['files']['tmp_name'] as $key => $tmpName) {
-                    $fileName = $_FILES['files']['name'][$key];
-                    $fileSize = $_FILES['files']['size'][$key];
-                    $fileType = $_FILES['files']['type'][$key];
-                    $fileError = $_FILES['files']['error'][$key];
-                    
-                    if ($fileError === UPLOAD_ERR_OK) {
-                        $uniqueName = uniqid() . '_' . $fileName;
-                        $destination = $uploadDir . $uniqueName;
-                        
-                        if (move_uploaded_file($tmpName, $destination)) {
-                            DB::insert('task_files', [
-                                'task_id' => $taskId,
-                                'file_name' => $fileName,
-                                'file_path' => $destination,
-                                'file_type' => $fileType,
-                                'file_size' => $fileSize,
-                                'uploaded_at' => date('Y-m-d H:i:s')
-                            ]);
-                        }
+
+            // In your create_task case:
+            $uploadDir = '../uploads/tasks/';
+            if (!file_exists($uploadDir)) {
+                mkdir($uploadDir, 0777, true);
+            }
+
+            foreach ($_FILES['files']['tmp_name'] as $key => $tmpName) {
+                $originalName = $_FILES['files']['name'][$key];
+                $fileSize = $_FILES['files']['size'][$key];
+                $fileType = $_FILES['files']['type'][$key];
+                $fileError = $_FILES['files']['error'][$key];
+
+                if ($fileError === UPLOAD_ERR_OK) {
+                    // Sanitize filename
+                    $cleanName = preg_replace('/[^a-zA-Z0-9._-]/', '_', $originalName);
+
+                    // Handle duplicate filenames
+                    $counter = 1;
+                    $pathInfo = pathinfo($cleanName);
+                    $filename = $pathInfo['filename'];
+                    $extension = isset($pathInfo['extension']) ? '.' . $pathInfo['extension'] : '';
+
+                    while (file_exists($uploadDir . $filename . $extension)) {
+                        $filename = $pathInfo['filename'] . '_' . $counter;
+                        $counter++;
+                    }
+
+                    $finalName = $filename . $extension;
+                    $destination = $uploadDir . $finalName;
+
+                    if (move_uploaded_file($tmpName, $destination)) {
+                        DB::insert('task_files', [
+                            'task_id' => $taskId,
+                            'file_name' => $originalName,
+                            'file_path' => 'uploads/tasks/' . $finalName,
+                            'file_type' => $fileType,
+                            'file_size' => $fileSize,
+                            'uploaded_at' => date('Y-m-d H:i:s')
+                        ]);
                     }
                 }
             }
