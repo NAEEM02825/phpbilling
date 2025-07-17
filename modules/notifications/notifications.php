@@ -59,15 +59,23 @@ $page_title = "Notification Center";
         font-weight: 600;
     }
     
-    .status-unread {
-        background-color: #e0f2fe;
-        color: #0369a1;
-    }
-    
-    .status-read {
-        background-color: #e2e8f0;
-        color: #475569;
-    }
+  .status-unread {
+  background-color: #FEF3C7; /* Yellow-ish */
+  color: #92400E;
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.status-read {
+  background-color: #D1FAE5; /* Green-ish */
+  color: #065F46;
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
     
     .unread-row {
         background-color: #f8fafc;
@@ -419,39 +427,40 @@ function renderNotifications(notifications) {
         return;
     }
     
-    let html = '';
-    notifications.forEach(notification => {
-        const isUnread = !notification.is_read;
-        const statusClass = isUnread ? 'status-unread' : 'status-read';
-        const statusText = isUnread ? 'Unread' : 'Read';
-        const rowClass = isUnread ? 'unread-row' : '';
-        const timeAgo = formatTimeAgo(notification.created_at);
-        
-        html += `
-            <tr class="${rowClass} animate__animated animate__fadeIn" data-id="${notification.id}">
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 timestamp" data-label="Time">
-                    <div class="flex items-center">
-                        <i class="far fa-clock mr-2 text-gray-400"></i>
-                        <span title="${new Date(notification.created_at).toLocaleString()}">
-                            ${timeAgo}
-                        </span>
-                    </div>
-                </td>
-                <td class="px-6 py-4 text-sm text-gray-900" data-label="Notification">
-                    <div class="message-preview font-medium">${escapeHtml(notification.message)}</div>
-                    ${notification.related_task_id ? `
-                    <div class="mt-1 text-xs text-gray-500">
-                        <i class="fas fa-link mr-1"></i> Task ID: ${escapeHtml(notification.related_task_id)}
-                    </div>` : ''}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-center" data-label="Status">
-                    <span class="status-badge ${statusClass}">${statusText}</span>
-                </td>
-            </tr>
-        `;
-    });
-    
-    notificationsBody.innerHTML = html;
+let html = '';
+notifications.forEach(notification => {
+    const isUnread = notification.is_read == 0 || notification.is_read === false;
+    const statusClass = isUnread ? 'status-unread' : 'status-read';
+    const statusText = isUnread ? 'Unread' : 'Read';
+    const rowClass = isUnread ? 'unread-row' : '';
+    const timeAgo = formatTimeAgo(notification.created_at);
+
+    html += `
+        <tr class="${rowClass} animate__animated animate__fadeIn" data-id="${notification.id}">
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 timestamp" data-label="Time">
+                <div class="flex items-center">
+                    <i class="far fa-clock mr-2 text-gray-400"></i>
+                    <span title="${new Date(notification.created_at).toLocaleString()}">
+                        ${timeAgo}
+                    </span>
+                </div>
+            </td>
+            <td class="px-6 py-4 text-sm text-gray-900" data-label="Notification">
+                <div class="message-preview font-medium">${escapeHtml(notification.message)}</div>
+                ${notification.related_task_id ? `
+                <div class="mt-1 text-xs text-gray-500">
+                    <i class="fas fa-link mr-1"></i> Task ID: ${escapeHtml(notification.related_task_id)}
+                </div>` : ''}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-center" data-label="Status">
+                <span class="status-badge ${statusClass}">${statusText}</span>
+            </td>
+        </tr>
+    `;
+});
+
+notificationsBody.innerHTML = html;
+
     
     // Add click event to rows to view details
     document.querySelectorAll('tbody tr').forEach(row => {
