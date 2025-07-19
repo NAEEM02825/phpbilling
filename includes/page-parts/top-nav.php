@@ -418,14 +418,6 @@ if (unread.length > 0) {
     </button>`;
   container.appendChild(footer);
 }
-        // Footer: view all as read (only show if there are unread)
-   const footer = document.createElement('div');
-footer.className = 'dropdown-footer text-center p-2 border-top';
-footer.innerHTML = `
-  <button onclick="viewAllNotifications()" class="btn btn-sm btn-primary w-100">
-    View All Notifications
-  </button>`;
-container.appendChild(footer);
       })
       .catch(error => {
         console.error('Error fetching notifications:', error);
