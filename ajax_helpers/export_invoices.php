@@ -1,91 +1,314 @@
 <?php
 require('../functions.php');
 
-// Check if the request is POST
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header('Content-Type: application/json');
-    echo json_encode(['success' => false, 'error' => 'Invalid request method']);
+// Check if it's an export request
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SERVER['CONTENT_TYPE']) && strpos($_SERVER['CONTENT_TYPE'], 'application/json') !== false) {
+    // Handle export request
+    handleExportRequest();
     exit;
 }
 
-// Get the export type and filters from the request
-$data = json_decode(file_get_contents('php://input'), true);
-$exportType = $data['exportType'] ?? '';
-$filters = $data['filters'] ?? [];
+// Otherwise, handle the normal JSON API request
+handleJsonRequest();
 
-// Validate export type
-$allowedTypes = ['pdf', 'csv', 'excel'];
-if (!in_array($exportType, $allowedTypes)) {
+function handleJsonRequest() {
     header('Content-Type: application/json');
-    echo json_encode(['success' => false, 'error' => 'Invalid export type']);
-    exit;
-}
 
-// Build the query conditions based on filters
-$whereConditions = [];
-$whereValues = [];
+    try {
+        // Pagination parameters
+        $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
+        $perPage = isset($_GET['per_page']) ? max(1, intval($_GET['per_page'])) : 10;
+        $offset = ($page - 1) * $perPage;
+        
+        // Filter parameters
+        $status = isset($_GET['status']) ? $_GET['status'] : '';
+        $clientId = isset($_GET['client_id']) ? intval($_GET['client_id']) : 0;
+        $projectId = isset($_GET['project_id']) ? intval($_GET['project_id']) : 0;
+        $search = isset($_GET['search']) ? trim($_GET['search']) : '';
+        
+        // Date range filters
+        $dateFrom = isset($_GET['date_from']) ? $_GET['date_from'] : '';
+        $dateTo = isset($_GET['date_to']) ? $_GET['date_to'] : '';
+        
+        // Amount range filters
+        $amountFrom = isset($_GET['amount_from']) ? floatval($_GET['amount_from']) : null;
+        $amountTo = isset($_GET['amount_to']) ? floatval($_GET['amount_to']) : null;
 
-if (!empty($filters['client_id'])) {
-    $whereConditions[] = 'i.client_id = %i';
-    $whereValues[] = $filters['client_id'];
-}
+        // Build WHERE clause
+        $where = [];
+        $whereValues = [];
 
-if (!empty($filters['date_from'])) {
-    $whereConditions[] = 'i.issue_date >= %s';
-    $whereValues[] = $filters['date_from'];
-}
+        if (!empty($status)) {
+            $where[] = "i.status = %s";
+            $whereValues[] = $status;
+        }
 
-if (!empty($filters['date_to'])) {
-    $whereConditions[] = 'i.issue_date <= %s';
-    $whereValues[] = $filters['date_to'];
-}
+        if ($clientId > 0) {
+            $where[] = "i.client_id = %i";
+            $whereValues[] = $clientId;
+        }
 
-if (!empty($filters['status']) && $filters['status'] !== 'all') {
-    $whereConditions[] = 'i.status = %s';
-    $whereValues[] = $filters['status'];
-}
+        if ($projectId > 0) {
+            $where[] = "i.project_id = %i";
+            $whereValues[] = $projectId;
+        }
 
-// Prepare the where clause
-$whereClause = '';
-if (!empty($whereConditions)) {
-    $whereClause = 'WHERE ' . implode(' AND ', $whereConditions);
-}
+        if (!empty($dateFrom)) {
+            $where[] = "i.issue_date >= %s";
+            $whereValues[] = $dateFrom;
+        }
 
-try {
-    // Get invoices data using MeekroDB
-    $invoices = DB::query("
-        SELECT 
-            i.id, 
-            i.invoice_number, 
-            CONCAT(c.first_name, ' ', c.last_name) AS client_name,
-            p.name AS project_name,
-            i.issue_date,
-            i.due_date,
-            i.status,
-            i.total_amount
-        FROM invoices i
-        LEFT JOIN clients c ON i.client_id = c.id
-        LEFT JOIN projects p ON i.project_id = p.id
-        $whereClause
-        ORDER BY i.issue_date DESC
-    ", ...$whereValues);
-    
-    // Process the export based on type
-    switch ($exportType) {
-        case 'pdf':
-            exportToPDF($invoices);
-            break;
-        case 'csv':
-            exportToCSV($invoices);
-            break;
-        case 'excel':
-            exportToExcel($invoices);
-            break;
+        if (!empty($dateTo)) {
+            $where[] = "i.issue_date <= %s";
+            $whereValues[] = $dateTo;
+        }
+
+        if ($amountFrom !== null) {
+            $where[] = "i.total_amount >= %f";
+            $whereValues[] = $amountFrom;
+        }
+
+        if ($amountTo !== null) {
+            $where[] = "i.total_amount <= %f";
+            $whereValues[] = $amountTo;
+        }
+
+        if (!empty($search)) {
+            $where[] = "(i.invoice_number LIKE %ss OR c.first_name LIKE %ss OR c.last_name LIKE %ss OR c.company LIKE %ss OR p.name LIKE %ss)";
+            $whereValues[] = $search;
+            $whereValues[] = $search;
+            $whereValues[] = $search;
+            $whereValues[] = $search;
+            $whereValues[] = $search;
+        }
+
+        // Prepare WHERE clause
+        $whereClause = !empty($where) ? 'WHERE ' . implode(' AND ', $where) : '';
+
+        // Get total count
+        $total = DB::queryFirstField(
+            "SELECT COUNT(*) FROM invoices i
+             LEFT JOIN clients c ON i.client_id = c.id
+             LEFT JOIN projects p ON i.project_id = p.id
+             $whereClause",
+            ...$whereValues
+        );
+
+        // Get paginated invoice data with proper column selection
+        $invoices = DB::query(
+            "SELECT 
+                i.id,
+                i.client_id,
+                i.project_id,
+                i.invoice_number,
+                i.issue_date,
+                i.due_date,
+                i.status,
+                i.total_amount,
+                i.notes,
+                i.created_at,
+                i.updated_at,
+                CONCAT(c.first_name, ' ', c.last_name) AS client_name,
+                c.email AS client_email,
+                c.phone AS client_phone,
+                c.address AS client_address,
+                c.company AS client_company,
+                p.name AS project_name,
+                p.from_company AS project_from_company,
+                p.to_client AS project_to_client,
+                p.type AS project_type,
+                p.rate AS project_rate,
+                p.payment_cycle AS project_payment_cycle,
+                p.category AS project_category
+             FROM invoices i
+             LEFT JOIN clients c ON i.client_id = c.id
+             LEFT JOIN projects p ON i.project_id = p.id
+             $whereClause
+             ORDER BY i.issue_date DESC
+             LIMIT %i OFFSET %i",
+            ...array_merge($whereValues, [$perPage, $offset])
+        );
+
+        // Format response data
+        foreach ($invoices as &$invoice) {
+            // Format dates
+            $invoice['issue_date_formatted'] = date('M d, Y', strtotime($invoice['issue_date']));
+            $invoice['due_date_formatted'] = date('M d, Y', strtotime($invoice['due_date']));
+            $invoice['created_at_formatted'] = date('M d, Y', strtotime($invoice['created_at']));
+            
+            // Format amounts
+            $invoice['total_amount_formatted'] = number_format($invoice['total_amount'], 2);
+            $invoice['project_rate_formatted'] = $invoice['project_rate'] ? number_format($invoice['project_rate'], 2) : null;
+            
+            // Add client full details
+            $invoice['client'] = [
+                'id' => $invoice['client_id'],
+                'name' => $invoice['client_name'],
+                'email' => $invoice['client_email'],
+                'phone' => $invoice['client_phone'],
+                'address' => $invoice['client_address'],
+                'company' => $invoice['client_company']
+            ];
+            
+            // Add project details if exists
+            if ($invoice['project_id']) {
+                $invoice['project'] = [
+                    'id' => $invoice['project_id'],
+                    'name' => $invoice['project_name'],
+                    'from_company' => $invoice['project_from_company'],
+                    'to_client' => $invoice['project_to_client'],
+                    'type' => $invoice['project_type'],
+                    'rate' => $invoice['project_rate'],
+                    'payment_cycle' => $invoice['project_payment_cycle'],
+                    'category' => $invoice['project_category']
+                ];
+            } else {
+                $invoice['project'] = null;
+            }
+            
+            // Remove redundant fields
+            unset(
+                $invoice['client_id'],
+                $invoice['client_name'],
+                $invoice['client_email'],
+                $invoice['client_phone'],
+                $invoice['client_address'],
+                $invoice['client_company'],
+                $invoice['project_id'],
+                $invoice['project_name'],
+                $invoice['project_from_company'],
+                $invoice['project_to_client'],
+                $invoice['project_type'],
+                $invoice['project_rate'],
+                $invoice['project_payment_cycle'],
+                $invoice['project_category']
+            );
+        }
+
+        echo json_encode([
+            'success' => true,
+            'data' => [
+                'invoices' => $invoices,
+                'pagination' => [
+                    'total' => (int)$total,
+                    'per_page' => $perPage,
+                    'current_page' => $page,
+                    'last_page' => ceil($total / $perPage)
+                ]
+            ]
+        ]);
+    } catch (Exception $e) {
+        echo json_encode([
+            'success' => false,
+            'error' => $e->getMessage()
+        ]);
     }
-} catch (MeekroDBException $e) {
-    header('Content-Type: application/json');
-    echo json_encode(['success' => false, 'error' => 'Database error: ' . $e->getMessage()]);
-    exit;
+}
+
+function handleExportRequest() {
+    // Get the export type and filters from the request
+    $data = json_decode(file_get_contents('php://input'), true);
+    $exportType = $data['exportType'] ?? '';
+    $filters = $data['filters'] ?? [];
+
+    // Validate export type
+    $allowedTypes = ['pdf', 'csv', 'excel'];
+    if (!in_array($exportType, $allowedTypes)) {
+        header('Content-Type: application/json');
+        echo json_encode(['success' => false, 'error' => 'Invalid export type']);
+        exit;
+    }
+
+    // Build WHERE clause based on filters
+    $where = [];
+    $whereValues = [];
+
+    if (!empty($filters['status'])) {
+        $where[] = "i.status = %s";
+        $whereValues[] = $filters['status'];
+    }
+
+    if (!empty($filters['client_id'])) {
+        $where[] = "i.client_id = %i";
+        $whereValues[] = $filters['client_id'];
+    }
+
+    if (!empty($filters['project_id'])) {
+        $where[] = "i.project_id = %i";
+        $whereValues[] = $filters['project_id'];
+    }
+
+    if (!empty($filters['date_from'])) {
+        $where[] = "i.issue_date >= %s";
+        $whereValues[] = $filters['date_from'];
+    }
+
+    if (!empty($filters['date_to'])) {
+        $where[] = "i.issue_date <= %s";
+        $whereValues[] = $filters['date_to'];
+    }
+
+    if (isset($filters['amount_from']) && $filters['amount_from'] !== '') {
+        $where[] = "i.total_amount >= %f";
+        $whereValues[] = $filters['amount_from'];
+    }
+
+    if (isset($filters['amount_to']) && $filters['amount_to'] !== '') {
+        $where[] = "i.total_amount <= %f";
+        $whereValues[] = $filters['amount_to'];
+    }
+
+    if (!empty($filters['search'])) {
+        $where[] = "(i.invoice_number LIKE %ss OR c.first_name LIKE %ss OR c.last_name LIKE %ss OR c.company LIKE %ss OR p.name LIKE %ss)";
+        $whereValues[] = $filters['search'];
+        $whereValues[] = $filters['search'];
+        $whereValues[] = $filters['search'];
+        $whereValues[] = $filters['search'];
+        $whereValues[] = $filters['search'];
+    }
+
+    // Prepare WHERE clause
+    $whereClause = !empty($where) ? 'WHERE ' . implode(' AND ', $where) : '';
+
+    try {
+        // Get invoices data for export
+$invoices = DB::query(
+    "SELECT 
+        i.id, 
+        i.invoice_number, 
+        CONCAT(c.first_name, ' ', c.last_name) AS client_name,
+        c.company AS client_company,
+        p.name AS project_name,
+        p.rate AS project_rate,
+        i.issue_date,
+        i.due_date,
+        i.status,
+        i.total_amount AS invoice_amount,
+        p.rate AS total_amount
+    FROM invoices i
+    LEFT JOIN clients c ON i.client_id = c.id
+    LEFT JOIN projects p ON i.project_id = p.id
+    $whereClause
+    ORDER BY i.issue_date DESC",
+    ...$whereValues
+);
+        // Process the export based on type
+        switch ($exportType) {
+            case 'pdf':
+                exportToPDF($invoices);
+                break;
+            case 'csv':
+                exportToCSV($invoices);
+                break;
+            case 'excel':
+                exportToExcel($invoices);
+                break;
+        }
+    } catch (Exception $e) {
+        header('Content-Type: application/json');
+        echo json_encode(['success' => false, 'error' => 'Database error: ' . $e->getMessage()]);
+        exit;
+    }
 }
 
 function exportToPDF($invoices) {
@@ -118,6 +341,7 @@ function exportToPDF($invoices) {
                 <tr>
                     <th>Invoice #</th>
                     <th>Client</th>
+                    <th>Company</th>
                     <th>Project</th>
                     <th>Issue Date</th>
                     <th>Due Date</th>
@@ -131,7 +355,8 @@ function exportToPDF($invoices) {
         $html .= '<tr>
             <td>' . htmlspecialchars($invoice['invoice_number']) . '</td>
             <td>' . htmlspecialchars($invoice['client_name']) . '</td>
-            <td>' . htmlspecialchars($invoice['project_name']) . '</td>
+            <td>' . htmlspecialchars($invoice['client_company'] ?? '') . '</td>
+            <td>' . htmlspecialchars($invoice['project_name'] ?? '') . '</td>
             <td class="text-center">' . date('m/d/Y', strtotime($invoice['issue_date'])) . '</td>
             <td class="text-center">' . date('m/d/Y', strtotime($invoice['due_date'])) . '</td>
             <td class="text-center">' . ucfirst($invoice['status']) . '</td>
@@ -158,13 +383,7 @@ function exportToPDF($invoices) {
     exit;
 }
 
-/**
- * Exports invoice data to a CSV file and forces download.
- *
- * @param array $invoices Array of invoice data.
- * @throws Exception If headers are already sent or CSV generation fails.
- */
-function exportToCSV(array $invoices): void {
+function exportToCSV($invoices) {
     // Check if headers are already sent
     if (headers_sent()) {
         throw new RuntimeException("Cannot export CSV: Headers already sent.");
@@ -189,6 +408,7 @@ function exportToCSV(array $invoices): void {
     fputcsv($output, [
         'Invoice Number',
         'Client',
+        'Company',
         'Project',
         'Issue Date',
         'Due Date',
@@ -201,6 +421,7 @@ function exportToCSV(array $invoices): void {
         $row = [
             $invoice['invoice_number'] ?? '',
             $invoice['client_name'] ?? '',
+            $invoice['client_company'] ?? '',
             $invoice['project_name'] ?? '',
             isset($invoice['issue_date']) ? date('m/d/Y', strtotime($invoice['issue_date'])) : '',
             isset($invoice['due_date']) ? date('m/d/Y', strtotime($invoice['due_date'])) : '',
@@ -217,6 +438,7 @@ function exportToCSV(array $invoices): void {
     fclose($output);
     exit;
 }
+
 function exportToExcel($invoices) {
     // Generate HTML content that Excel can open
     $html = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
@@ -249,6 +471,7 @@ function exportToExcel($invoices) {
             <tr>
                 <th>Invoice Number</th>
                 <th>Client</th>
+                <th>Company</th>
                 <th>Project</th>
                 <th>Issue Date</th>
                 <th>Due Date</th>
@@ -260,11 +483,12 @@ function exportToExcel($invoices) {
         $html .= '<tr>
             <td>' . htmlspecialchars($invoice['invoice_number']) . '</td>
             <td>' . htmlspecialchars($invoice['client_name']) . '</td>
-            <td>' . htmlspecialchars($invoice['project_name']) . '</td>
+            <td>' . htmlspecialchars($invoice['client_company'] ?? '') . '</td>
+            <td>' . htmlspecialchars($invoice['project_name'] ?? '') . '</td>
             <td class="text-center">' . date('m/d/Y', strtotime($invoice['issue_date'])) . '</td>
             <td class="text-center">' . date('m/d/Y', strtotime($invoice['due_date'])) . '</td>
             <td class="text-center">' . ucfirst($invoice['status']) . '</td>
-            <td class="text-right">' . number_format($invoice['total_amount'], 2) . '</td>
+            <td class="text-right">$' . number_format($invoice['total_amount'], 2) . '</td>
         </tr>';
     }
     

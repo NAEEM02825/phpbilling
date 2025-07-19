@@ -39,9 +39,9 @@ $projects = DB::query("SELECT * FROM projects");
                 <i class="fas fa-download me-1"></i> Export
             </button>
             <ul class="dropdown-menu" aria-labelledby="exportDropdown">
-                <li><a class="dropdown-item" href="#"><i class="fas fa-file-excel me-2"></i> Excel</a></li>
-                <li><a class="dropdown-item" href="#"><i class="fas fa-file-pdf me-2"></i> PDF</a></li>
-                <li><a class="dropdown-item" href="#"><i class="fas fa-file-csv me-2"></i> CSV</a></li>
+                <li><a class="dropdown-item" href="#" onclick="invoiceManager.handleExport('csv')"><i class="fas fa-file-csv me-2"></i> CSV</a></li>
+                <li><a class="dropdown-item" href="#" onclick="invoiceManager.handleExport('excel')"><i class="fas fa-file-excel me-2"></i> Excel</a></li>
+                <li><a class="dropdown-item" href="#" onclick="invoiceManager.handleExport('pdf')"><i class="fas fa-file-pdf me-2"></i> PDF</a></li>
             </ul>
         </div>
     </div>
@@ -283,6 +283,76 @@ $projects = DB::query("SELECT * FROM projects");
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
+
+
+ const invoiceManager = {
+        filters: {}, // Make sure this is defined with your actual filters
+
+        handleExport: function(exportType) {
+            Swal.fire({
+                title: 'Preparing Export',
+                html: 'Please wait while we prepare your export...',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+
+                    // Prepare the data to send
+                    const exportData = {
+                        exportType: exportType,
+                        filters: this.filters
+                    };
+
+                    fetch('ajax_helpers/export_invoices.php', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify(exportData)
+                        })
+                        .then(response => {
+                            if (exportType === 'pdf') {
+                                // For PDF, we return HTML that will trigger print dialog
+                                return response.text().then(html => {
+                                    // Open a new window with the HTML
+                                    const printWindow = window.open('', '_blank');
+                                    printWindow.document.write(html);
+                                    printWindow.document.close();
+                                    Swal.close();
+                                });
+                            } else {
+                                // For CSV and Excel, handle as blob
+                                return response.blob().then(blob => {
+                                    // Create a download link
+                                    const url = window.URL.createObjectURL(blob);
+                                    const a = document.createElement('a');
+                                    a.href = url;
+
+                                    // Set appropriate file extension
+                                    const extension = exportType === 'excel' ? 'xls' : exportType;
+                                    a.download = `tasks_export.${extension}`;
+
+                                    document.body.appendChild(a);
+                                    a.click();
+
+                                    // Clean up
+                                    window.URL.revokeObjectURL(url);
+                                    a.remove();
+                                    Swal.close();
+                                });
+                            }
+                        })
+                        .catch(error => {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Export Failed',
+                                text: error.message || 'An error occurred during export',
+                                confirmButtonColor: '#3085d6',
+                            });
+                        });
+                }
+            });
+        }
+    };
     document.addEventListener('DOMContentLoaded', function() {
         const invoiceManager = {
             currentTab: 'all',
