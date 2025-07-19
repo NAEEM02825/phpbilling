@@ -329,7 +329,7 @@ $projects = DB::query("SELECT * FROM projects");
 
                                     // Set appropriate file extension
                                     const extension = exportType === 'excel' ? 'xls' : exportType;
-                                    a.download = `tasks_export.${extension}`;
+                                    a.download = `invoices_export.${extension}`;
 
                                     document.body.appendChild(a);
                                     a.click();
