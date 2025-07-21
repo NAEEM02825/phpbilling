@@ -147,8 +147,8 @@
 <div class="modal fade" id="addUserModal" tabindex="-1" aria-labelledby="addUserModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="addUserModalLabel">Add New User</h5>
+            <div class="modal-header bg-custom">
+                <h5 class="modal-title text-white" id="addUserModalLabel">Add New User</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -296,7 +296,7 @@
     }
 
     .nav-tabs .nav-link:hover {
-        color: #3a4f8a;
+        color: #04665f;
         border-bottom-color: #dee2e6;
     }
   th {
@@ -316,11 +316,14 @@
         /* darker shade for hover effect */
     }
     .nav-tabs .nav-link.active {
-        color: #3a4f8a;
+        color: #04665f;
         background-color: transparent;
-        border-bottom-color: #3a4f8a;
+        border-bottom-color: #024440ff;
     }
-
+.bg-cuntom{
+    background-color: #04665f;
+        color: white;
+}
     /* Avatar Styles */
     .avatar-sm {
         width: 40px;
@@ -364,17 +367,17 @@
     }
 
     .badge.bg-primary {
-        background-color: #3a4f8a !important;
+        background-color: #04665f !important;
     }
 
     /* Pagination Styles */
     .page-item.active .page-link {
-        background-color: #3a4f8a;
-        border-color: #3a4f8a;
+        background-color: #04665f;
+        border-color: #04665f;
     }
 
     .page-link {
-        color: #3a4f8a;
+        color: #04665f;
     }
 
     /* Dropdown Menu Styles */
@@ -948,7 +951,7 @@ function deleteUser(userId) {
             title: `Are you sure you want to ${action} this user?`,
             icon: 'question',
             showCancelButton: true,
-            confirmButtonColor: '#3085d6',
+            confirmButtonColor: '#04665f',
             cancelButtonColor: '#d33',
             confirmButtonText: `Yes, ${action} it!`
         }).then((result) => {

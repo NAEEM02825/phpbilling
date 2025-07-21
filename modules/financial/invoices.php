@@ -136,8 +136,8 @@ $projects = DB::query("SELECT * FROM projects");
 <div class="modal fade" id="newInvoiceModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Create New Invoice</h5>
+            <div class="modal-header bg-cuntom">
+                <h5 class="modal-title text-white">Create New Invoice</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -279,6 +279,10 @@ $projects = DB::query("SELECT * FROM projects");
         position: absolute;
         z-index: 1000;
     }
+    .bg-cuntom{
+    background-color: #04665f;
+        color: white;
+}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 

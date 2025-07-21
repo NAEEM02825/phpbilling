@@ -1,3 +1,10 @@
+<Style>
+    .bg-custom{
+        background-color: #04665f !important;
+        color: white !important;
+    }
+</Style>
+
 <!-- Projects Page Header -->
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-4 pb-3 mb-4 border-bottom">
     <div>
@@ -151,8 +158,8 @@
 <div class="modal fade" id="newProjectModal" tabindex="-1" aria-labelledby="newProjectModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="newProjectModalLabel">Create New Project</h5>
+            <div class="modal-header bg-custom text-white">
+                <h5 class="modal-title text-white" id="newProjectModalLabel">Create New Project</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -265,7 +272,7 @@
 <div class="modal fade" id="newTaskModal" tabindex="-1" aria-labelledby="newTaskModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
+            <div class="modal-header bg-custom text-white">
                 <h5 class="modal-title" id="newTaskModalLabel">Create New Task</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
                     aria-label="Close"></button>

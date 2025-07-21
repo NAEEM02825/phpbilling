@@ -133,9 +133,9 @@
 <div class="modal fade" id="addClientModal" tabindex="-1" aria-labelledby="addClientModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="addClientModalLabel">Add New Client</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="modal-header bg-cuntom">
+                <h5 class="modal-title text-white" id="addClientModalLabel">Add New Client</h5>
+                <button type="button" class="btn-close text-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <form id="addClientForm">
@@ -266,7 +266,9 @@
         background-color: #3a4f8a;
         border-color: #3a4f8a;
     }
-
+.bg-cuntom{
+    background-color: #04665f;
+}
     .page-link {
         color: #3a4f8a;
     }
