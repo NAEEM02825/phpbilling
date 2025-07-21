@@ -167,7 +167,7 @@
 <div class="modal fade" id="newTaskModal" tabindex="-1" aria-labelledby="newTaskModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
+            <div class="modal-header bg-cuntom text-white">
                 <h5 class="modal-title" id="newTaskModalLabel">Create New Task</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
                     aria-label="Close"></button>
@@ -354,7 +354,9 @@
         font-size: 0.875rem;
         font-weight: 600;
     }
-
+.modal-title{
+    color: white !important;
+}
     /* Add to the style section */
     .task-status-select {
         width: 120px;
@@ -385,7 +387,10 @@
         color: white;
         /* darker shade for hover effect */
     }
-
+.bg-cuntom{
+    background-color: #04665f;
+        color: white;
+}
     .task-status-select option {
         padding: 0.5rem;
     }
