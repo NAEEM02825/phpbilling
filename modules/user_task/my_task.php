@@ -80,14 +80,54 @@ if (!$userId) {
 </head>
 
 <body>
-    <div class="container py-4">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="mb-0">My Tasks</h2>
-            <button class="btn btn-primary" id="btnNewTask"><i class="fas fa-plus me-1"></i> New Task</button>
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Work report</h5>
+            <div>
+                <button class="btn btn-primary btn-sm" id="btnNewTask">
+                    <i class="fas fa-plus me-1"></i> Add Task
+                </button>
+            </div>
         </div>
-        <div id="tasks-container">
-            <div class="text-center py-5">
-                <div class="spinner-border text-primary"></div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover" id="tasksTable">
+                    <thead>
+                        <tr>
+                            <th> <!-- Adjust colspan based on your total columns -->
+                                <input type="text" class="form-control form-control-sm search-input"
+                                    placeholder="Search all..." id="globalSearch">
+                            </th>
+                               <th>
+            <select class="form-select form-select-sm search-input" data-column="4" id="statusFilter">
+                <option value="">All</option>
+                <option>Pending</option>
+                <option>In Progress</option>
+                <option>Completed</option>
+            </select>
+        </th>
+                            <th></th>
+                        </tr>
+                        <tr>
+                            <th class="sortable" data-sort="title">Title <i class="fas fa-sort"></i></th>
+                            <th class="sortable" data-sort="project_name">Project <i class="fas fa-sort"></i></th>
+                            <th class="sortable" data-sort="task_date">Date <i class="fas fa-sort"></i></th>
+                            <th class="sortable" data-sort="hours">Hours <i class="fas fa-sort"></i></th>
+                            <th class="sortable" data-sort="status">Status <i class="fas fa-sort"></i></th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tasksTableBody"></tbody>
+                </table>
+            </div>
+            <div class="d-flex justify-content-between align-items-center mt-3">
+                <div class="form-text">Showing <span id="showingFrom">0</span> to <span id="showingTo">0</span> of <span
+                        id="totalTasks">0</span> tasks</div>
+                <nav>
+                    <ul class="pagination pagination-sm mb-0" id="pagination">
+                        <!-- Pagination will be inserted here by JS -->
+                    </ul>
+                </nav>
             </div>
         </div>
     </div>
@@ -102,8 +142,8 @@ if (!$userId) {
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label for="taskTitle" class="form-label">Title</label>
-                        <input type="text" class="form-control" name="title" id="taskTitle" required maxlength="100">
+                        <label for="taskDate" class="form-label"> Date</label>
+                        <input type="date" class="form-control" name="task_date" id="taskDate" required>
                     </div>
                     <div class="mb-3">
                         <label for="taskProject" class="form-label">Project</label>
@@ -112,29 +152,14 @@ if (!$userId) {
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label for="taskDate" class="form-label">Due Date</label>
-                        <input type="date" class="form-control" name="task_date" id="taskDate" required>
-                    </div>
-                    <div class="mb-3">
                         <label for="taskHours" class="form-label">Hours Taken</label>
-                        <input type="number" class="form-control" name="hours" id="taskHours" min="0.5" step="0.5" required>
+                        <input type="number" class="form-control" name="hours" id="taskHours" min="0.5" step="0.5"
+                            required>
                     </div>
                     <div class="mb-3">
-                        <label for="taskStatus" class="form-label">Status</label>
-                        <select class="form-select" name="status" id="taskStatus" required>
-                            <option value="Pending">Pending</option>
-                            <option value="In Progress">In Progress</option>
-                            <option value="Completed">Completed</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="taskDetails" class="form-label">Details</label>
-                        <textarea class="form-control" name="details" id="taskDetails" rows="3" maxlength="500"></textarea>
-                    </div>
-                    <div class="mb-3">
-                        <label for="taskFiles" class="form-label">Attachments</label>
-                        <input type="file" class="form-control" id="taskFiles" name="files[]" multiple>
-                        <small class="text-muted">You can upload multiple files (Max 10MB each)</small>
+                        <label for="taskDetails" class="form-label">Description</label>
+                        <textarea class="form-control" name="details" id="taskDetails" rows="3"
+                            maxlength="500"></textarea>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -149,7 +174,7 @@ if (!$userId) {
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        const userId = <?= (int)$userId ?>;
+        const userId = <?= (int) $userId ?>;
 
         // Load all tasks for this user
         async function loadTasks() {
@@ -172,10 +197,10 @@ if (!$userId) {
                 return;
             }
             container.innerHTML = '';
-data.tasks.forEach(task => {
-    const card = document.createElement('div');
-    card.className = 'task-card';
-    card.innerHTML = `
+            data.tasks.forEach(task => {
+                const card = document.createElement('div');
+                card.className = 'task-card';
+                card.innerHTML = `
     <div class="d-flex justify-content-between align-items-center mb-2">
         <span class="task-title">${escapeHtml(task.title)}</span>
         <span class="badge badge-status ${getStatusClass(task.status)}">${escapeHtml(task.status)}</span>
@@ -186,9 +211,9 @@ data.tasks.forEach(task => {
         &nbsp;|&nbsp; <i class="fas fa-clock me-1"></i> ${task.hours || '0'}h
     </div>
     <div class="mb-2">${escapeHtml(truncateWords(task.details, 10))}</div>
-    ${task.details && task.details.split(/\s+/).length > 10 ? 
-        '<div><a href="#" onclick="viewTask('+task.id+')" class="small">View more</a></div>' : 
-        ''}
+    ${task.details && task.details.split(/\s+/).length > 10 ?
+                        '<div><a href="#" onclick="viewTask(' + task.id + ')" class="small">View more</a></div>' :
+                        ''}
     <div>
         <a href="index.php?route=modules/user_task/view_task&task_id=${task.id}" 
            class="btn btn-sm btn-outline-secondary me-2" 
@@ -197,17 +222,17 @@ data.tasks.forEach(task => {
            aria-label="View Task">
            <i class="fas fa-eye"></i>
         </a>
-        ${task.status === 'Pending' ? 
-            `<button class="btn btn-sm btn-outline-warning me-2" onclick="startTask(${task.id})"><i class="fas fa-play"></i> Start</button>` : 
-            ''}
-        ${task.status !== 'Completed' ? 
-            `<button class="btn btn-sm btn-outline-success me-2" onclick="completeTask(${task.id})" ${task.status === 'Pending' ? 'disabled' : ''}><i class="fas fa-check"></i> Complete</button>` : 
-            ''}
+        ${task.status === 'Pending' ?
+                        `<button class="btn btn-sm btn-outline-warning me-2" onclick="startTask(${task.id})"><i class="fas fa-play"></i> Start</button>` :
+                        ''}
+        ${task.status !== 'Completed' ?
+                        `<button class="btn btn-sm btn-outline-success me-2" onclick="completeTask(${task.id})" ${task.status === 'Pending' ? 'disabled' : ''}><i class="fas fa-check"></i> Complete</button>` :
+                        ''}
         <button class="btn btn-sm btn-outline-primary me-2" onclick="editTask(${task.id})" ${task.status === 'Completed' ? 'disabled' : ''}><i class="fas fa-edit"></i> Edit</button>
         <button class="btn btn-sm btn-outline-danger" onclick="deleteTask(${task.id})" ${task.status === 'Completed' ? 'disabled' : ''}><i class="fas fa-trash"></i> Delete</button>
     </div>`;
-    container.appendChild(card);
-});
+                container.appendChild(card);
+            });
         }
 
         // Load project options for select
@@ -321,7 +346,7 @@ data.tasks.forEach(task => {
             document.getElementById('clickupLink').value = task.clickup_link || '';
 
             // Store task ID in form for update
-            document.getElementById('taskForm').onsubmit = async function(e) {
+            document.getElementById('taskForm').onsubmit = async function (e) {
                 e.preventDefault();
                 const formData = new FormData(this);
                 const isEdit = !!this.dataset.taskId;
@@ -390,7 +415,7 @@ data.tasks.forEach(task => {
 
         // Escape HTML
         function escapeHtml(str) {
-            return (str || '').replace(/[&<>"']/g, function(m) {
+            return (str || '').replace(/[&<>"']/g, function (m) {
                 return ({
                     '&': '&amp;',
                     '<': '&lt;',
@@ -420,7 +445,7 @@ data.tasks.forEach(task => {
         };
 
         // Handle form submit (create/update task)
-        document.getElementById('taskForm').onsubmit = async function(e) {
+        document.getElementById('taskForm').onsubmit = async function (e) {
             e.preventDefault();
             const formData = new FormData(this);
             const isEdit = !!this.dataset.taskId;
@@ -454,5 +479,209 @@ data.tasks.forEach(task => {
             window.location.href = `index.php?route=modules/assign/view_task&task_id=${taskId}`;
         }
         // Initial load
+
+        // Add these global variables
+        let currentPage = 1;
+        let globalSearchTerm = "";
+        const tasksPerPage = 10;
+        let allTasks = [];
+        let sortColumn = 'task_date';
+        let sortDirection = 'desc';
+        let searchTerms = ['', '', '', '', ''];
+        let statusFilter = "";
+
+        // Replace loadTasks() with this version
+        async function loadTasks() {
+            const res = await fetch('ajax_helpers/user_task_crud.php', {
+                method: 'POST',
+                body: new URLSearchParams({
+                    action: 'get_my_tasks',
+                    user_id: userId
+                })
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                allTasks = data.tasks;
+                applySortingAndFiltering();
+                renderTable();
+                updatePagination();
+            } else {
+                document.getElementById('tasksTableBody').innerHTML =
+                    `<tr><td colspan="6" class="text-center text-danger">Failed to load tasks</td></tr>`;
+            }
+        }
+
+        document.getElementById("globalSearch").addEventListener("input", function (e) {
+            globalSearchTerm = e.target.value.toLowerCase();
+            updateFilteredTasks(); // Call your filtering function
+        });
+        document.getElementById("statusFilter")?.addEventListener("change", function(e) {
+    statusFilter = e.target.value; // Will be "" for "All" option
+    currentPage = 1;
+    renderTable();
+});
+
+        // Add these new functions
+      function applySortingAndFiltering() {
+    // Filtering - first apply global search
+    let filteredTasks = allTasks.filter(task => {
+        if (globalSearchTerm) {
+            const matchesSearch = (
+                task.title.toLowerCase().includes(globalSearchTerm) ||
+                (task.project_name || '').toLowerCase().includes(globalSearchTerm) ||
+                task.task_date.includes(globalSearchTerm) ||
+                task.hours.toString().includes(globalSearchTerm) ||
+                (task.status || '').toLowerCase().includes(globalSearchTerm)
+            );
+            if (!matchesSearch) return false;
+        }
+        
+        // Then apply status filter if set
+        if (statusFilter && task.status !== statusFilter) {
+            return false;
+        }
+        
+        return true;
+    });
+
+    // Sorting
+    filteredTasks.sort((a, b) => {
+        const valA = a[sortColumn] || '';
+        const valB = b[sortColumn] || '';
+
+        if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
+        if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
+        return 0;
+    });
+
+    return filteredTasks;
+}
+        function renderTable() {
+            const filteredTasks = applySortingAndFiltering();
+            const startIdx = (currentPage - 1) * tasksPerPage;
+            const paginatedTasks = filteredTasks.slice(startIdx, startIdx + tasksPerPage);
+
+            const tbody = document.getElementById('tasksTableBody');
+            tbody.innerHTML = paginatedTasks.length ? '' :
+                `<tr><td colspan="6" class="text-center">No tasks found</td></tr>`;
+
+            paginatedTasks.forEach(task => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+            <td>${escapeHtml(task.title)}</td>
+            <td>${escapeHtml(task.project_name || '—')}</td>
+            <td>${escapeHtml(task.task_date)}</td>
+            <td>${task.hours || '0'}h</td>
+            <td><span class="badge ${getStatusClass(task.status)}">${escapeHtml(task.status)}</span></td>
+            <td class="text-nowrap">
+                <button class="btn btn-sm btn-outline-secondary me-1" onclick="viewTask(${task.id})" title="View">
+                    <i class="fas fa-eye"></i>
+                </button>
+                ${task.status === 'Pending' ?
+                        `<button class="btn btn-sm btn-outline-warning me-1" onclick="startTask(${task.id})" title="Start">
+                        <i class="fas fa-play"></i>
+                    </button>` : ''}
+                ${task.status !== 'Completed' ?
+                        `<button class="btn btn-sm btn-outline-success me-1" onclick="completeTask(${task.id})" 
+                        ${task.status === 'Pending' ? 'disabled' : ''} title="Complete">
+                        <i class="fas fa-check"></i>
+                    </button>` : ''}
+                <button class="btn btn-sm btn-outline-primary me-1" onclick="editTask(${task.id})" 
+                    ${task.status === 'Completed' ? 'disabled' : ''} title="Edit">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-danger" onclick="deleteTask(${task.id})" 
+                    ${task.status === 'Completed' ? 'disabled' : ''} title="Delete">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </td>`;
+                tbody.appendChild(row);
+            });
+
+            // Update showing X-Y of Z
+            document.getElementById('showingFrom').textContent = paginatedTasks.length ? startIdx + 1 : 0;
+            document.getElementById('showingTo').textContent = startIdx + paginatedTasks.length;
+            document.getElementById('totalTasks').textContent = filteredTasks.length;
+        }
+
+        function updatePagination() {
+            const filteredTasks = applySortingAndFiltering();
+            const totalPages = Math.ceil(filteredTasks.length / tasksPerPage);
+            const paginationEl = document.getElementById('pagination');
+            paginationEl.innerHTML = '';
+
+            // Previous button
+            const prevLi = document.createElement('li');
+            prevLi.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
+            prevLi.innerHTML = `<a class="page-link" href="#">&laquo;</a>`;
+            prevLi.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (currentPage > 1) {
+                    currentPage--;
+                    renderTable();
+                }
+            });
+            paginationEl.appendChild(prevLi);
+
+            // Page buttons
+            for (let i = 1; i <= totalPages; i++) {
+                const li = document.createElement('li');
+                li.className = `page-item ${i === currentPage ? 'active' : ''}`;
+                li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+                li.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    currentPage = i;
+                    renderTable();
+                });
+                paginationEl.appendChild(li);
+            }
+
+            // Next button
+            const nextLi = document.createElement('li');
+            nextLi.className = `page-item ${currentPage === totalPages ? 'disabled' : ''}`;
+            nextLi.innerHTML = `<a class="page-link" href="#">&raquo;</a>`;
+            nextLi.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    renderTable();
+                }
+            });
+            paginationEl.appendChild(nextLi);
+        }
+
+        // Add sorting functionality
+        document.querySelectorAll('.sortable').forEach(header => {
+            header.addEventListener('click', () => {
+                const column = header.dataset.sort;
+                if (sortColumn === column) {
+                    sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+                } else {
+                    sortColumn = column;
+                    sortDirection = 'asc';
+                }
+
+                // Update sort icons
+                document.querySelectorAll('.sortable i').forEach(icon => {
+                    icon.className = 'fas fa-sort';
+                });
+                const icon = header.querySelector('i');
+                icon.className = `fas fa-sort-${sortDirection === 'asc' ? 'up' : 'down'}`;
+
+                currentPage = 1;
+                renderTable();
+            });
+        });
+
+        // Add search functionality
+        document.querySelectorAll('.search-input').forEach(input => {
+            input.addEventListener('input', () => {
+                const column = parseInt(input.dataset.column);
+                searchTerms[column] = input.value;
+                currentPage = 1;
+                renderTable();
+            });
+        });
         loadTasks();
     </script>
