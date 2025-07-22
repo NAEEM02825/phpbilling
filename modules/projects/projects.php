@@ -1,5 +1,5 @@
 <Style>
-    .bg-custom{
+    .bg-custom {
         background-color: #04665f !important;
         color: white !important;
     }
@@ -160,7 +160,7 @@
         <div class="modal-content">
             <div class="modal-header bg-custom text-white">
                 <h5 class="modal-title text-white" id="newProjectModalLabel">Create New Project</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <form id="projectForm">
@@ -227,7 +227,8 @@
                             </select>
                         </div>
 
-                        <div class="col-12">
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                             <button type="submit" class="btn btn-custom">Create Project</button>
                         </div>
                     </div>
@@ -268,99 +269,25 @@
     </div>
 </div>
 
-<!-- New Task Modal (modified form) -->
-<div class="modal fade" id="newTaskModal" tabindex="-1" aria-labelledby="newTaskModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+<!-- Assign Users Modal -->
+<div class="modal fade" id="assignUsersModal" tabindex="-1" aria-labelledby="assignUsersModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header bg-custom text-white">
-                <h5 class="modal-title" id="newTaskModalLabel">Create New Task</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                    aria-label="Close"></button>
+            <div class="modal-header">
+                <h5 class="modal-title" id="assignUsersModalLabel">Assign Users</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <form id="taskForm">
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label for="taskTitle" class="form-label">Task Title</label>
-                            <input type="text" class="form-control" id="taskTitle" name="title"
-                                placeholder="Enter task title" required>
-                        </div>
-
-                        <div class="col-md-6">
-                            <label for="taskProject" class="form-label">Project</label>
-                            <select class="form-select" id="taskProject" name="project_id" required>
-                                <option value="" selected disabled>Loading projects...</option>
-                            </select>
-                        </div>
-
-                        <div class="col-md-6">
-                            <label for="taskDate" class="form-label">Date</label>
-                            <input type="date" class="form-control" id="taskDate" name="task_date" required>
-                        </div>
-
-                        <div class="col-md-6">
-                            <label for="taskHours" class="form-label">Estimated Hours</label>
-                            <input type="number" class="form-control" id="taskHours" name="hours" step="0.5" min="0.5"
-                                placeholder="0.0" required>
-                        </div>
-
-                        <div class="col-md-6">
-                            <label for="taskAssignee" class="form-label">Assignee</label>
-                            <select class="form-select" id="taskAssignee" name="assignee_id" required>
-                                <option value="" selected disabled>Loading users...</option>
-                            </select>
-                        </div>
-
-                        <div class="col-md-6">
-                            <label for="taskStatus" class="form-label">Status</label>
-                            <select class="form-select" id="taskStatus" name="status" required>
-                                <option value="Pending" selected>Pending</option>
-                                <option value="In Progress">In Progress</option>
-                                <option value="Completed">Completed</option>
-                            </select>
-                        </div>
-
-                        <div class="col-12">
-                            <label for="taskDetails" class="form-label">Task Details</label>
-                            <textarea class="form-control" id="taskDetails" name="details" rows="3"
-                                placeholder="Detailed description of the task"></textarea>
-                        </div>
-
-                        <div class="col-12">
-                            <label for="clickupLink" class="form-label">ClickUp Link</label>
-                            <input type="url" class="form-control" id="clickupLink" name="clickup_link"
-                                placeholder="https://app.clickup.com/t/xxxxxx">
-                        </div>
-                    </div>
+                <form id="assignUsersForm">
+                    <input type="hidden" id="assignProjectId" name="project_id">
+                    <div id="usersCheckboxList"></div>
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" id="saveTask">Create Task</button>
+                <button type="button" class="btn btn-primary" id="saveUserAssignments">Save</button>
             </div>
         </div>
     </div>
-</div>
-
-<!-- Assign Users Modal -->
-<div class="modal fade" id="assignUsersModal" tabindex="-1" aria-labelledby="assignUsersModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="assignUsersModalLabel">Assign Users</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
-        <form id="assignUsersForm">
-          <input type="hidden" id="assignProjectId" name="project_id">
-          <div id="usersCheckboxList"></div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-primary" id="saveUserAssignments">Save</button>
-      </div>
-    </div>
-  </div>
 </div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -430,47 +357,47 @@
         $('input[name="type"]:checked').trigger('change');
 
         // Handle project form submission
-       // Handle project form submission
-$('#projectForm').submit(function(e) {
-    e.preventDefault();
+        // Handle project form submission
+        $('#projectForm').submit(function(e) {
+            e.preventDefault();
 
-    const formData = $(this).serialize();
-    const editId = $(this).data('edit-id');
-    let url = 'ajax_helpers/ajax_add_projects.php?action=create';
+            const formData = $(this).serialize();
+            const editId = $(this).data('edit-id');
+            let url = 'ajax_helpers/ajax_add_projects.php?action=create';
 
-    if (editId) {
-        url = 'ajax_helpers/ajax_add_projects.php?action=update&project_id=' + editId;
-    }
-
-    $.ajax({
-        url: url,
-        type: 'POST',
-        data: formData,
-        dataType: 'json',
-        success: function(response) {
-            if (response.success) {
-                $('#newProjectModal').modal('hide');
-                $('#projectForm')[0].reset();
-                $('#projectForm').removeData('edit-id');
-                $('#newProjectModalLabel').text('Create New Project');
-                
-                // Instead of reloading individual tables, reload the entire page
-                window.location.reload();
-                
-                // Show success message (optional)
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Success!',
-                    text: editId ? 'Project updated successfully!' : 'Project created successfully!',
-                    confirmButtonColor: '#3085d6',
-                });
+            if (editId) {
+                url = 'ajax_helpers/ajax_add_projects.php?action=update&project_id=' + editId;
             }
-        },
-        error: function(xhr) {
-            alert('Error: ' + xhr.responseJSON.error);
-        }
-    });
-});
+
+            $.ajax({
+                url: url,
+                type: 'POST',
+                data: formData,
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        $('#newProjectModal').modal('hide');
+                        $('#projectForm')[0].reset();
+                        $('#projectForm').removeData('edit-id');
+                        $('#newProjectModalLabel').text('Create New Project');
+
+                        // Instead of reloading individual tables, reload the entire page
+                        window.location.reload();
+
+                        // Show success message (optional)
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success!',
+                            text: editId ? 'Project updated successfully!' : 'Project created successfully!',
+                            confirmButtonColor: '#3085d6',
+                        });
+                    }
+                },
+                error: function(xhr) {
+                    alert('Error: ' + xhr.responseJSON.error);
+                }
+            });
+        });
 
         // Handle task form submission
         $('#taskForm').submit(function(e) {
@@ -540,7 +467,7 @@ $('#projectForm').submit(function(e) {
                         const row = `
                         <tr>
                             <td>
-                                <a href="#" class="text-primary fw-bold">${project.name}</a>
+                                <a href="#" class="text-custom fw-bold">${project.name}</a>
                             </td>
                             <td>${project.from_company}</td>
                             <td>${project.to_client}</td>
@@ -564,8 +491,8 @@ $('#projectForm').submit(function(e) {
             <i class="fas fa-eye"></i>
         </a>
         <a href="#"
-           class="btn btn-outline-primary p-0 d-flex align-items-center justify-content-center action-edit-project"
-           style="width:32px;height:32px;border-radius:6px;border:1px solid #3a4f8a;"
+           class="btn btn-outline-custom p-0 d-flex align-items-center justify-content-center action-edit-project"
+           style="width:32px;height:32px;border-radius:6px;border:1px solid #04665f;"
            title="Edit Project" data-id="${project.id}">
             <i class="fas fa-edit"></i>
         </a>
@@ -896,7 +823,9 @@ $('#projectForm').submit(function(e) {
         const projectId = $(this).data('project-id');
         $('#assignProjectId').val(projectId);
         // Load all users
-        $.get('ajax_helpers/ajax_get_user.php', {action: 'get_users'}, function(data) {
+        $.get('ajax_helpers/ajax_get_user.php', {
+            action: 'get_users'
+        }, function(data) {
             let html = '';
             data.data.forEach(u => {
                 html += `<div class="form-check">
@@ -906,7 +835,10 @@ $('#projectForm').submit(function(e) {
             });
             $('#usersCheckboxList').html(html);
             // Load project's assigned users
-            $.get('ajax_helpers/user_project_assign.php', {action: 'get_project_users', project_id: projectId}, function(res) {
+            $.get('ajax_helpers/user_project_assign.php', {
+                action: 'get_project_users',
+                project_id: projectId
+            }, function(res) {
                 if (res.success) {
                     res.users.forEach(u => {
                         $(`#userCheck${u.id}`).prop('checked', true);
@@ -919,8 +851,14 @@ $('#projectForm').submit(function(e) {
 
     $('#saveUserAssignments').on('click', function() {
         const projectId = $('#assignProjectId').val();
-        const userIds = $('#assignUsersForm input[name="user_ids[]"]:checked').map(function(){return this.value;}).get();
-        $.post('ajax_helpers/user_project_assign.php', {action: 'assign_users_to_project', project_id: projectId, user_ids: userIds}, function(res) {
+        const userIds = $('#assignUsersForm input[name="user_ids[]"]:checked').map(function() {
+            return this.value;
+        }).get();
+        $.post('ajax_helpers/user_project_assign.php', {
+            action: 'assign_users_to_project',
+            project_id: projectId,
+            user_ids: userIds
+        }, function(res) {
             if (res.success) {
                 $('#assignUsersModal').modal('hide');
                 alert('Users assigned!');
@@ -947,16 +885,17 @@ $('#projectForm').submit(function(e) {
     }
 
     .nav-tabs .nav-link:hover {
-        color: #3a4f8a;
+        color: #0c4d48ff;
         border-bottom-color: #dee2e6;
     }
 
     .nav-tabs .nav-link.active {
-        color: #3a4f8a;
+        color: #0c4d48ff;
         background-color: transparent;
-        border-bottom-color: #3a4f8a;
+        border-bottom-color: #0c4d48ff;
     }
-  th {
+
+    th {
         background-color: #04665f !important;
         color: white !important;
     }
@@ -967,11 +906,29 @@ $('#projectForm').submit(function(e) {
         border: none;
     }
 
+    .btn-outline-custom {
+        color: #04665f;
+        border-color: #04665f;
+    }
+
+    .text-custom {
+        color: #04665f;
+        font-weight: 600;
+        font-size: 20px;
+    }
+
+    .btn-outline-custom:hover {
+        background-color: #04665f;
+        color: white;
+        border-color: #04665f;
+    }
+
     .btn-custom:hover {
         background-color: #034b45;
         color: white;
         /* darker shade for hover effect */
     }
+
     /* Badge Styles */
     .badge {
         font-weight: 500;

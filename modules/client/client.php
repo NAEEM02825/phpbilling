@@ -135,7 +135,7 @@
         <div class="modal-content">
             <div class="modal-header bg-cuntom">
                 <h5 class="modal-title text-white" id="addClientModalLabel">Add New Client</h5>
-                <button type="button" class="btn-close text-white" data-bs-dismiss="modal" aria-label="Close"></button>
+              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <form id="addClientForm">
