@@ -101,9 +101,10 @@ if (!$userId) {
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="taskTitle" class="form-label">Title</label>
-                        <input type="text" class="form-control" name="title" id="taskTitle" required maxlength="100">
+
+                 <div class="mb-3">
+                        <label for="taskDate" class="form-label">Date</label>
+                        <input type="date" class="form-control" name="task_date" id="taskDate" required>
                     </div>
                     <div class="mb-3">
                         <label for="taskProject" class="form-label">Project</label>
@@ -111,30 +112,14 @@ if (!$userId) {
                             <option value="">Loading...</option>
                         </select>
                     </div>
-                    <div class="mb-3">
-                        <label for="taskDate" class="form-label">Due Date</label>
-                        <input type="date" class="form-control" name="task_date" id="taskDate" required>
-                    </div>
+                   
                     <div class="mb-3">
                         <label for="taskHours" class="form-label">Hours Taken</label>
                         <input type="number" class="form-control" name="hours" id="taskHours" min="0.5" step="0.5" required>
                     </div>
                     <div class="mb-3">
-                        <label for="taskStatus" class="form-label">Status</label>
-                        <select class="form-select" name="status" id="taskStatus" required>
-                            <option value="Pending">Pending</option>
-                            <option value="In Progress">In Progress</option>
-                            <option value="Completed">Completed</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="taskDetails" class="form-label">Details</label>
+                        <label for="taskDetails" class="form-label">Description</label>
                         <textarea class="form-control" name="details" id="taskDetails" rows="3" maxlength="500"></textarea>
-                    </div>
-                    <div class="mb-3">
-                        <label for="taskFiles" class="form-label">Attachments</label>
-                        <input type="file" class="form-control" id="taskFiles" name="files[]" multiple>
-                        <small class="text-muted">You can upload multiple files (Max 10MB each)</small>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -286,78 +271,45 @@ data.tasks.forEach(task => {
         }
 
         // Edit task
-        async function editTask(taskId) {
-            // Load task data
-            const res = await fetch('ajax_helpers/user_task_crud.php', {
-                method: 'POST',
-                body: new URLSearchParams({
-                    action: 'get_task',
-                    task_id: taskId,
-                    user_id: userId
-                })
-            });
-            const data = await res.json();
+       async function editTask(taskId) {
+    // Load task data
+    const res = await fetch('ajax_helpers/user_task_crud.php', {
+        method: 'POST',
+        body: new URLSearchParams({
+            action: 'get_task',
+            task_id: taskId,
+            user_id: userId
+        })
+    });
+    const data = await res.json();
 
-            if (!data.success) {
-                showAlert(data.error || 'Failed to load task', 'danger');
-                return;
-            }
+    if (!data.success) {
+        showAlert(data.error || 'Failed to load task', 'danger');
+        return;
+    }
 
-            const task = data.task;
+    const task = data.task;
+    const form = document.getElementById('taskForm');
 
-            // Set modal title
-            document.getElementById('taskModalLabel').textContent = 'Edit Task';
+    // Set modal title
+    document.getElementById('taskModalLabel').textContent = 'Edit Task';
 
-            // Load projects
-            await loadProjectOptions();
+    // Load projects
+    await loadProjectOptions();
 
-            // Fill form with task data
-            document.getElementById('taskTitle').value = task.title;
-            document.getElementById('taskProject').value = task.project_id;
-            document.getElementById('taskDate').value = task.task_date;
-            document.getElementById('taskHours').value = task.hours;
-            document.getElementById('taskStatus').value = task.status;
-            document.getElementById('taskDetails').value = task.details || '';
-            document.getElementById('clickupLink').value = task.clickup_link || '';
+    // Fill form with task data
+    document.getElementById('taskDate').value = task.task_date;
+    document.getElementById('taskProject').value = task.project_id;
+    document.getElementById('taskHours').value = task.hours;
+    document.getElementById('taskDetails').value = task.details || '';
 
-            // Store task ID in form for update
-            document.getElementById('taskForm').onsubmit = async function(e) {
-                e.preventDefault();
-                const formData = new FormData(this);
-                const isEdit = !!this.dataset.taskId;
+    // Store task ID in form for update
+    form.dataset.taskId = taskId;
 
-                if (isEdit) {
-                    formData.append('action', 'update_task');
-                    formData.append('task_id', this.dataset.taskId);
-                } else {
-                    formData.append('action', 'create_task');
-                    formData.append('assignee_id', userId);
-                }
-                formData.append('user_id', userId);
-
-                try {
-                    const res = await fetch('ajax_helpers/user_task_crud.php', {
-                        method: 'POST',
-                        body: formData // No headers needed for FormData
-                    });
-                    const data = await res.json();
-                    if (data.success) {
-                        showAlert(isEdit ? 'Task updated!' : 'Task created!');
-                        bootstrap.Modal.getInstance(document.getElementById('taskModal')).hide();
-                        loadTasks();
-                    } else {
-                        showAlert(data.error || (isEdit ? 'Failed to update task' : 'Failed to create task'), 'danger');
-                    }
-                } catch (error) {
-                    showAlert('Error: ' + error.message, 'danger');
-                }
-            };
-            form.dataset.taskId = taskId;
-
-            // Show modal
-            const modal = new bootstrap.Modal(document.getElementById('taskModal'));
-            modal.show();
-        }
+    // Show modal
+    const modal = new bootstrap.Modal(document.getElementById('taskModal'));
+    modal.show();
+}
 
         // Delete task
         async function deleteTask(taskId) {

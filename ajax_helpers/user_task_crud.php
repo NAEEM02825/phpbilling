@@ -8,7 +8,7 @@ $response = ['success' => false];
 try {
     switch ($action) {
         case 'get_my_tasks':
-            $tasks = DB::query("SELECT t.*, p.name as project_name FROM tasks t LEFT JOIN projects p ON p.id = t.project_id WHERE t.assignee_id = %i ORDER BY t.task_date DESC", $_POST['user_id']);
+            $tasks = DB::query("SELECT t.*, p.name as project_name FROM tasks t LEFT JOIN projects p ON p.id = t.project_id WHERE t.assignee_id = %i ORDER BY t.task_date DESC", $userId);
             $response = ['success' => true, 'tasks' => $tasks];
             break;
 
@@ -17,25 +17,14 @@ try {
             $response = ['success' => true, 'projects' => $projects];
             break;
 
-        case 'get_user_details':
-            $user = DB::queryFirstRow("SELECT first_name, last_name FROM users WHERE id = %i", $userId);
-            if ($user) {
-                $response = ['success' => true, 'user' => $user];
-            } else {
-                $response['error'] = 'User not found';
-            }
-            break;
-
         case 'create_task':
             $taskData = [
-                'title' => $_POST['title'],
-                'project_id' => $_POST['project_id'],
-                'task_date' => $_POST['task_date'],
-                'hours' => $_POST['hours'],
-                'assignee_id' => $_POST['assignee_id'],
-                'status' => $_POST['status'],
+                'project_id' => $_POST['project_id'] ?? null,
+                'task_date' => $_POST['task_date'] ?? date('Y-m-d'),
+                'hours' => $_POST['hours'] ?? 0,
                 'details' => $_POST['details'] ?? '',
-                'clickup_link' => $_POST['clickup_link'] ?? '',
+                'assignee_id' => $userId, // Automatically set to current user
+                'status' => 'Pending',   // Default status
                 'created_at' => date('Y-m-d H:i:s')
             ];
 
@@ -50,27 +39,21 @@ try {
                 }
 
                 foreach ($_FILES['files']['tmp_name'] as $key => $tmpName) {
-                    $originalName = $_FILES['files']['name'][$key];
-                    $fileSize = $_FILES['files']['size'][$key];
-                    $fileType = $_FILES['files']['type'][$key];
-                    $fileError = $_FILES['files']['error'][$key];
-
-                    if ($fileError === UPLOAD_ERR_OK) {
-                        // Sanitize filename
+                    if ($_FILES['files']['error'][$key] === UPLOAD_ERR_OK) {
+                        $originalName = $_FILES['files']['name'][$key];
                         $cleanName = preg_replace('/[^a-zA-Z0-9._-]/', '_', $originalName);
-
-                        // Handle duplicate filenames
-                        $counter = 1;
                         $pathInfo = pathinfo($cleanName);
+                        
+                        $counter = 1;
                         $filename = $pathInfo['filename'];
-                        $extension = isset($pathInfo['extension']) ? '.' . $pathInfo['extension'] : '';
-
-                        while (file_exists($uploadDir . $filename . $extension)) {
+                        $extension = $pathInfo['extension'] ?? '';
+                        
+                        while (file_exists($uploadDir . $filename . ($extension ? '.' . $extension : ''))) {
                             $filename = $pathInfo['filename'] . '_' . $counter;
                             $counter++;
                         }
-
-                        $finalName = $filename . $extension;
+                        
+                        $finalName = $filename . ($extension ? '.' . $extension : '');
                         $destination = $uploadDir . $finalName;
 
                         if (move_uploaded_file($tmpName, $destination)) {
@@ -78,8 +61,8 @@ try {
                                 'task_id' => $taskId,
                                 'file_name' => $originalName,
                                 'file_path' => 'uploads/tasks/' . $finalName,
-                                'file_type' => $fileType,
-                                'file_size' => $fileSize,
+                                'file_type' => $_FILES['files']['type'][$key],
+                                'file_size' => $_FILES['files']['size'][$key],
                                 'uploaded_at' => date('Y-m-d H:i:s')
                             ]);
                         }
@@ -87,20 +70,13 @@ try {
                 }
             }
 
-            $response = ['success' => true, 'message' => 'Task created successfully'];
+            $response = ['success' => true, 'task_id' => $taskId];
             break;
 
         case 'start_task':
-            // Get user details first
-            $user = DB::queryFirstRow("SELECT first_name, last_name FROM users WHERE user_id = %i", $userId);
-            if (!$user) {
-                throw new Exception('User not found');
-            }
-            $userName = $user['first_name'] . ' ' . $user['last_name'];
-
             // Verify task belongs to user and is pending
             $task = DB::queryFirstRow(
-                "SELECT id, title FROM tasks WHERE id = %i AND assignee_id = %i AND status = %s",
+                "SELECT id FROM tasks WHERE id = %i AND assignee_id = %i AND status = %s",
                 $_POST['task_id'],
                 $userId,
                 'Pending'
@@ -117,35 +93,13 @@ try {
                 'updated_at' => date('Y-m-d H:i:s')
             ], 'id = %i', $_POST['task_id']);
 
-            try {
-                // Create admin notification
-                $message = "User {$userName} has started task: {$task['title']}";
-                DB::insert('admin_notifications', [
-                    'message' => $message,
-                    'related_task_id' => $_POST['task_id'],
-                    'user_id' => $userId,
-                    'created_at' => date('Y-m-d H:i:s'),
-                    'is_read' => 0
-                ]);
-            } catch (Exception $e) {
-                // Log the error but don't fail the entire operation
-                error_log("Failed to create notification: " . $e->getMessage());
-            }
-
             $response = ['success' => true];
             break;
 
         case 'complete_task':
-            // Get user details first
-            $user = DB::queryFirstRow("SELECT first_name, last_name FROM users WHERE user_id = %i", $userId);
-            if (!$user) {
-                throw new Exception('User not found');
-            }
-            $userName = $user['first_name'] . ' ' . $user['last_name'];
-
-            // Get task details
+            // Verify task belongs to user
             $task = DB::queryFirstRow(
-                "SELECT id, title FROM tasks WHERE id = %i AND assignee_id = %i",
+                "SELECT id FROM tasks WHERE id = %i AND assignee_id = %i",
                 $_POST['task_id'],
                 $userId
             );
@@ -159,21 +113,7 @@ try {
             DB::update('tasks', [
                 'status' => 'Completed',
                 'updated_at' => date('Y-m-d H:i:s')
-            ], 'id = %i AND assignee_id = %i', $_POST['task_id'], $userId);
-
-            try {
-                // Create admin notification
-                $message = "User {$userName} has completed task: {$task['title']}";
-                DB::insert('admin_notifications', [
-                    'message' => $message,
-                    'related_task_id' => $_POST['task_id'],
-                    'user_id' => $userId,
-                    'created_at' => date('Y-m-d H:i:s'),
-                    'is_read' => 0
-                ]);
-            } catch (Exception $e) {
-                error_log("Failed to create notification: " . $e->getMessage());
-            }
+            ], 'id = %i', $_POST['task_id']);
 
             $response = ['success' => true];
             break;
@@ -184,29 +124,18 @@ try {
             break;
 
         case 'get_task':
-            $task = DB::queryFirstRow("SELECT * FROM tasks WHERE id = %i AND assignee_id = %i", $_POST['task_id'], $userId);
+            $task = DB::queryFirstRow(
+                "SELECT * FROM tasks WHERE id = %i AND assignee_id = %i", 
+                $_POST['task_id'], 
+                $userId
+            );
+            
             if ($task) {
-                // Get files if they exist
-                $files = [];
-                try {
-                    $tableExists = DB::queryFirstField("
-                        SELECT COUNT(*) 
-                        FROM information_schema.tables 
-                        WHERE table_schema = DATABASE() 
-                        AND table_name = 'task_files'
-                    ");
-
-                    if ($tableExists) {
-                        $files = DB::query("
-                            SELECT * FROM task_files 
-                            WHERE task_id = %i
-                            ORDER BY uploaded_at DESC
-                        ", $_POST['task_id']);
-                    }
-                } catch (Exception $e) {
-                    $files = [];
-                }
-
+                $files = DB::query(
+                    "SELECT * FROM task_files WHERE task_id = %i ORDER BY uploaded_at DESC", 
+                    $_POST['task_id']
+                );
+                
                 $response = [
                     'success' => true, 
                     'task' => $task,
@@ -218,70 +147,20 @@ try {
             break;
 
         case 'update_task':
-            $taskData = [
-                'title' => $_POST['title'],
-                'project_id' => $_POST['project_id'],
-                'task_date' => $_POST['task_date'],
-                'hours' => $_POST['hours'],
-                'status' => $_POST['status'],
-                'details' => $_POST['details'] ?? '',
-                'clickup_link' => $_POST['clickup_link'] ?? '',
-                'updated_at' => date('Y-m-d H:i:s')
-            ];
+    $taskData = [
+        'project_id' => $_POST['project_id'] ?? null,
+        'task_date' => $_POST['task_date'] ?? date('Y-m-d'),
+        'hours' => $_POST['hours'] ?? 0,
+        'details' => $_POST['details'] ?? '',
+        'updated_at' => date('Y-m-d H:i:s')
+    ];
 
-            DB::update('tasks', $taskData, 'id = %i AND assignee_id = %i', $_POST['task_id'], $userId);
-
-            // Handle file uploads if any
-            if (!empty($_FILES['files'])) {
-                $uploadDir = '../uploads/tasks/';
-                if (!file_exists($uploadDir)) {
-                    mkdir($uploadDir, 0777, true);
-                }
-
-                foreach ($_FILES['files']['tmp_name'] as $key => $tmpName) {
-                    $originalName = $_FILES['files']['name'][$key];
-                    $fileSize = $_FILES['files']['size'][$key];
-                    $fileType = $_FILES['files']['type'][$key];
-                    $fileError = $_FILES['files']['error'][$key];
-
-                    if ($fileError === UPLOAD_ERR_OK) {
-                        // Sanitize filename
-                        $cleanName = preg_replace('/[^a-zA-Z0-9._-]/', '_', $originalName);
-
-                        // Handle duplicate filenames
-                        $counter = 1;
-                        $pathInfo = pathinfo($cleanName);
-                        $filename = $pathInfo['filename'];
-                        $extension = isset($pathInfo['extension']) ? '.' . $pathInfo['extension'] : '';
-
-                        while (file_exists($uploadDir . $filename . $extension)) {
-                            $filename = $pathInfo['filename'] . '_' . $counter;
-                            $counter++;
-                        }
-
-                        $finalName = $filename . $extension;
-                        $destination = $uploadDir . $finalName;
-
-                        if (move_uploaded_file($tmpName, $destination)) {
-                            DB::insert('task_files', [
-                                'task_id' => $_POST['task_id'],
-                                'file_name' => $originalName,
-                                'file_path' => 'uploads/tasks/' . $finalName,
-                                'file_type' => $fileType,
-                                'file_size' => $fileSize,
-                                'uploaded_at' => date('Y-m-d H:i:s')
-                            ]);
-                        }
-                    }
-                }
-            }
-
-            $response = ['success' => true, 'message' => 'Task updated successfully'];
-            break;
-
-        default:
+    DB::update('tasks', $taskData, 'id = %i AND assignee_id = %i', $_POST['task_id'], $userId);
+    $response = ['success' => true];
+    default:
             $response['error'] = 'Invalid action';
-    }
+            break;
+}
 } catch (Exception $e) {
     $response['error'] = $e->getMessage();
 }
