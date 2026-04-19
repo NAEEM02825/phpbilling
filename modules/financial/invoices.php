@@ -552,7 +552,7 @@ $projects = DB::query("SELECT * FROM projects");
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="#" onclick="invoiceManager.updateStatus(${invoice.id}, 'draft')">Draft</a></li>
                             <li><a class="dropdown-item" href="#" onclick="invoiceManager.updateStatus(${invoice.id}, 'pending')">Pending</a></li>
-                            <li><a class="dropdown-item" href="#" onclick="invoiceManager.updateStatus(${invoice.id}, 'paid')">Paid</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="window.invoiceManager.updateStatus(${invoice.id}, 'paid')">Paid</a></li>
                             <li><a class="dropdown-item" href="#" onclick="invoiceManager.updateStatus(${invoice.id}, 'overdue')">Overdue</a></li>
                         </ul>
                     </div>
@@ -1045,8 +1045,13 @@ $projects = DB::query("SELECT * FROM projects");
                 });
             },
 
+<<<<<<< Updated upstream
            updateStatus: function(invoiceId, newStatus) {
     console.log(`Attempting to update invoice ${invoiceId} to status ${newStatus}`); // Debug log
+=======
+            updateStatus: function(invoiceId, newStatus) {
+    const self = this;  // ✅ Context save karo
+>>>>>>> Stashed changes
     
     Swal.fire({
         title: 'Are you sure?',
@@ -1058,8 +1063,11 @@ $projects = DB::query("SELECT * FROM projects");
         confirmButtonText: 'Yes, update it!'
     }).then((result) => {
         if (result.isConfirmed) {
+<<<<<<< Updated upstream
             console.log('User confirmed status change'); // Debug log
             
+=======
+>>>>>>> Stashed changes
             fetch('ajax_helpers/updateInvoiceStatus.php', {
                 method: 'POST',
                 headers: {
@@ -1070,6 +1078,7 @@ $projects = DB::query("SELECT * FROM projects");
                     new_status: newStatus
                 })
             })
+<<<<<<< Updated upstream
             .then(response => {
                 console.log('Received response from server'); // Debug log
                 if (!response.ok) {
@@ -1081,6 +1090,12 @@ $projects = DB::query("SELECT * FROM projects");
                 console.log('Response data:', data); // Debug log
                 if (data.success) {
                     this.loadInvoices();
+=======
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    self.loadInvoices();  // ✅ self use karo
+>>>>>>> Stashed changes
                     Swal.fire({
                         icon: 'success',
                         title: 'Updated!',
@@ -1092,7 +1107,10 @@ $projects = DB::query("SELECT * FROM projects");
                 }
             })
             .catch(error => {
+<<<<<<< Updated upstream
                 console.error('Error updating status:', error); // Debug log
+=======
+>>>>>>> Stashed changes
                 Swal.fire({
                     icon: 'error',
                     title: 'Error',
