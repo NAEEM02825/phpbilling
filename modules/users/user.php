@@ -294,19 +294,19 @@
         border-bottom-color: #3a4f8a;
     }
 
-    /* Avatar Styles */
-    .avatar-sm {
+    /* picture Styles */
+    .picture-sm {
         width: 40px;
         height: 40px;
     }
 
-    .avatar-img {
+    .picture-img {
         width: 100%;
         height: 100%;
         object-fit: cover;
     }
 
-    .avatar-title {
+    .picture-title {
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -604,13 +604,13 @@
                 // Last active date
                 const lastActive = user.last_active ? formatDate(user.last_active) : 'Never';
 
-                // Avatar handling
-                let avatar;
-                if (user.avatar) {
-                    avatar = `<img src="${user.avatar}" class="avatar-img rounded-circle" alt="${user.first_name}">`;
+                // picture handling
+                let picture;
+                if (user.picture) {
+                    picture = `<img src="${user.picture}" class="picture-img rounded-circle" alt="${user.first_name}">`;
                 } else {
                     const initials = (user.first_name?.charAt(0) || '') + (user.last_name?.charAt(0) || '');
-                    avatar = `<span class="avatar-title rounded-circle bg-primary text-white">${initials}</span>`;
+                    picture = `<span class="picture-title rounded-circle bg-primary text-white">${initials}</span>`;
                 }
 
                 // Role handling
@@ -625,8 +625,8 @@
                     </td>
                     <td>
                         <div class="d-flex align-items-center">
-                            <div class="avatar-sm me-3">
-                                ${avatar}
+                            <div class="picture-sm me-3">
+                                ${picture}
                             </div>
                             <div>
                                 <a href="#" class="text-primary fw-bold">${user.first_name || ''} ${user.last_name || ''}</a>
