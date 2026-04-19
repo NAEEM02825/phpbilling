@@ -7,7 +7,9 @@
 
 if ($_SESSION['role_id'] == ROLE_ID_ADMIN) {
     include_once('includes/page-parts/admins/admins_sidebar.php');
-}  else if ($_SESSION['role_id'] == ROLE_ID_USER) {
+}  else if ($_SESSION['role_id'] == ROLE_ID_MANAGER) {
+    include_once('includes/page-parts/managers/managers_sidebar.php');
+} else if ($_SESSION['role_id'] == ROLE_ID_USER) {
     include_once('includes/page-parts/user/user_sidebar.php');
 }   else { // Default sidebar for all other roles
     
