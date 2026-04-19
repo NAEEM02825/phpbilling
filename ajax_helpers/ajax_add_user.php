@@ -1,7 +1,10 @@
 <?php
 require('../functions.php');
-
 header('Content-Type: application/json');
+
+// Logged-in user ki details session se nikalna
+$logged_in_user_id = $_SESSION['user_id'] ?? 0;
+$logged_in_role_id = $_SESSION['role_id'] ?? 0;
 
 try {
     $action = $_POST['action'] ?? '';
@@ -13,6 +16,11 @@ try {
                 if (empty($_POST[$field])) {
                     throw new Exception("Field $field is required");
                 }
+            }
+
+            // Manager check: Agar manager login hai to wo Admin (role 1) add nahi kar sakta
+            if ($logged_in_role_id == 2 && $_POST['role_id'] == 1) {
+                throw new Exception("Managers cannot create Admin accounts.");
             }
 
             $existing = DB::queryFirstRow(
@@ -42,57 +50,64 @@ try {
             break;
 
         case 'update_user':
-            if (empty($_POST['user_id'])) {
-                throw new Exception("User ID is required");
-            }
-
-            $data = [
-                'first_name' => $_POST['first_name'],
-                'last_name' => $_POST['last_name'],
-                'email' => $_POST['email'],
-                'name' => $_POST['name'],
-                'role_id' => $_POST['role_id'],
-                'status' => $_POST['status'] ?? 'active',
-                'avatar' => $_POST['avatar'] ?? null,
-                'updated_at' => date('Y-m-d H:i:s')
-            ];
-
-            if (!empty($_POST['password'])) {
-                $data['password'] = $_POST['password']; 
-            }
-
-            DB::update('users', $data, 'user_id=%i', $_POST['user_id']);
-            echo json_encode(['success' => true, 'message' => 'User updated successfully']);
-            break;
-
         case 'delete_user':
-            if (empty($_POST['user_id'])) {
+        case 'change_status':
+            $target_user_id = $_POST['user_id'] ?? 0;
+
+            if (empty($target_user_id)) {
                 throw new Exception("User ID is required");
             }
 
-            DB::delete('users', 'user_id=%i', $_POST['user_id']);
-            echo json_encode(['success' => true, 'message' => 'User deleted successfully']);
-            break;
-
-        case 'change_status':
-            if (empty($_POST['user_id']) || empty($_POST['status'])) {
-                throw new Exception("User ID and status are required");
+            // CHECK 1: Apna record modify nahi kar sakta
+            if ($target_user_id == $logged_in_user_id) {
+                throw new Exception("You cannot perform this action on your own account for security reasons.");
             }
-            
-            DB::update(
-                'users',
-                [
-                    'status' => $_POST['status'],
+
+            // Target user ka role check karna
+            $target_user = DB::queryFirstRow("SELECT role_id FROM users WHERE user_id = %i", $target_user_id);
+            if (!$target_user) {
+                throw new Exception("User not found");
+            }
+
+            // CHECK 2: Manager Admin ko modify nahi kar sakta
+            if ($logged_in_role_id == 2 && $target_user['role_id'] == 1) {
+                throw new Exception("Access Denied: Managers cannot modify Admin accounts.");
+            }
+
+            // --- Logic Execution Starts ---
+            if ($action == 'update_user') {
+                $data = [
+                    'first_name' => $_POST['first_name'],
+                    'last_name' => $_POST['last_name'],
+                    'email' => $_POST['email'],
+                    'name' => $_POST['name'],
+                    'role_id' => $_POST['role_id'],
+                    'status' => $_POST['status'] ?? 'active',
                     'updated_at' => date('Y-m-d H:i:s')
-                ],
-                'user_id=%i',
-                $_POST['user_id']
-            );
-            echo json_encode(['success' => true, 'message' => 'Status updated successfully']);
+                ];
+                if (!empty($_POST['password'])) {
+                    $data['password'] = $_POST['password']; 
+                }
+                DB::update('users', $data, 'user_id=%i', $target_user_id);
+                echo json_encode(['success' => true, 'message' => 'User updated successfully']);
+
+            } elseif ($action == 'delete_user') {
+                DB::delete('users', 'user_id=%i', $target_user_id);
+                echo json_encode(['success' => true, 'message' => 'User deleted successfully']);
+
+            } elseif ($action == 'change_status') {
+                DB::update('users', ['status' => $_POST['status'], 'updated_at' => date('Y-m-d H:i:s')], 'user_id=%i', $target_user_id);
+                echo json_encode(['success' => true, 'message' => 'Status updated successfully']);
+            }
             break;
 
         case 'get_roles':
-            $roles = DB::query("SELECT * FROM roles");
+            // Manager ko Admin role select karne ki ijazat nahi hai
+            if ($logged_in_role_id == 2) {
+                $roles = DB::query("SELECT * FROM roles WHERE id != 1 ORDER BY name ASC");
+            } else {
+                $roles = DB::query("SELECT * FROM roles ORDER BY name ASC");
+            }
             echo json_encode(['success' => true, 'data' => $roles]);
             break;
 
@@ -103,6 +118,11 @@ try {
             
             $user = DB::queryFirstRow("SELECT * FROM users WHERE user_id = %i", $_POST['user_id']);
             
+            // Security: Manager kisi Admin ka data fetch na kar sakay
+            if ($logged_in_role_id == 2 && $user['role_id'] == 1) {
+                throw new Exception("Unauthorized access to Admin data.");
+            }
+
             if ($user) {
                 echo json_encode(['success' => true, 'data' => $user]);
             } else {

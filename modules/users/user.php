@@ -1,3 +1,27 @@
+
+<?php
+// =====================================================
+// ROLE-BASED ACCESS CONTROL
+// =====================================================
+$current_user_id = $_SESSION['user_id'] ?? 0;
+$current_role_id = $_SESSION['role_id'] ?? 0;
+
+// Employee (role_id = 3) ko access nahi hai
+if ($current_role_id == 3) {
+    echo '<div class="alert alert-danger text-center py-5">
+        <i class="fas fa-lock fa-3x mb-3"></i>
+        <h4>Access Denied</h4>
+        <p>You do not have permission to access this page.</p>
+        <a href="index.php?route=dashboard" class="btn btn-primary">Go to Dashboard</a>
+    </div>';
+    return; // Stop page execution
+}
+
+// Get current user data for restrictions
+$currentUser = DB::queryFirstRow("
+    SELECT user_id, role_id, status FROM users WHERE user_id = %i
+", $current_user_id);
+?>
 <!-- Users Page Header -->
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-4 pb-3 mb-4 border-bottom">
     <div>
@@ -569,114 +593,67 @@
         });
     }
 
-    function renderUsers(users) {
-        console.log('Rendering users:', users); // Debug log
+   function renderUsers(users) {
+    const tbody = $('#usersTable tbody');
+    tbody.empty();
 
-        const tbody = $('#usersTable tbody');
-        tbody.empty();
+    // Login user details from PHP
+    const loginUserId = <?php echo $current_user_id; ?>;
+    const loginUserRole = <?php echo $current_role_id; ?>;
 
-        if (!users || users.length === 0) {
-            console.warn('No users data received for rendering');
-            tbody.append('<tr><td colspan="7" class="text-center py-4">No users found</td></tr>');
-            return;
+    users.forEach(user => {
+        // 1. Agar Manager login hai (Role 2) aur samne wala Admin hai (Role 1), to skip kar do
+        // Note: Admin ki ID apni database ke mutabiq check kar lein (usually 1 hoti hai)
+        if (loginUserRole == 2 && user.role_id == 1) {
+            return; // Manager ko admin nazar nahi aayega
         }
 
-        // Simple date formatter if not defined
-        window.formatDate = window.formatDate || function(dateString) {
-            if (!dateString) return 'Never';
-            const date = new Date(dateString);
-            return date.toLocaleString();
-        };
+        // Check if this row belongs to the logged-in user
+        const isSelf = (user.user_id == loginUserId);
 
-        try {
-            users.forEach(user => {
-                // Debug current user
-                console.log('Processing user:', user.user_id, user.first_name, user.last_name);
-
-                // Safely handle username
-                const usernameDisplay = user.name ? `@${user.name}` : 'No username';
-
-                // Status handling
-                const status = user.status || 'Inactive';
-                const statusClass = status === 'Active' ? 'bg-success' :
-                    (status === 'Suspended' ? 'bg-warning' : 'bg-secondary');
-
-                // Last active date
-                const lastActive = user.last_active ? formatDate(user.last_active) : 'Never';
-
-                // picture handling
-                let picture;
-                if (user.picture) {
-                    picture = `<img src="${user.picture}" class="picture-img rounded-circle" alt="${user.first_name}">`;
-                } else {
-                    const initials = (user.first_name?.charAt(0) || '') + (user.last_name?.charAt(0) || '');
-                    picture = `<span class="picture-title rounded-circle bg-primary text-white">${initials}</span>`;
-                }
-
-                // Role handling
-                const roleDisplay = user.role_name || user.role || 'No role';
-
-                const row = `
-                <tr data-user-id="${user.user_id}">
-                    <td>
-                        <div class="form-check">
-                            <input class="form-check-input user-checkbox" type="checkbox" value="${user.user_id}">
-                        </div>
-                    </td>
-                    <td>
-                        <div class="d-flex align-items-center">
-                            <div class="picture-sm me-3">
-                                ${picture}
-                            </div>
-                            <div>
-                                <a href="#" class="text-primary fw-bold">${user.first_name || ''} ${user.last_name || ''}</a>
-                                <p class="mb-0 text-muted small">${usernameDisplay}</p>
-                            </div>
-                        </div>
-                    </td>
-                    <td>${user.email || 'No email'}</td>
-                    <td><span class="badge bg-primary">${roleDisplay}</span></td>
-                    <td>${lastActive}</td>
-                    <td><span class="badge ${statusClass}">${status}</span></td>
-                    <td>
-                        <div class="d-flex gap-2">
-                            <a href="#" 
-                               class="btn btn-outline-primary p-0 d-flex align-items-center justify-content-center edit-user" 
-                               data-user_id="${user.user_id}"
-                               style="width:32px;height:32px;border-radius:6px;border:1px solid #3a4f8a;" 
-                               title="Edit" data-id="${user.user_id}">
-                                <i class="fas fa-edit"></i>
-                            </a>
-                            <a href="#" 
-                               class="btn ${status === 'Active' ? 'btn-outline-danger' : 'btn-outline-success'} p-0 d-flex align-items-center justify-content-center change-status" 
-                               style="width:32px;height:32px;border-radius:6px;border:1px solid ${status === 'Active' ? '#dc3545' : '#198754'};" 
-                               title="${status === 'Active' ? 'Deactivate' : 'Activate'}" 
-                               data-user_id="${user.user_id}" data-status="${status === 'Active' ? 'Inactive' : 'Active'}">
-                                <i class="fas ${status === 'Active' ? 'fa-user-slash' : 'fa-user-check'}"></i>
-                            </a>
-                            <a href="#" 
-                               class="btn btn-outline-danger p-0 d-flex align-items-center justify-content-center delete-user" 
-                               style="width:32px;height:32px;border-radius:6px;border:1px solid #dc3545;" 
-                               title="Delete" data-user_id="${user.user_id}">
-                                <i class="fas fa-trash"></i>
-                            </a>
-                            <button class="btn btn-sm btn-outline-info assign-projects-btn" data-user-id="${user.user_id}" title="Assign Projects">
-                                <i class="fas fa-project-diagram"></i>
-                            </button>
-                        </div>
-                    </td>
-                </tr>
+        const status = user.status || 'Inactive';
+        const statusClass = status === 'Active' ? 'bg-success' : 'bg-secondary';
+        
+        // Actions HTML (Sirf tab dikhayen jab apna record na ho)
+        let actionButtons = '';
+        if (!isSelf) {
+            actionButtons = `
+                <a href="#" class="btn btn-outline-primary p-0 d-flex align-items-center justify-content-center edit-user" 
+                   data-user_id="${user.user_id}" style="width:32px;height:32px;">
+                    <i class="fas fa-edit"></i>
+                </a>
+                <a href="#" class="btn ${status === 'Active' ? 'btn-outline-danger' : 'btn-outline-success'} p-0 d-flex align-items-center justify-content-center change-status" 
+                   data-user_id="${user.user_id}" data-status="${status === 'Active' ? 'Inactive' : 'Active'}" style="width:32px;height:32px;">
+                    <i class="fas ${status === 'Active' ? 'fa-user-slash' : 'fa-user-check'}"></i>
+                </a>
+                <a href="#" class="btn btn-outline-danger p-0 d-flex align-items-center justify-content-center delete-user" 
+                   data-user_id="${user.user_id}" style="width:32px;height:32px;">
+                    <i class="fas fa-trash"></i>
+                </a>
             `;
-
-                tbody.append(row);
-            });
-
-            console.log('Successfully rendered', users.length, 'users');
-        } catch (error) {
-            console.error('Error rendering users:', error);
-            tbody.append('<tr><td colspan="7" class="text-center py-4 text-danger">Error displaying users</td></tr>');
+        } else {
+            actionButtons = '<span class="badge bg-light text-dark">You</span>';
         }
-    }
+
+        const row = `
+            <tr>
+                <td><div class="form-check"><input class="form-check-input" type="checkbox" value="${user.user_id}" ${isSelf ? 'disabled' : ''}></div></td>
+                <td>
+                    <div class="d-flex align-items-center">
+                        <div>
+                            <span class="fw-bold">${user.first_name} ${user.last_name}</span>
+                            <p class="mb-0 text-muted small">@${user.name}</p>
+                        </div>
+                    </div>
+                </td>
+                <td>${user.email}</td>
+                <td><span class="badge bg-primary">${user.role_name}</span></td>
+                <td>${user.status}</td>
+                <td><div class="d-flex gap-2">${actionButtons}</div></td>
+            </tr>`;
+        tbody.append(row);
+    });
+}
 
     function formatDate(dateString) {
         const date = new Date(dateString);

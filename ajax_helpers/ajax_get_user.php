@@ -1,7 +1,9 @@
 <?php
 require('../functions.php');
-
 header('Content-Type: application/json');
+
+$logged_in_user_id = $_SESSION['user_id'] ?? 0;
+$logged_in_role_id = $_SESSION['role_id'] ?? 0;
 
 try {
     $action = $_GET['action'] ?? '';
@@ -17,6 +19,11 @@ try {
 
             $where = [];
             $params = [];
+
+            // --- CORE REQUIREMENT: Manager (Role 2) ko Admin (Role 1) ka record nahi dikhana ---
+            if ($logged_in_role_id == 2) {
+                $where[] = 'u.role_id != 1';
+            }
 
             if (!empty($id)) {
                 $where[] = 'u.user_id = %i';
@@ -42,6 +49,7 @@ try {
                 u.status,
                 u.last_active,
                 u.picture,
+                u.role_id,
                 r.name as role_name
             FROM users u
             LEFT JOIN roles r ON u.role_id = r.id";
@@ -50,8 +58,9 @@ try {
                 $query .= " WHERE " . implode(' AND ', $where);
             }
 
+            $query .= " ORDER BY u.user_id DESC"; // Newest users first
+
             error_log("Executing query: " . $query);
-            error_log("With params: " . print_r($params, true));
 
             $users = DB::query($query, ...$params);
             
@@ -60,6 +69,7 @@ try {
             echo json_encode([
                 'success' => true,
                 'data' => $users,
+                'logged_in_user' => $logged_in_user_id, // Frontend check ke liye
                 'debug' => [
                     'query' => $query,
                     'params' => $params
@@ -68,7 +78,12 @@ try {
             break;
 
         case 'get_roles':
-            $roles = DB::query("SELECT * FROM roles");
+            // Manager ko dropdown mein Admin role nazar na aaye
+            if ($logged_in_role_id == 2) {
+                $roles = DB::query("SELECT * FROM roles WHERE id != 1 ORDER BY name ASC");
+            } else {
+                $roles = DB::query("SELECT * FROM roles ORDER BY name ASC");
+            }
             echo json_encode(['success' => true, 'data' => $roles]);
             break;
 
@@ -82,7 +97,6 @@ try {
     error_log("Error in get_users.php: " . $e->getMessage());
     echo json_encode([
         'success' => false,
-        'message' => $e->getMessage(),
-        'trace' => $e->getTrace() // Only in development!
+        'message' => $e->getMessage()
     ]);
 }
