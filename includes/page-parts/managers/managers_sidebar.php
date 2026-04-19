@@ -139,18 +139,7 @@
                             </ul>
                         </li>
 
-                        <!-- Financial Section -->
-                        <li>
-                            <a href="javascript:;" class="has-arrow">
-                                <div class="parent-icon"><i class="material-icons-outlined icon">payments</i></div>
-                                <div class="menu-title">Financial</div>
-                            </a>
-                            <ul>
-                                <li><a href="index.php?route=modules/financial/invoices"><i class="material-icons-outlined icon">receipt</i> Invoices</a></li>
-                                <!-- <li><a href="index.php?route=modules/financial/payment_history"><i class="material-icons-outlined icon">history</i> Payment History</a></li>
-                                <li><a href="index.php?route=modules/financial/client_ledger"><i class="material-icons-outlined icon">book</i> Client Ledger</a></li> -->
-                            </ul>
-                        </li>
+                    
 
                         <!-- Administration Section -->
                         <li>
