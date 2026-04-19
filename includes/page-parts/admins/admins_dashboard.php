@@ -162,7 +162,6 @@
         <div class="card h-100 shadow-sm">
             <div class="card-header bg-white d-flex justify-content-between align-items-center border-bottom">
                 <h5 class="mb-0">Recent Tasks</h5>
-                <a href="index.php?route=modules/task/my_task" class="btn btn-sm btn-outline-primary">View All</a>
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
@@ -263,7 +262,6 @@
                             <th>Due</th>
                             <th>Amount</th>
                             <th>Status</th>
-                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody id="invoicesTable">
@@ -706,11 +704,6 @@ function fetchRecentInvoices(limit = 5) {
                         <td>${formatDate(invoice.due_date)}</td>
                         <td>$${parseFloat(invoice.total_amount || 0).toFixed(2)}</td>
                         <td><span class="badge ${statusClass}">${statusText}</span></td>
-                        <td>
-                            <button class="btn btn-sm btn-outline-primary" onclick="viewInvoice(${invoice.id})">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                        </td>
                     </tr>
                     `;
                 });
