@@ -175,7 +175,7 @@
                     <div class="mb-3">
                         <label for="userStatus" class="form-label">Status</label>
                         <select class="form-select" id="userStatus" name="status">
-                            <option selected value="active">Active</option>
+                            <option selected value="Active">Active</option>
                             <option value="inactive">Inactive</option>
                         </select>
                     </div>
@@ -234,7 +234,7 @@
                     <div class="mb-3">
                         <label for="editStatus" class="form-label">Status</label>
                         <select class="form-select" id="editStatus" name="status">
-                            <option value="active">Active</option>
+                            <option value="Active">Active</option>
                             <option value="inactive">Inactive</option>
                         </select>
                     </div>
@@ -528,7 +528,7 @@
 
         // Override status if tab is selected
         let status = '';
-        if (tab === 'active-users') status = 'active';
+        if (tab === 'active-users') status = 'Active';
         if (tab === 'inactive-users') status = 'inactive';
 
         // ⛔️ Don't send filters if they're not real values
